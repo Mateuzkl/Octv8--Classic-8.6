@@ -84,6 +84,14 @@ public:
     void addBoudingRect(const Rect& dest, int innerLineWidth);
     void addRepeatedRects(const Rect& dest, const Rect& src);
 
+    void addTexturedTriangle(const Point& a, const Point& b, const Point& c,
+                             const PointF& ta, const PointF& tb, const PointF& tc)
+    {
+        if (m_locked) unlock();
+        m_vertexArray->addTriangle(a, b, c);
+        m_textureCoordArray->addTriangle(ta, tb, tc);
+    }
+
     float *getVertexArray() { return m_vertexArray->vertices(); }
     float *getTextureCoordArray() { return m_textureCoordArray->vertices(); }
     int getVertexCount() { return m_vertexArray->vertexCount(); }

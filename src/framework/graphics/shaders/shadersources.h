@@ -74,6 +74,43 @@ static const std::string glslSolidColorFragmentShader = "\n\
         return u_Color;\n\
     }\n";
 
+static const std::string glslMainWithColorVertexShader = "\n\
+    attribute vec4 a_Color;\n\
+    varying vec4 v_Color;\n\
+    vec4 calculatePosition();\n\
+    void main() {\n\
+        gl_Position = calculatePosition();\n\
+        v_Color = a_Color;\n\
+    }\n";
+
+static const std::string glslMainWithTexCoordsAndColorVertexShader = "\n\
+    attribute vec2 a_TexCoord;\n\
+    attribute vec4 a_Color;\n\
+    uniform mat3 u_TextureMatrix;\n\
+    varying vec2 v_TexCoord;\n\
+    varying vec4 v_Color;\n\
+    vec4 calculatePosition();\n\
+    void main()\n\
+    {\n\
+        gl_Position = calculatePosition();\n\
+        v_TexCoord = (u_TextureMatrix * vec3(a_TexCoord,1.0)).xy;\n\
+        v_Color = a_Color;\n\
+    }\n";
+
+static const std::string glslSolidColorPerVertexFragmentShader = "\n\
+    varying vec4 v_Color;\n\
+    vec4 calculatePixel() {\n\
+        return v_Color;\n\
+    }\n";
+
+static const std::string glslTextureSrcPerVertexFragmentShader = "\n\
+    varying vec2 v_TexCoord;\n\
+    varying vec4 v_Color;\n\
+    uniform sampler2D u_Tex0;\n\
+    vec4 calculatePixel() {\n\
+        return texture2D(u_Tex0, v_TexCoord) * v_Color;\n\
+    }\n";
+
 static const std::string glslSolidColorOnTextureFragmentShader = "\n\
     uniform vec4 u_Color;\n\
     varying vec2 v_TexCoord;\n\

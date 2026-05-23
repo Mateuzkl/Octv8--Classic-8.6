@@ -1,0 +1,17 @@
+<rml>
+<head>
+  <title>HTML/CSS Test</title>
+  <link type="text/rcss" href="/modules/test_rmlui2/test.rcss"/>
+</head>
+<body>
+  <div id="window">
+    <div id="title">HTML/CSS Test</div>
+    <div id="status-box">
+      <div id="statusLabel">Waiting for click</div>
+      <div id="counterLabel">Clicks: 0</div>
+    </div>
+    <button id="clickButton">Click</button>
+    <button id="closeButton">Close</button>
+  </div>
+</body>
+</rml>

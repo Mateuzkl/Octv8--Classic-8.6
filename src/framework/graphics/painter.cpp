@@ -63,8 +63,15 @@ Painter::Painter()
     m_drawTextProgram = PainterShaderProgram::create("drawTextProgram", textVertexShader, textFragmentShader);
     m_drawLineProgram = PainterShaderProgram::create("drawLineProgram", lineVertexShader, lineFragmentShader);
 
+    m_drawSolidColorPerVertexProgram = PainterShaderProgram::create("drawSolidColorPerVertexProgram",
+        glslMainWithColorVertexShader + glslPositionOnlyVertexShader,
+        glslMainFragmentShader + glslSolidColorPerVertexFragmentShader);
+    m_drawTexturedPerVertexProgram = PainterShaderProgram::create("drawTexturedPerVertexProgram",
+        glslMainWithTexCoordsAndColorVertexShader + glslPositionOnlyVertexShader,
+        glslMainFragmentShader + glslTextureSrcPerVertexFragmentShader);
+
     if (!m_drawTexturedProgram || !m_drawSolidColorProgram || !m_drawSolidColorOnTextureProgram || !m_drawOutfitLayersProgram ||
-        !m_drawNewProgram || !m_drawTextProgram || !m_drawLineProgram) {
+        !m_drawNewProgram || !m_drawTextProgram || !m_drawLineProgram || !m_drawSolidColorPerVertexProgram || !m_drawTexturedPerVertexProgram) {
         g_logger.fatal("Can't setup default shaders, check log file for details");
     }
 

@@ -21,6 +21,7 @@
         "openal-soft",
         "glew",
         "luajit",
+        "rmlui",
         {
             "name": "opengl",
             "platform": "windows | linux"

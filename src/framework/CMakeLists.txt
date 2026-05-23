@@ -271,6 +271,7 @@ if(NOT WASM)
     find_package(PhysFS REQUIRED)
     find_package(OpenSSL REQUIRED)
     find_package(ZLIB REQUIRED)
+    find_package(RmlUi REQUIRED)
 
     set(framework_LIBRARIES ${framework_LIBRARIES}
         ${Boost_LIBRARIES}
@@ -281,6 +282,7 @@ if(NOT WASM)
         ${LIBZIP_LIBRARY}
 	${ZLIB_LIBRARY}
 	${BZIP2_LIBRARIES}
+        RmlUi::RmlUi
     )
 
     if(WIN32)
@@ -503,6 +505,16 @@ if(FRAMEWORK_GRAPHICS)
         ${CMAKE_CURRENT_LIST_DIR}/platform/x11window.h
         ${CMAKE_CURRENT_LIST_DIR}/platform/sdlwindow.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platform/sdlwindow.h
+
+        # rmlui
+        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluirenderer.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluirenderer.h
+        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluisystem.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluisystem.h
+        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluifileinterface.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluifileinterface.h
+        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluimanager.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluimanager.h
 
         # window input
         ${CMAKE_CURRENT_LIST_DIR}/input/mouse.cpp

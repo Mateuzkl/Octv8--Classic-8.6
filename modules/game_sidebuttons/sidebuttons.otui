@@ -244,6 +244,23 @@ NonClosableMiniWindow
         image-clip: 0 20 20 20
 
     UIWidget
+      id: rmluiTestButton
+      image-source: buttons/questlog
+      anchors.left: testHtmlButton.right
+      anchors.top: forgeButton.top
+      margin-left: 3
+      size: 20 20
+      image-clip: 0 0 20 20
+      tooltip: RmlUi Test
+      @onClick: TestRmlUi2.toggle()
+
+      $pressed:
+        image-clip: 0 20 20 20
+
+      $checked:
+        image-clip: 0 20 20 20
+
+    UIWidget
       id: fullButtons
       image-source: buttons/fullButtons
       anchors.right: parent.right

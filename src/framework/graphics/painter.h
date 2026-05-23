@@ -191,6 +191,16 @@ public:
         setShaderProgram(m_drawSolidColorOnTextureProgram);
     }
 
+    void setDrawSolidColorPerVertexProgram()
+    {
+        setDrawProgram(m_drawSolidColorPerVertexProgram.get());
+    }
+
+    void setDrawTexturedPerVertexProgram()
+    {
+        setDrawProgram(m_drawTexturedPerVertexProgram.get());
+    }
+
     void setMatrixColor(const Matrix4& mat4)
     {
         m_matrixColor = mat4;
@@ -247,6 +257,9 @@ private:
     PainterShaderProgramPtr m_drawSolidColorProgram;
     PainterShaderProgramPtr m_drawSolidColorOnTextureProgram;
     PainterShaderProgramPtr m_drawOutfitLayersProgram;
+
+    PainterShaderProgramPtr m_drawSolidColorPerVertexProgram;
+    PainterShaderProgramPtr m_drawTexturedPerVertexProgram;
 
     PainterShaderProgramPtr m_drawNewProgram;
 

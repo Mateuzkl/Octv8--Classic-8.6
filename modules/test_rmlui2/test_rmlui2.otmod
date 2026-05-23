@@ -1,0 +1,11 @@
+Module
+  name: test_rmlui2
+  description: RmlUi port of the test_html click counter with dark theme
+  author: opencode
+  version: 1
+  sandboxed: false
+  autoload: true
+  autoload-priority: 1000
+  scripts: [ test_rmlui2 ]
+  @onLoad: TestRmlUi2.init()
+  @onUnload: TestRmlUi2.terminate()

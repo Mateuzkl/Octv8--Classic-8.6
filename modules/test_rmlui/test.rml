@@ -1,0 +1,14 @@
+<rml>
+<head>
+  <title>RmlUi Click Counter</title>
+  <link type="text/rcss" href="test.rcss"/>
+</head>
+<body>
+  <div id="window">
+    <h1>RmlUi Test Module</h1>
+    <div id="click-label">Clicks: 0</div>
+    <button id="click-btn">Click Me!</button>
+    <input type="text" id="text-input" placeholder="Type something..."/>
+  </div>
+</body>
+</rml>

@@ -1,0 +1,8 @@
+Module
+  name: test_rmlui
+  description: Test module demonstrating RmlUi with click counter and text input
+  author: opencode
+  scripts: [ test_rmlui ]
+  @onLoad: TestRmlUi.init()
+  @onUnload: TestRmlUi.terminate()
+  load-later: []

@@ -31,6 +31,7 @@
 #include <framework/core/application.h>
 #include <framework/core/resourcemanager.h>
 #include <framework/util/extras.h>
+#include <framework/rmlui/rmluimanager.h>
 
 UIManager g_ui;
 
@@ -78,22 +79,27 @@ void UIManager::inputEvent(const InputEvent& event)
     UIWidgetList widgetList;
     switch(event.type) {
         case Fw::KeyTextInputEvent:
+            g_rmlui.processTextInput(event.keyText);
             g_lua.callGlobalField("g_ui", "onKeyText", event.keyText);
             m_keyboardReceiver->propagateOnKeyText(event.keyText);
             break;
         case Fw::KeyDownInputEvent:
+            g_rmlui.processKeyDown((Rml::Input::KeyIdentifier)event.keyCode, event.keyboardModifiers);
             g_lua.callGlobalField("g_ui", "onKeyDown", event.keyCode, event.keyboardModifiers);
             m_keyboardReceiver->propagateOnKeyDown(event.keyCode, event.keyboardModifiers);
             break;
         case Fw::KeyPressInputEvent:
+            g_rmlui.processKeyDown((Rml::Input::KeyIdentifier)event.keyCode, event.keyboardModifiers);
             g_lua.callGlobalField("g_ui", "onKeyPress", event.keyCode, event.keyboardModifiers, event.autoRepeatTicks);
             m_keyboardReceiver->propagateOnKeyPress(event.keyCode, event.keyboardModifiers, event.autoRepeatTicks);
             break;
         case Fw::KeyUpInputEvent:
+            g_rmlui.processKeyUp((Rml::Input::KeyIdentifier)event.keyCode, event.keyboardModifiers);
             g_lua.callGlobalField("g_ui", "onKeyUp", event.keyCode, event.keyboardModifiers);
             m_keyboardReceiver->propagateOnKeyUp(event.keyCode, event.keyboardModifiers);
             break;
         case Fw::MousePressInputEvent:
+            g_rmlui.processMouseButtonDown(std::max(0, (int)event.mouseButton - 1), event.keyboardModifiers);
             g_lua.callGlobalField("g_ui", "onMousePress", event.mousePos, event.mouseButton);
 
             if(m_mouseReceiver->isVisible() && (event.mouseButton == Fw::MouseLeftButton || event.mouseButton == Fw::MouseTouch2 || event.mouseButton == Fw::MouseTouch3)) {
@@ -112,6 +118,7 @@ void UIManager::inputEvent(const InputEvent& event)
 
             break;
         case Fw::MouseReleaseInputEvent: {
+            g_rmlui.processMouseButtonUp(std::max(0, (int)event.mouseButton - 1), event.keyboardModifiers);
             g_lua.callGlobalField("g_ui", "onMouseRelease", event.mousePos, event.mouseButton);
 
             // release dragging widget
@@ -144,6 +151,7 @@ void UIManager::inputEvent(const InputEvent& event)
             break;
         }
         case Fw::MouseMoveInputEvent: {
+            g_rmlui.processMouseMove(event.mousePos.x, event.mousePos.y, event.keyboardModifiers);
             g_lua.callGlobalField("g_ui", "onMouseMove", event.mousePos, event.mouseMoved);
 
             // start dragging when moving a pressed widget
@@ -178,6 +186,7 @@ void UIManager::inputEvent(const InputEvent& event)
             break;
         }
         case Fw::MouseWheelInputEvent:
+            g_rmlui.processMouseWheel(event.wheelDirection == Fw::MouseWheelUp ? -1.0f : 1.0f, event.keyboardModifiers);
             g_lua.callGlobalField("g_ui", "onMouseWheel", event.mousePos, event.wheelDirection);
 
             m_rootWidget->propagateOnMouseEvent(event.mousePos, widgetList);

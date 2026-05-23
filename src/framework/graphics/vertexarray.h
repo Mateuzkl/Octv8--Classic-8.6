@@ -51,6 +51,11 @@ public:
         addVertex(b.x, b.y);
         addVertex(c.x, c.y);
     }
+    inline void addTriangle(const PointF& a, const PointF& b, const PointF& c) {
+        addVertex(a.x, a.y);
+        addVertex(b.x, b.y);
+        addVertex(c.x, c.y);
+    }
     inline void addRect(const Rect& rect)
     {
         float top = rect.top();
