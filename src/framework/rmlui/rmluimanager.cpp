@@ -10,8 +10,18 @@
 #include <RmlUi/Core.h>
 #include <RmlUi/Debugger.h>
 #include <physfs.h>
+#include <algorithm>
+#include <filesystem>
 
 RmlUiManager g_rmlui;
+
+LuaEventListener::LuaEventListener(Rml::Element* element, const std::string& eventName, const std::string& code) :
+    m_element(element),
+    m_document(element ? element->GetOwnerDocument() : nullptr),
+    m_eventName(eventName),
+    m_code(code)
+{
+}
 
 void LuaEventListener::ProcessEvent(Rml::Event& event)
 {
@@ -23,6 +33,14 @@ void LuaEventListener::ProcessEvent(Rml::Event& event)
             g_logger.error(stdext::format("[RmlUi] Event error: %s", e.what()));
         }
     });
+}
+
+void LuaEventListener::detach()
+{
+    if (m_element) {
+        m_element->RemoveEventListener(m_eventName, this);
+        m_element = nullptr;
+    }
 }
 
 void RmlUiManager::init()
@@ -46,11 +64,20 @@ void RmlUiManager::terminate()
 {
     if (!m_initialized) return;
 
-    for (auto& pair : m_contexts) {
-        Rml::RemoveContext(pair.first);
+    for (auto* listener : m_listeners) {
+        listener->detach();
+        delete listener;
     }
-    m_contexts.clear();
-    m_mainContext = nullptr;
+    m_listeners.clear();
+
+    {
+        std::lock_guard<std::mutex> lock(m_contextsMutex);
+        for (auto& pair : m_contexts) {
+            Rml::RemoveContext(pair.first);
+        }
+        m_contexts.clear();
+        m_mainContext = nullptr;
+    }
 
     Rml::Shutdown();
 
@@ -68,12 +95,17 @@ void RmlUiManager::update()
 {
     if (!m_initialized) return;
 
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
     for (auto& pair : m_contexts) {
-        pair.second->Update();
+        if (pair.second)
+            pair.second->Update();
     }
 
     for (auto it = m_contexts.begin(); it != m_contexts.end();) {
-        if (it->second->GetNumDocuments() == 0) {
+        Rml::Context* context = it->second;
+        if (!context || (context != m_mainContext && context->GetNumDocuments() == 0)) {
+            if (context)
+                Rml::RemoveContext(it->first);
             it = m_contexts.erase(it);
         } else {
             ++it;
@@ -85,22 +117,43 @@ void RmlUiManager::render()
 {
     if (!m_initialized) return;
 
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
     for (auto& pair : m_contexts) {
-        pair.second->Render();
+        if (pair.second)
+            pair.second->Render();
     }
 }
 
 void RmlUiManager::resize(int width, int height)
 {
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
     for (auto& pair : m_contexts) {
-        pair.second->SetDimensions(Rml::Vector2i(width, height));
+        if (pair.second)
+            pair.second->SetDimensions(Rml::Vector2i(width, height));
     }
+}
+
+Rml::Context* RmlUiManager::getMainContext()
+{
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
+    return m_mainContext;
+}
+
+Rml::Context* RmlUiManager::getContext(const std::string& name)
+{
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
+    if (name.empty())
+        return m_mainContext;
+
+    auto it = m_contexts.find(name);
+    return it != m_contexts.end() ? it->second : nullptr;
 }
 
 Rml::Context* RmlUiManager::createContext(const std::string& name, int width, int height)
 {
     if (!m_initialized) return nullptr;
 
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
     Rml::Context* ctx = Rml::CreateContext(name, Rml::Vector2i(width, height));
     if (ctx) {
         m_contexts[name] = ctx;
@@ -112,6 +165,7 @@ Rml::Context* RmlUiManager::createContext(const std::string& name, int width, in
 
 void RmlUiManager::removeContext(const std::string& name)
 {
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
     if (m_mainContext && m_mainContext->GetName() == name)
         m_mainContext = nullptr;
     Rml::RemoveContext(name);
@@ -122,13 +176,14 @@ Rml::ElementDocument* RmlUiManager::loadDocument(const std::string& path, Rml::C
 {
     if (!m_initialized) return nullptr;
 
-    Rml::Context* ctx = context ? context : m_mainContext;
+    Rml::Context* ctx = context ? context : getMainContext();
     if (!ctx) return nullptr;
 
     std::string resolvedPath = path;
     if (!stdext::starts_with(path, "/") && !stdext::starts_with(path, "\\"))
         resolvedPath = "/" + g_lua.getCurrentSourcePath() + "/" + path;
     stdext::replace_all(resolvedPath, "//", "/");
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
     auto doc = ctx->LoadDocument(resolvedPath);
     if (doc) {
         doc->Show();
@@ -143,9 +198,10 @@ Rml::ElementDocument* RmlUiManager::loadDocumentFromString(const std::string& rm
 {
     if (!m_initialized) return nullptr;
 
-    Rml::Context* ctx = context ? context : m_mainContext;
+    Rml::Context* ctx = context ? context : getMainContext();
     if (!ctx) return nullptr;
 
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
     auto doc = ctx->LoadDocumentFromMemory(rml, "memory.rml");
     if (doc) {
         doc->Show();
@@ -157,9 +213,17 @@ void RmlUiManager::closeDocument(Rml::ElementDocument* doc)
 {
     if (!doc) return;
 
-    for (auto* listener : m_listeners)
-        delete listener;
-    m_listeners.clear();
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
+    for (auto it = m_listeners.begin(); it != m_listeners.end();) {
+        auto* listener = *it;
+        if (listener->getDocument() == doc) {
+            listener->detach();
+            delete listener;
+            it = m_listeners.erase(it);
+        } else {
+            ++it;
+        }
+    }
 
     doc->Close();
 }
@@ -168,7 +232,8 @@ void RmlUiManager::addEventListener(uintptr_t elemPtr, const std::string& event,
 {
     auto* elem = reinterpret_cast<Rml::Element*>(elemPtr);
     if (!elem) return;
-    auto* listener = new LuaEventListener(luaCode);
+    auto* listener = new LuaEventListener(elem, event, luaCode);
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
     m_listeners.push_back(listener);
     elem->AddEventListener(event, listener);
 }
@@ -177,89 +242,125 @@ bool RmlUiManager::loadFontFace(const std::string& path)
 {
     const char* realDir = PHYSFS_getRealDir(path.c_str());
     if (realDir) {
-        std::string dir(realDir);
-        while (!dir.empty() && (dir.back() == '/' || dir.back() == '\\'))
-            dir.pop_back();
         std::string cleanPath = path;
         if (!cleanPath.empty() && (cleanPath[0] == '/' || cleanPath[0] == '\\'))
             cleanPath = cleanPath.substr(1);
-        stdext::replace_all(cleanPath, "/", "\\");
-        std::string realPath = dir + "\\" + cleanPath;
-        return Rml::LoadFontFace(realPath);
+        std::filesystem::path realPath = std::filesystem::path(realDir) / std::filesystem::path(cleanPath);
+        realPath.make_preferred();
+        return Rml::LoadFontFace(realPath.string());
     }
 
     g_logger.warning(stdext::format("[RmlUi] Font not found in PhysicsFS: %s", path));
     return Rml::LoadFontFace(path);
 }
 
-void RmlUiManager::processKeyDown(Rml::Input::KeyIdentifier key, int modifiers)
+bool RmlUiManager::processKeyDown(Rml::Input::KeyIdentifier key, int modifiers)
 {
-    for (auto& pair : m_contexts)
-        pair.second->ProcessKeyDown(key, modifiers);
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
+    for (auto& pair : m_contexts) {
+        if (pair.second && !pair.second->ProcessKeyDown(key, modifiers))
+            return false;
+    }
+    return true;
 }
 
-void RmlUiManager::processKeyUp(Rml::Input::KeyIdentifier key, int modifiers)
+bool RmlUiManager::processKeyUp(Rml::Input::KeyIdentifier key, int modifiers)
 {
-    for (auto& pair : m_contexts)
-        pair.second->ProcessKeyUp(key, modifiers);
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
+    for (auto& pair : m_contexts) {
+        if (pair.second && !pair.second->ProcessKeyUp(key, modifiers))
+            return false;
+    }
+    return true;
 }
 
-void RmlUiManager::processTextInput(Rml::Character c)
+bool RmlUiManager::processTextInput(Rml::Character c)
 {
-    for (auto& pair : m_contexts)
-        pair.second->ProcessTextInput(c);
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
+    for (auto& pair : m_contexts) {
+        if (pair.second && !pair.second->ProcessTextInput(c))
+            return false;
+    }
+    return true;
 }
 
-void RmlUiManager::processTextInput(const std::string& text)
+bool RmlUiManager::processTextInput(const std::string& text)
 {
-    for (auto& pair : m_contexts)
-        pair.second->ProcessTextInput(text);
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
+    for (auto& pair : m_contexts) {
+        if (pair.second && !pair.second->ProcessTextInput(text))
+            return false;
+    }
+    return true;
 }
 
-void RmlUiManager::processMouseMove(int x, int y, int modifiers)
+bool RmlUiManager::processMouseMove(int x, int y, int modifiers)
 {
-    for (auto& pair : m_contexts)
-        pair.second->ProcessMouseMove(x, y, modifiers);
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
+    for (auto& pair : m_contexts) {
+        if (pair.second && !pair.second->ProcessMouseMove(x, y, modifiers))
+            return false;
+    }
+    return true;
 }
 
-void RmlUiManager::processMouseButtonDown(int button, int modifiers)
+bool RmlUiManager::processMouseButtonDown(int button, int modifiers)
 {
-    for (auto& pair : m_contexts)
-        pair.second->ProcessMouseButtonDown(button, modifiers);
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
+    for (auto& pair : m_contexts) {
+        if (pair.second && !pair.second->ProcessMouseButtonDown(button, modifiers))
+            return false;
+    }
+    return true;
 }
 
-void RmlUiManager::processMouseButtonUp(int button, int modifiers)
+bool RmlUiManager::processMouseButtonUp(int button, int modifiers)
 {
-    for (auto& pair : m_contexts)
-        pair.second->ProcessMouseButtonUp(button, modifiers);
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
+    for (auto& pair : m_contexts) {
+        if (pair.second && !pair.second->ProcessMouseButtonUp(button, modifiers))
+            return false;
+    }
+    return true;
 }
 
-void RmlUiManager::processMouseWheel(float delta, int modifiers)
+bool RmlUiManager::processMouseWheel(float delta, int modifiers)
 {
-    for (auto& pair : m_contexts)
-        pair.second->ProcessMouseWheel(delta, modifiers);
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
+    for (auto& pair : m_contexts) {
+        if (pair.second && !pair.second->ProcessMouseWheel(delta, modifiers))
+            return false;
+    }
+    return true;
 }
 
 bool RmlUiManager::createDataModel(const std::string& contextName, const std::string& modelName)
 {
-    Rml::Context* ctx = contextName.empty() ? m_mainContext : m_contexts[contextName];
+    std::lock_guard<std::mutex> lock(m_contextsMutex);
+    Rml::Context* ctx = m_mainContext;
+    if (!contextName.empty()) {
+        auto it = m_contexts.find(contextName);
+        ctx = it != m_contexts.end() ? it->second : nullptr;
+    }
     if (!ctx) return false;
 
     Rml::DataModelConstructor constructor = ctx->CreateDataModel(modelName);
     if (!constructor) return false;
 
-    m_dataModels[modelName] = constructor.GetModelHandle();
-    m_dataModelContexts[modelName] = ctx;
+    const std::string modelKey = buildDataModelKey(contextName, modelName);
+    m_dataModels[modelKey] = constructor.GetModelHandle();
+    m_dataModelContexts[modelKey] = ctx;
     return true;
 }
 
 void RmlUiManager::setModelVar(const std::string& modelName, const std::string& varName,
     const Rml::Variant& value)
 {
-    std::string key = modelName + "." + varName;
+    const std::string modelKey = resolveDataModelKey(modelName);
+    std::string key = modelKey + "." + varName;
     m_dataVars[key] = value;
 
-    auto modelIt = m_dataModels.find(modelName);
+    auto modelIt = m_dataModels.find(modelKey);
     if (modelIt != m_dataModels.end()) {
         modelIt->second.DirtyVariable(varName);
     }
@@ -267,7 +368,8 @@ void RmlUiManager::setModelVar(const std::string& modelName, const std::string& 
 
 Rml::Variant RmlUiManager::getModelVar(const std::string& modelName, const std::string& varName)
 {
-    std::string key = modelName + "." + varName;
+    const std::string modelKey = resolveDataModelKey(modelName);
+    std::string key = modelKey + "." + varName;
     auto it = m_dataVars.find(key);
     if (it != m_dataVars.end())
         return it->second;
@@ -276,8 +378,34 @@ Rml::Variant RmlUiManager::getModelVar(const std::string& modelName, const std::
 
 void RmlUiManager::dirtyModelVar(const std::string& modelName, const std::string& varName)
 {
-    auto modelIt = m_dataModels.find(modelName);
+    const std::string modelKey = resolveDataModelKey(modelName);
+    auto modelIt = m_dataModels.find(modelKey);
     if (modelIt != m_dataModels.end()) {
         modelIt->second.DirtyVariable(varName);
     }
+}
+
+std::string RmlUiManager::buildDataModelKey(const std::string& contextName, const std::string& modelName) const
+{
+    std::string contextKey = contextName.empty() ? "main" : contextName;
+    return contextKey + ":" + modelName;
+}
+
+std::string RmlUiManager::resolveDataModelKey(const std::string& modelName) const
+{
+    if (m_dataModels.find(modelName) != m_dataModels.end())
+        return modelName;
+
+    const std::string suffix = ":" + modelName;
+    std::string foundKey;
+    for (const auto& pair : m_dataModels) {
+        if (pair.first.size() >= suffix.size() &&
+            pair.first.compare(pair.first.size() - suffix.size(), suffix.size(), suffix) == 0) {
+            if (!foundKey.empty())
+                return buildDataModelKey("", modelName);
+            foundKey = pair.first;
+        }
+    }
+
+    return foundKey.empty() ? buildDataModelKey("", modelName) : foundKey;
 }

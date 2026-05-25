@@ -56,11 +56,13 @@ private:
     struct FilterEntry {
         Rml::String name;
         Rml::Dictionary parameters;
+        bool active = false;
     };
 
     std::vector<CompiledGeometry*> m_geometries;
     std::vector<LayerEntry> m_layers;
     std::vector<FilterEntry> m_filters;
+    std::vector<size_t> m_freeFilterIndices;
     bool m_scissorEnabled = false;
     Rml::Rectanglei m_scissorRegion;
     std::unordered_map<Rml::TextureHandle, TexturePtr> m_textureCache;

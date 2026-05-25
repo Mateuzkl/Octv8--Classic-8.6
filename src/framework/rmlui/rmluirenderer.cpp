@@ -21,6 +21,7 @@ RmlUiRenderInterface::~RmlUiRenderInterface()
     m_geometries.clear();
     m_layers.clear();
     m_filters.clear();
+    m_freeFilterIndices.clear();
 }
 
 Rml::CompiledGeometryHandle RmlUiRenderInterface::CompileGeometry(
@@ -202,20 +203,35 @@ void RmlUiRenderInterface::CompositeLayers(Rml::LayerHandle source, Rml::LayerHa
     Rml::BlendMode blend_mode, Rml::Span<const Rml::CompiledFilterHandle> filters)
 {
     size_t srcIdx = static_cast<size_t>(source) - 1;
-    if (srcIdx >= m_layers.size()) return;
+    size_t dstIdx = static_cast<size_t>(destination) - 1;
+    if (srcIdx >= m_layers.size() || dstIdx >= m_layers.size()) return;
 
     auto& srcLayer = m_layers[srcIdx];
-    if (!srcLayer.framebuffer) return;
+    auto& dstLayer = m_layers[dstIdx];
+    if (!srcLayer.framebuffer || !dstLayer.framebuffer) return;
 
     Size sz = srcLayer.framebuffer->getSize();
     Rect dest(0, 0, sz.width(), sz.height());
+    auto oldCompositionMode = g_painter->getCompositionMode();
+    dstLayer.framebuffer->bind();
+    g_painter->setCompositionMode(blend_mode == Rml::BlendMode::Replace ?
+        Painter::CompositionMode_Replace : Painter::CompositionMode_Normal);
+    for (auto filter : filters) {
+        size_t filterIdx = static_cast<size_t>(filter) - 1;
+        if (filterIdx >= m_filters.size() || !m_filters[filterIdx].active)
+            continue;
+    }
     g_painter->drawTexturedRect(dest, srcLayer.framebuffer->getTexture());
+    g_painter->setCompositionMode(oldCompositionMode);
+    dstLayer.framebuffer->release();
 }
 
 void RmlUiRenderInterface::PopLayer()
 {
     if (m_layers.empty()) return;
-    m_layers.back().framebuffer->release();
+    auto& entry = m_layers.back();
+    m_textureCache.erase(entry.textureHandle);
+    entry.framebuffer->release();
     m_layers.pop_back();
 }
 
@@ -225,10 +241,28 @@ Rml::CompiledFilterHandle RmlUiRenderInterface::CompileFilter(const Rml::String&
     FilterEntry entry;
     entry.name = name;
     entry.parameters = parameters;
+    entry.active = true;
+
+    if (!m_freeFilterIndices.empty()) {
+        size_t index = m_freeFilterIndices.back();
+        m_freeFilterIndices.pop_back();
+        m_filters[index] = entry;
+        return Rml::CompiledFilterHandle(index + 1);
+    }
+
     m_filters.push_back(entry);
     return Rml::CompiledFilterHandle(m_filters.size());
 }
 
 void RmlUiRenderInterface::ReleaseFilter(Rml::CompiledFilterHandle filter)
 {
+    if (filter == 0)
+        return;
+
+    size_t index = static_cast<size_t>(filter) - 1;
+    if (index >= m_filters.size() || !m_filters[index].active)
+        return;
+
+    m_filters[index] = FilterEntry();
+    m_freeFilterIndices.push_back(index);
 }

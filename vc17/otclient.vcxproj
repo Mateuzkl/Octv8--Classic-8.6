@@ -608,6 +608,7 @@
     <ClCompile Include="..\src\framework\ui\uilayoutflexbox.cpp" />
     <ClCompile Include="..\src\framework\ui\uiwidgethtml.cpp" />
     <ClCompile Include="..\src\framework\rmlui\rmluifileinterface.cpp" />
+    <ClCompile Include="..\src\framework\rmlui\rmluilua.cpp" />
     <ClCompile Include="..\src\framework\rmlui\rmluimanager.cpp" />
     <ClCompile Include="..\src\framework\rmlui\rmluirenderer.cpp" />
     <ClCompile Include="..\src\framework\rmlui\rmluisystem.cpp" />
@@ -810,6 +811,7 @@
     <ClInclude Include="..\src\framework\ui\uiverticallayout.h" />
     <ClInclude Include="..\src\framework\ui\uiwidget.h" />
     <ClInclude Include="..\src\framework\rmlui\rmluifileinterface.h" />
+    <ClInclude Include="..\src\framework\rmlui\rmluilua.h" />
     <ClInclude Include="..\src\framework\rmlui\rmluimanager.h" />
     <ClInclude Include="..\src\framework\rmlui\rmluirenderer.h" />
     <ClInclude Include="..\src\framework\rmlui\rmluisystem.h" />

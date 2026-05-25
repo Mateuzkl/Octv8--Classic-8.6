@@ -55,7 +55,7 @@
 #include <framework/graphics/shadermanager.h>
 #include <framework/ui/ui.h>
 #include <framework/input/mouse.h>
-#include "rmlui/rmluilua.cpp"
+#include "rmlui/rmluilua.h"
 #endif
 
 #include <framework/net/server.h>

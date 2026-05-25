@@ -72,7 +72,9 @@ void GraphicalApplication::init(std::vector<std::string>& args)
 
     // initialize RmlUi
     g_rmlui.init();
-    g_rmlui.createContext("main", g_graphics.getViewportSize().width(), g_graphics.getViewportSize().height());
+    auto viewportSize = g_graphics.getViewportSize();
+    g_rmlui.createContext("main", viewportSize.width(), viewportSize.height());
+    g_rmlui.resize(viewportSize.width(), viewportSize.height());
 
     // initialize graphics
     g_graphics.init();
@@ -490,8 +492,10 @@ void GraphicalApplication::scale(float value)
     g_window.setScaling(m_scaling);
 
     g_dispatcher.addEvent([&] {
+        auto viewportSize = g_graphics.getViewportSize() / m_scaling;
         m_onInputEvent = true;
-        g_ui.resize(g_graphics.getViewportSize() / m_scaling);
+        g_ui.resize(viewportSize);
+        g_rmlui.resize(viewportSize.width(), viewportSize.height());
         m_onInputEvent = false;
         m_mustRepaint = true;
     });

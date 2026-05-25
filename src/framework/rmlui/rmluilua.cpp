@@ -1,3 +1,4 @@
+#include "rmluilua.h"
 #include <framework/luaengine/luainterface.h>
 #include <framework/core/logger.h>
 #include <framework/core/resourcemanager.h>
@@ -7,13 +8,13 @@
 #include <RmlUi/Debugger.h>
 
 static void pushModelVarsFromLuaTable(Rml::DataModelConstructor& constructor,
-    const std::string& modelName, int tableIdx)
+    const std::string& modelKey, int tableIdx)
 {
     g_lua.pushNil();
     while (g_lua.next(tableIdx < 0 ? tableIdx - 1 : tableIdx)) {
         std::string varName = g_lua.toString(-2);
 
-        std::string key = modelName + "." + varName;
+        std::string key = modelKey + "." + varName;
         if (g_lua.isNumber(-1)) {
             double v = g_lua.toNumber(-1);
             g_rmlui.m_dataVars[key] = Rml::Variant((int)v);
@@ -56,7 +57,9 @@ void registerRmlUiLuaFunctions()
     g_lua.bindSingletonFunction("g_rmlui", "loadFontFace", &RmlUiManager::loadFontFace, &g_rmlui);
 
     g_lua.bindSingletonFunction("g_rmlui", "loadDocument", [](const std::string& path, const std::string& contextName) {
-        Rml::Context* ctx = contextName.empty() ? g_rmlui.getMainContext() : g_rmlui.m_contexts[contextName];
+        Rml::Context* ctx = g_rmlui.getContext(contextName);
+        if (!ctx)
+            ctx = g_rmlui.getMainContext();
         auto* doc = g_rmlui.loadDocument(path, ctx);
         return reinterpret_cast<uintptr_t>(doc);
     });
@@ -113,17 +116,23 @@ void registerRmlUiLuaFunctions()
     });
 
     g_lua.bindSingletonFunction("g_rmlui", "createDataModel", [](const std::string& ctxName, const std::string& modelName) -> bool {
-        Rml::Context* ctx = ctxName.empty() ? g_rmlui.getMainContext() : g_rmlui.m_contexts[ctxName];
+        std::string contextKey = ctxName;
+        Rml::Context* ctx = g_rmlui.getContext(ctxName);
+        if (!ctx) {
+            ctx = g_rmlui.getMainContext();
+            contextKey.clear();
+        }
         if (!ctx) return false;
 
         Rml::DataModelConstructor constructor = ctx->CreateDataModel(modelName);
         if (!constructor) return false;
 
-        g_rmlui.m_dataModels[modelName] = constructor.GetModelHandle();
-        g_rmlui.m_dataModelContexts[modelName] = ctx;
+        const std::string modelKey = g_rmlui.buildDataModelKey(contextKey, modelName);
+        g_rmlui.m_dataModels[modelKey] = constructor.GetModelHandle();
+        g_rmlui.m_dataModelContexts[modelKey] = ctx;
 
         if (g_lua.getTop() >= 3 && g_lua.isTable(3)) {
-            pushModelVarsFromLuaTable(constructor, modelName, 3);
+            pushModelVarsFromLuaTable(constructor, modelKey, 3);
         }
 
         return true;
