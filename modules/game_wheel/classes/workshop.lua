@@ -318,10 +318,9 @@ function Workshop.onSelectChild(list, selected)
         return true
     end
 
-    local player = g_game.getLocalPlayer()
     local goldCost = isSupreme and greaterResources[supremeTier].price or lesserResources[basicTier].price
     local fragmentCost = isSupreme and greaterResources[supremeTier].fragment or lesserResources[basicTier].fragment
-    local resourceCheck = isSupreme and player:getResourceBalance(ResourceTypes.GREATER_FRAGMENTS) or player:getResourceBalance(ResourceTypes.LESSER_FRAGMENTS)
+    local resourceCheck = isSupreme and getPlayerResourceBalance(ResourceTypes.GREATER_FRAGMENTS) or getPlayerResourceBalance(ResourceTypes.LESSER_FRAGMENTS)
     local iconOffset = isSupreme and "0 12 12 12" or "0 0 12 12"
     local iconTooltip = isSupreme and "Greater Fragments" or "Lesser Fragments"
 
@@ -338,7 +337,7 @@ function Workshop.onSelectChild(list, selected)
     fragmentWidget:setOn(true)
 
     local blockedTooltip = ""
-    local totalBalance = player:getResourceBalance(ResourceTypes.BANK_BALANCE) + player:getResourceBalance(ResourceTypes.GOLD_EQUIPPED)
+    local totalBalance = getPlayerResourceBalance(ResourceTypes.BANK_BALANCE) + getPlayerResourceBalance(ResourceTypes.GOLD_EQUIPPED)
     if totalBalance < goldCost then
         blockedTooltip = tr("You need at least %s gold to enhance mods of this quality.", comma_value(goldCost))
         goldWidget:setOn(false)

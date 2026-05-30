@@ -707,11 +707,10 @@ function WheelOfDestiny.onDestinyWheel(playerId, canView, changeState, vocationI
 
   resetWheel(true)
 
-  local player = g_game.getLocalPlayer()
-  local bankMoney = player:getResourceBalance(ResourceTypes.BANK_BALANCE)
-  local characterMoney = player:getResourceBalance(ResourceTypes.GOLD_EQUIPPED)
-  local lesserFragment = player:getResourceBalance(ResourceTypes.LESSER_FRAGMENTS)
-  local greaterFragment = player:getResourceBalance(ResourceTypes.GREATER_FRAGMENTS)
+  local bankMoney = getPlayerResourceBalance(ResourceTypes.BANK_BALANCE)
+  local characterMoney = getPlayerResourceBalance(ResourceTypes.GOLD_EQUIPPED)
+  local lesserFragment = getPlayerResourceBalance(ResourceTypes.LESSER_FRAGMENTS)
+  local greaterFragment = getPlayerResourceBalance(ResourceTypes.GREATER_FRAGMENTS)
 
   local value = bankMoney + characterMoney
   wheelWindow.moneyPanel.gold:setText(formatMoney(value, ','))

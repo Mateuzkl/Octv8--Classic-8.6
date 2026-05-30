@@ -216,6 +216,19 @@ function destroy()
   pendingBuyOffer = nil
 end
 
+local function ensureStoreWindow()
+  if gameStoreWindow then
+    return true
+  end
+
+  if not g_game.isOnline() then
+    return false
+  end
+
+  create()
+  return gameStoreWindow ~= nil
+end
+
 function requestCatalog()
   local protocolGame = g_game.getProtocolGame()
   if not protocolGame then
@@ -413,7 +426,7 @@ end
 
 function show()
   hideTransferWindow()
-  if not gameStoreWindow or not gameStoreButton then
+  if not ensureStoreWindow() then
     return
   end
 
@@ -432,7 +445,7 @@ function hide()
 end
 
 function toggle()
-  if not gameStoreWindow then
+  if not ensureStoreWindow() then
     return
   end
 

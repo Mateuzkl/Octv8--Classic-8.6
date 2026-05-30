@@ -397,13 +397,12 @@ function GemAtelier.showGemRevelation()
 		return true
 	end
 
-	local player = g_game:getLocalPlayer()
 	local revelation = gemAtelierWindow.gemRevelation
-	local totalBalance = player:getResourceBalance(ResourceTypes.BANK_BALANCE) + player:getResourceBalance(ResourceTypes.GOLD_EQUIPPED)
+	local totalBalance = getPlayerResourceBalance(ResourceTypes.BANK_BALANCE) + getPlayerResourceBalance(ResourceTypes.GOLD_EQUIPPED)
 	local resources = {
-		[0] = player:getResourceBalance(ResourceTypes.LESSER_GEMS),
-		[1] = player:getResourceBalance(ResourceTypes.REGULAR_GEMS),
-		[2] = player:getResourceBalance(ResourceTypes.GREATER_GEMS)
+		[0] = getPlayerResourceBalance(ResourceTypes.LESSER_GEMS),
+		[1] = getPlayerResourceBalance(ResourceTypes.REGULAR_GEMS),
+		[2] = getPlayerResourceBalance(ResourceTypes.GREATER_GEMS)
 	}
 
 	for i = 0, 2 do
@@ -638,9 +637,8 @@ function GemAtelier.onSelectGem(selected, clicked)
 		GemAtelier.createGemInformation(widgetMods.modLabel2, gemData.supremeBonus, true, false, gemData, 2)
 	end
 
-	local player = g_game:getLocalPlayer()
-	local totalBalance = player:getResourceBalance(ResourceTypes.BANK_BALANCE)
-	+ player:getResourceBalance(ResourceTypes.GOLD_EQUIPPED)
+	local totalBalance = getPlayerResourceBalance(ResourceTypes.BANK_BALANCE)
+	+ getPlayerResourceBalance(ResourceTypes.GOLD_EQUIPPED)
 
 	local price = GemSwitchPrice[gemData.gemType] or 0
 	local enough = totalBalance >= price

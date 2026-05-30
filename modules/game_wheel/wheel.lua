@@ -10,12 +10,23 @@ checkSavePresetWindow = nil
 selectedNewPresetRadio = nil
 wheelButton = nil
 local summaryVisible = false
+local resourceBalances = {}
 
 wheelPanel = nil
 centerReferencePoint = nil
 
 if not SkillwheelStringsLibrary then
   SkillwheelStringsLibrary = {}
+end
+
+function getPlayerResourceBalance(resourceType)
+  local player = g_game.getLocalPlayer()
+  if player and player.getResourceBalance then
+    return player:getResourceBalance(resourceType)
+  end
+
+  local key = tonumber(resourceType)
+  return key and resourceBalances[key] or 0
 end
 
 local function setWheelButtonState(state)
@@ -339,16 +350,20 @@ function toggleTabBarButtons(selectedButtonId)
   end
 end
 
-function onResourceBalance()
-  if not wheelWindow:isVisible() then
+function onResourceBalance(resourceType, balance)
+  local key = tonumber(resourceType)
+  if key then
+    resourceBalances[key] = tonumber(balance) or 0
+  end
+
+  if not wheelWindow or not wheelWindow:isVisible() then
     return true
   end
-  local player = g_game.getLocalPlayer()
 
-  local bankMoney = player:getResourceBalance(ResourceTypes.BANK_BALANCE)
-  local characterMoney = player:getResourceBalance(ResourceTypes.GOLD_EQUIPPED)
-  local lesserFragment = player:getResourceBalance(ResourceTypes.LESSER_FRAGMENTS)
-  local greaterFragment = player:getResourceBalance(ResourceTypes.GREATER_FRAGMENTS)
+  local bankMoney = getPlayerResourceBalance(ResourceTypes.BANK_BALANCE)
+  local characterMoney = getPlayerResourceBalance(ResourceTypes.GOLD_EQUIPPED)
+  local lesserFragment = getPlayerResourceBalance(ResourceTypes.LESSER_FRAGMENTS)
+  local greaterFragment = getPlayerResourceBalance(ResourceTypes.GREATER_FRAGMENTS)
 
   local value = bankMoney + characterMoney
 
