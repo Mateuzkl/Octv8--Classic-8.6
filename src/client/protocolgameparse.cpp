@@ -2825,8 +2825,9 @@ void ProtocolGame::parseGameNews(const InputMessagePtr& msg)
 
 void ProtocolGame::parseMessageDialog(const InputMessagePtr& msg)
 {
-    msg->getU8();
-    msg->getString();
+    const uint8_t type = msg->getU8();
+    const std::string message = msg->getString();
+    g_lua.callGlobalField("g_game", "onMessageDialog", type, message);
 }
 
 void ProtocolGame::parseBlessDialog(const InputMessagePtr& msg)
@@ -3009,35 +3010,112 @@ void ProtocolGame::parseQuestTracker(const InputMessagePtr& msg)
 
 void ProtocolGame::parseImbuementWindow(const InputMessagePtr& msg)
 {
-    int itemId = msg->getU16();
-    int slots = msg->getU8();
+    constexpr int ModernImbuementVersion = 860;
 
-    std::map<int, std::tuple<Imbuement, int, int>> activeSlots;
-    for (int i = 0; i < slots; ++i) {
-        bool info = msg->getU8() == 1;
-        if (info) {
-            Imbuement imbuement = getImbuementInfo(msg);
-            int duration = msg->getU32();
-            int removalCost = msg->getU32();
-            activeSlots[i] = std::make_tuple(imbuement, duration, removalCost);
+    if (g_game.getClientVersion() < ModernImbuementVersion) {
+        int itemId = msg->getU16();
+        int slots = msg->getU8();
+
+        std::map<int, std::tuple<Imbuement, int, int>> activeSlots;
+        for (int i = 0; i < slots; ++i) {
+            bool info = msg->getU8() == 1;
+            if (info) {
+                Imbuement imbuement = getImbuementInfo(msg);
+                int duration = msg->getU32();
+                int removalCost = msg->getU32();
+                activeSlots[i] = std::make_tuple(imbuement, duration, removalCost);
+            }
+        }
+
+        int imbuements_size = msg->getU16();
+        std::vector<Imbuement> imbuements;
+        for (int i = 0; i < imbuements_size; ++i) {
+            imbuements.push_back(getImbuementInfo(msg));
+        }
+
+        std::vector<ItemPtr> needItems;
+        int needItems_count = msg->getU32();
+        for (int i = 0; i < needItems_count; ++i) {
+            int item = msg->getU16();
+            int count = msg->getU16();
+            needItems.push_back(Item::create(item, count));
+        }
+
+        g_lua.callGlobalField("g_game", "onImbuementWindow", itemId, slots, activeSlots, imbuements, needItems);
+        return;
+    }
+
+    uint8_t windowType = msg->getU8();
+    msg->getU8(); // has blank imbuement scroll
+
+    switch (windowType) {
+        case Otc::IMBUEMENT_WINDOW_CHOICE: {
+            // Server sends U16(0) as placeholder for Open action (no extra U32)
+            const uint16_t itemId = msg->getU16();
+            g_lua.callGlobalField("g_game", "onOpenImbuementWindow", itemId);
+            break;
+        }
+        case Otc::IMBUEMENT_WINDOW_SCROLL: {
+            msg->getU8(); // has free backpack slot
+            msg->getU8(); // unknown byte
+
+            const uint16_t imbuementsSize = msg->getU16();
+            std::vector<Imbuement> imbuements;
+            for (int i = 0; i < imbuementsSize; ++i) {
+                imbuements.push_back(getImbuementInfo(msg));
+            }
+
+            const uint32_t neededItemsCount = msg->getU32();
+            std::vector<ItemPtr> neededItems;
+            neededItems.reserve(neededItemsCount);
+            for (uint32_t i = 0; i < neededItemsCount; ++i) {
+                const uint16_t itemId = msg->getU16();
+                const uint16_t count = msg->getU16();
+                neededItems.push_back(Item::create(itemId, count));
+            }
+
+            g_lua.callGlobalField("g_game", "onImbuementScroll", imbuements, neededItems);
+            break;
+        }
+        case Otc::IMBUEMENT_WINDOW_SELECT_ITEM: {
+            const uint16_t itemId = msg->getU16();
+            uint8_t tier = 0;
+            const auto& thing = g_things.getThingType(itemId, ThingCategoryItem);
+            if (thing && thing->getClassification() > 0) {
+                tier = msg->getU8();
+            }
+
+            const uint8_t slots = msg->getU8();
+            std::map<int, std::tuple<Imbuement, int, int>> activeSlots;
+            for (int i = 0; i < slots; ++i) {
+                const bool info = msg->getU8() == 1;
+                if (info) {
+                    Imbuement imbuement = getImbuementInfo(msg);
+                    const int duration = msg->getU32();
+                    const int removalCost = msg->getU32();
+                    activeSlots[i] = std::make_tuple(imbuement, duration, removalCost);
+                }
+            }
+
+            const uint16_t imbuementsSize = msg->getU16();
+            std::vector<Imbuement> imbuements;
+            for (int i = 0; i < imbuementsSize; ++i) {
+                imbuements.push_back(getImbuementInfo(msg));
+            }
+
+            const uint32_t neededItemsCount = msg->getU32();
+            std::vector<ItemPtr> neededItems;
+            neededItems.reserve(neededItemsCount);
+            for (uint32_t i = 0; i < neededItemsCount; ++i) {
+                const uint16_t needItemId = msg->getU16();
+                const uint16_t count = msg->getU16();
+                neededItems.push_back(Item::create(needItemId, count));
+            }
+
+            g_lua.callGlobalField("g_game", "onImbuementItem", itemId, tier, slots, activeSlots, imbuements, neededItems);
+            break;
         }
     }
-
-    int imbuements_size = msg->getU16();
-    std::vector<Imbuement> imbuements;
-    for (int i = 0; i < imbuements_size; ++i) {
-        imbuements.push_back(getImbuementInfo(msg));
-    }
-
-    std::vector<ItemPtr> needItems;
-    int needItems_count = msg->getU32();
-    for (int i = 0; i < needItems_count; ++i) {
-        int item = msg->getU16();
-        int count = msg->getU16();
-        needItems.push_back(Item::create(item, count));
-    }
-
-    g_lua.callGlobalField("g_game", "onImbuementWindow", itemId, slots, activeSlots, imbuements, needItems);
 }
 
 void ProtocolGame::parseCloseImbuementWindow(const InputMessagePtr&)
@@ -3138,14 +3216,38 @@ void ProtocolGame::parseDailyRewardHistory(const InputMessagePtr& msg)
 
 Imbuement ProtocolGame::getImbuementInfo(const InputMessagePtr& msg)
 {
+    constexpr int ModernImbuementVersion = 860;
+
     Imbuement i;
     i.id = msg->getU32();
     i.name = msg->getString();
     i.description = msg->getString();
-    i.group = msg->getString();
+
+    if (g_game.getClientVersion() >= ModernImbuementVersion) {
+        i.tier = msg->getU8();
+        if (i.tier == 0) {
+            i.group = "Basic";
+        } else if (i.tier == 1) {
+            i.group = "Intricate";
+        } else if (i.tier == 2) {
+            i.group = "Powerful";
+        } else {
+            i.group = "Unknown";
+        }
+    } else {
+        i.group = msg->getString();
+        i.tier = 0;
+    }
+
     i.imageId = msg->getU16();
     i.duration = msg->getU32();
-    i.premiumOnly = msg->getU8() > 0;
+
+    if (g_game.getClientVersion() < ModernImbuementVersion) {
+        i.premiumOnly = msg->getU8() > 0;
+    } else {
+        i.premiumOnly = false;
+    }
+
     int size = msg->getU8();
     for (int j = 0; j < size; ++j) {
         int id = msg->getU16();
@@ -3154,8 +3256,13 @@ Imbuement ProtocolGame::getImbuementInfo(const InputMessagePtr& msg)
         i.sources.push_back(std::make_pair(Item::create(id, count), description));
     }
     i.cost = msg->getU32();
-    i.successRate = msg->getU8();
-    i.protectionCost = msg->getU32();
+    if (g_game.getClientVersion() < ModernImbuementVersion) {
+        i.successRate = msg->getU8();
+        i.protectionCost = msg->getU32();
+    } else {
+        i.successRate = 100;
+        i.protectionCost = 0;
+    }
     return i;
 }
 
