@@ -107,6 +107,8 @@ public:
     void sendApplyImbuement(uint8_t slot, uint32_t imbuementId, bool protectionCharm);
     void sendClearImbuement(uint8_t slot);
     void sendCloseImbuingWindow();
+    void sendSelectImbuementItem(uint16_t itemId, const Position& position, uint8_t stackPos);
+    void sendSelectImbuementScroll();
     void sendImbuementDurations(bool isOpen = false);
     void sendAddVip(const std::string& name);
     void sendRemoveVip(uint playerId);

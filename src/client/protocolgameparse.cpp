@@ -41,6 +41,23 @@
 #include <framework/util/extras.h>
 #include <framework/stdext/string.h>
 
+static bool isQuiverClientId(uint16 id)
+{
+    switch (id) {
+        case 35524: // jungle quiver
+        case 35562: // quiver
+        case 35848: // blue quiver
+        case 35849: // red quiver
+        case 36666: // eldritch quiver
+        case 39150: // alicorn quiver
+        case 39160: // naga quiver
+        case 45644: // candy-coated quiver
+            return true;
+        default:
+            return false;
+    }
+}
+
 void ProtocolGame::parseMessage(const InputMessagePtr& msg)
 {
     int opcode = -1;
@@ -3079,12 +3096,7 @@ void ProtocolGame::parseImbuementWindow(const InputMessagePtr& msg)
         }
         case Otc::IMBUEMENT_WINDOW_SELECT_ITEM: {
             const uint16_t itemId = msg->getU16();
-            uint8_t tier = 0;
-            const auto& thing = g_things.getThingType(itemId, ThingCategoryItem);
-            if (thing && thing->getClassification() > 0) {
-                tier = msg->getU8();
-            }
-
+            const uint8_t tier = msg->getU8();
             const uint8_t slots = msg->getU8();
             std::map<int, std::tuple<Imbuement, int, int>> activeSlots;
             for (int i = 0; i < slots; ++i) {
@@ -3929,6 +3941,10 @@ ItemPtr ProtocolGame::getItem(const InputMessagePtr& msg, int id, bool hasDescri
         if (hasQuickLootFlags > 0) {
             item->setQuickLootFlags(msg->getU32()); // quick loot flags
         }
+    }
+
+    if (g_game.getProtocolVersion() >= 860 && isQuiverClientId(item->getId())) {
+        item->setCountOrSubType(msg->getU8());
     }
 
     if (g_game.getFeature(Otc::GameItemTierByte)) {

@@ -144,6 +144,7 @@ struct Imbuement {
     std::string name;
     std::string description;
     std::string group;
+    uint8_t tier = 0;
     int imageId;
     int duration;
     bool premiumOnly;

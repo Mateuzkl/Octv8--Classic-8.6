@@ -680,6 +680,13 @@ namespace Otc
         RESOURE_COIN_TOURNAMENT = 93,
     };
 
+    enum Imbuement_Window_t : uint8_t
+    {
+        IMBUEMENT_WINDOW_CHOICE = 0,
+        IMBUEMENT_WINDOW_SELECT_ITEM = 1,
+        IMBUEMENT_WINDOW_SCROLL = 2
+    };
+
     enum class WheelSlots_t : uint8_t
     {
         SLOT_GREEN_200 = 1,

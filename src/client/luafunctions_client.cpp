@@ -348,6 +348,8 @@ void Client::registerLuaFunctions()
     g_lua.bindSingletonFunction("g_game", "applyImbuement", &Game::applyImbuement, &g_game);
     g_lua.bindSingletonFunction("g_game", "clearImbuement", &Game::clearImbuement, &g_game);
     g_lua.bindSingletonFunction("g_game", "closeImbuingWindow", &Game::closeImbuingWindow, &g_game);
+    g_lua.bindSingletonFunction("g_game", "selectImbuementItem", &Game::selectImbuementItem, &g_game);
+    g_lua.bindSingletonFunction("g_game", "selectImbuementScroll", &Game::selectImbuementScroll, &g_game);
     g_lua.bindSingletonFunction("g_game", "imbuementDurations", &Game::imbuementDurations, &g_game);
     g_lua.bindSingletonFunction("g_game", "setTibiaCoins", &Game::setTibiaCoins, &g_game);
     g_lua.bindSingletonFunction("g_game", "getTibiaCoins", &Game::getTibiaCoins, &g_game);
