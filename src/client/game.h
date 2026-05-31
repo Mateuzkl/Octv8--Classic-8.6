@@ -323,6 +323,10 @@ public:
     void selectImbuementScroll();
     void imbuementDurations(const bool isOpen = false);
 
+    // weapon proficiency related
+    void sendWeaponProficiencyAction(uint8_t actionType, uint16_t itemId = 0);
+    void sendWeaponProficiencyApply(uint16_t itemId, const std::vector<uint8_t>& levels, const std::vector<uint8_t>& perkPositions);
+
     //void reportRuleViolation2();
     void ping();
     void newPing();

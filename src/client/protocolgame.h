@@ -137,6 +137,8 @@ public:
     void sendOpenWheel(uint32_t playerId);
     void sendApplyWheelPoints(const std::vector<uint16_t>& slotPoints, uint16_t greenGem, uint16_t redGem, uint16_t aquaGem, uint16_t purpleGem);
     void sendWheelGemAction(uint8_t actionType, uint8_t param, uint8_t pos);
+    void sendWeaponProficiencyAction(uint8_t actionType, uint16_t itemId = 0);
+    void sendWeaponProficiencyApply(uint16_t itemId, const std::vector<uint8_t>& levels, const std::vector<uint8_t>& perkPositions);
 
     // otclient only
     void sendChangeMapAwareRange(int xrange, int yrange);
@@ -273,6 +275,9 @@ private:
     void parseBlessDialog(const InputMessagePtr& msg);
     void parseResourceBalance(const InputMessagePtr& msg);
     void parseOpenWheelWindow(const InputMessagePtr& msg);
+    void parseWeaponProficiencyCatalog(const InputMessagePtr& msg);
+    void parseWeaponProficiencyExperience(const InputMessagePtr& msg);
+    void parseWeaponProficiencyInfo(const InputMessagePtr& msg);
     void parseServerTime(const InputMessagePtr& msg);
     void parseQuestTracker(const InputMessagePtr& msg);
     void parseImbuementWindow(const InputMessagePtr& msg);

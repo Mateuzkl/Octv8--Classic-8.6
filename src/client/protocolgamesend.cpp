@@ -923,6 +923,31 @@ void ProtocolGame::sendSelectImbuementScroll()
     send(msg);
 }
 
+void ProtocolGame::sendWeaponProficiencyAction(const uint8_t actionType, const uint16_t itemId)
+{
+    auto msg = std::make_shared<OutputMessage>();
+    msg->addU8(Proto::ClientWeaponProficiency);
+    msg->addU8(actionType);
+    if (actionType == Otc::WEAPON_PROFICIENCY_ITEM_INFO || actionType == Otc::WEAPON_PROFICIENCY_RESET_PERKS)
+        msg->addU16(itemId);
+    send(msg);
+}
+
+void ProtocolGame::sendWeaponProficiencyApply(const uint16_t itemId, const std::vector<uint8_t>& levels, const std::vector<uint8_t>& perkPositions)
+{
+    auto msg = std::make_shared<OutputMessage>();
+    msg->addU8(Proto::ClientWeaponProficiency);
+    msg->addU8(Otc::WEAPON_PROFICIENCY_APPLY_PERKS);
+    msg->addU16(itemId);
+    const size_t count = std::min(levels.size(), perkPositions.size());
+    msg->addU8(static_cast<uint8_t>(count));
+    for (size_t i = 0; i < count; ++i) {
+        msg->addU8(levels[i]);
+        msg->addU8(perkPositions[i]);
+    }
+    send(msg);
+}
+
 void ProtocolGame::sendImbuementDurations(const bool isOpen)
 {
     auto msg = std::make_shared<OutputMessage>();

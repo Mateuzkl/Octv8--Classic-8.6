@@ -492,8 +492,9 @@ namespace Otc
         GameDisplayItemDuration = 129,
         GameThingUpgradeClassification = 130,
         GameItemTierByte = 131,
+        GameProficiency = 132,
 
-        LastGameFeature = 132
+        LastGameFeature = 133
     };
 
     enum PathFindResult {
@@ -685,6 +686,14 @@ namespace Otc
         IMBUEMENT_WINDOW_CHOICE = 0,
         IMBUEMENT_WINDOW_SELECT_ITEM = 1,
         IMBUEMENT_WINDOW_SCROLL = 2
+    };
+
+    enum WeaponProficiency_t : uint8_t
+    {
+        WEAPON_PROFICIENCY_ITEM_INFO = 0,
+        WEAPON_PROFICIENCY_LIST_INFO = 1,
+        WEAPON_PROFICIENCY_RESET_PERKS = 2,
+        WEAPON_PROFICIENCY_APPLY_PERKS = 3
     };
 
     enum class WheelSlots_t : uint8_t
