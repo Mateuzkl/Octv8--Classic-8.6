@@ -665,7 +665,13 @@ end
 -- Public function to open the proficiency window
 function show()
     if not WeaponProficiency.window then
-        createWindow()
+        if not createWindow() then
+            return false
+        end
+    end
+
+    if not WeaponProficiency.window then
+        return false
     end
 
     -- Reset search filter and clear search text
@@ -702,6 +708,7 @@ function show()
     -- Use longer delay to ensure items are loaded, with retry
     WeaponProficiency.autoSelectRetries = 0
     scheduleAutoSelect(300)
+    return true
 end
 
 -- Auto-select an item (equipped weapon or first in list)
@@ -913,7 +920,9 @@ function requestOpenWindow(redirectItem)
         WeaponProficiency.firstItemRequested = redirectItem
     end
 
-    show()
+    if not show() then
+        return
+    end
 
     if WeaponProficiency.optionFilter and category then
         WeaponProficiency.optionFilter:setCurrentOption(category, true)
@@ -952,6 +961,9 @@ end
 -- Create the proficiency window
 function createWindow()
     WeaponProficiency.window = g_ui.displayUI('proficiency')
+    if not WeaponProficiency.window then
+        return false
+    end
     WeaponProficiency.window:hide()
 
     WeaponProficiency.displayItemPanel = WeaponProficiency.window:recursiveGetChildById("itemPanel")
@@ -1003,6 +1015,7 @@ function createWindow()
 
     -- Initialize item list
     WeaponProficiency:refreshItemList()
+    return true
 end
 
 -- Reset proficiency data

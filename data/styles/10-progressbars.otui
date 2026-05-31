@@ -35,3 +35,11 @@ HealthBar < ProgressBar
 
 ManaBar < ProgressBar
   background-color: #4444ff
+
+ProgressBarSD < UIProgressBarSD
+  height: 22
+  tooltip-delayed: true
+
+HealthBarSD < ProgressBarSD
+
+ProgressBarSDInv < UIProgressBarSDInverted
