@@ -278,6 +278,7 @@ private:
     void parseWeaponProficiencyCatalog(const InputMessagePtr& msg);
     void parseWeaponProficiencyExperience(const InputMessagePtr& msg);
     void parseWeaponProficiencyInfo(const InputMessagePtr& msg);
+    void parseWeaponProficiencyInfoBatch(const InputMessagePtr& msg);
     void parseServerTime(const InputMessagePtr& msg);
     void parseQuestTracker(const InputMessagePtr& msg);
     void parseImbuementWindow(const InputMessagePtr& msg);
