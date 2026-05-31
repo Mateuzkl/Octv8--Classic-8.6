@@ -1445,7 +1445,9 @@ function WeaponProficiency:refreshItemList()
             local displayId = marketItem.displayId or marketItem.originalId
             local cacheId = marketItem.originalId or displayId
             itemWidget:setItemId(displayId)
-            ItemsDatabase.setRarityItem(itemWidget, itemWidget:getItem())
+            if ItemsDatabase and ItemsDatabase.setRarityItem then
+                ItemsDatabase.setRarityItem(itemWidget, itemWidget:getItem())
+            end
             -- Add tooltip with item name
             child:setTooltip(marketItem.marketData.name or "")
 
