@@ -215,7 +215,12 @@ function onContainerOpen(container, previousContainer)
 	name = name:sub(1, 1):upper() .. name:sub(2)
 
 	containerWindow:setText(name)
-	containerItemWidget:setItem(container:getContainerItem())
+	local containerItem = container:getContainerItem()
+	if containerItem then
+		containerItemWidget:setItemId(containerItem:getId())
+	else
+		containerItemWidget:setItem(nil)
+	end
 	containerPanel:destroyChildren()
 
 	for slot = 0, container:getCapacity() - 1 do

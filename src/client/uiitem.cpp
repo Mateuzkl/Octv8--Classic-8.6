@@ -60,7 +60,7 @@ void UIItem::drawSelf(Fw::DrawPane drawPane)
         m_item->setColor(m_itemColor);
         m_item->draw(drawRect);
 
-        if(m_font && m_showCount && (m_showCountAlways || (m_item->isStackable() || m_item->isChargeable()) && m_item->getCountOrSubType() > 1)) {
+        if(m_font && m_showCount && (m_showCountAlways || (m_item->isStackable() || m_item->isChargeable() || m_item->isQuiver()) && m_item->getCountOrSubType() > 1)) {
             g_drawQueue->addText(m_font, m_countText, Rect(drawRect.topLeft(), drawRect.bottomRight() - Point(3, 0)), Fw::AlignBottomRight, m_color);
         }
 

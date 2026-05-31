@@ -41,23 +41,6 @@
 #include <framework/util/extras.h>
 #include <framework/stdext/string.h>
 
-static bool isQuiverClientId(uint16 id)
-{
-    switch (id) {
-        case 35524: // jungle quiver
-        case 35562: // quiver
-        case 35848: // blue quiver
-        case 35849: // red quiver
-        case 36666: // eldritch quiver
-        case 39150: // alicorn quiver
-        case 39160: // naga quiver
-        case 45644: // candy-coated quiver
-            return true;
-        default:
-            return false;
-    }
-}
-
 void ProtocolGame::parseMessage(const InputMessagePtr& msg)
 {
     int opcode = -1;
@@ -3944,7 +3927,7 @@ ItemPtr ProtocolGame::getItem(const InputMessagePtr& msg, int id, bool hasDescri
         }
     }
 
-    if (g_game.getProtocolVersion() >= 860 && isQuiverClientId(item->getId())) {
+    if (g_game.getProtocolVersion() >= 860 && item->isQuiver()) {
         item->setCountOrSubType(msg->getU8());
     }
 

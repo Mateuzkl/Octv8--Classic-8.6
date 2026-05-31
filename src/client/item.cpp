@@ -333,6 +333,23 @@ int Item::getCount()
     return 1;
 }
 
+bool Item::isQuiver()
+{
+    switch (getId()) {
+        case 35524: // jungle quiver
+        case 35562: // quiver
+        case 35848: // blue quiver
+        case 35849: // red quiver
+        case 36666: // eldritch quiver
+        case 39150: // alicorn quiver
+        case 39160: // naga quiver
+        case 45644: // candy-coated quiver
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool Item::isMoveable()
 {
     return !rawGetThingType()->isNotMoveable();
