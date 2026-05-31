@@ -284,6 +284,26 @@ NonClosableMiniWindow
         image-clip: 20 0 20 20
 
     UIWidget
+      id: proficiencyButton
+      image-source: /images/options/button_proficiency
+      image-clip: 0 0 20 20
+      anchors.left: wheelButton.right
+      anchors.top: forgeButton.top
+      margin-left: 3
+      size: 20 20
+      tooltip: Weapon Proficiency
+      @onClick: if modules.game_proficiency then modules.game_proficiency.toggle() end
+
+      $pressed:
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
+
+      $checked:
+        image-clip: 20 0 20 20
+
+    UIWidget
       id: fullButtons
       image-source: buttons/fullButtons
       anchors.right: parent.right

@@ -10,6 +10,7 @@ preyTrackerButton = nil
 forgeButton = nil
 imbuementTrackerButton = nil
 wheelButton = nil
+proficiencyButton = nil
 spellsButton = nil
 ciclopediaButton = nil
 unjustifiedPointsButton = nil
@@ -36,6 +37,7 @@ function init()
 	forgeButton = buttonsWindow:recursiveGetChildById("forgeButton")
 	imbuementTrackerButton = buttonsWindow:recursiveGetChildById("imbuementTrackerButton")
 	wheelButton = buttonsWindow:recursiveGetChildById("wheelButton")
+	proficiencyButton = buttonsWindow:recursiveGetChildById("proficiencyButton")
 	spellsButton = buttonsWindow:recursiveGetChildById("spellsButton")
 	ciclopediaButton = buttonsWindow:recursiveGetChildById("ciclopediaButton")
 	unjustifiedPointsButton = buttonsWindow:recursiveGetChildById("unjustifiedPointsButton")
@@ -80,6 +82,7 @@ function hideButtons()
 		forgeButton,
 		imbuementTrackerButton,
 		wheelButton,
+		proficiencyButton,
 		optionsButton,
 		logoutButton,
 		verticalSeparator
@@ -107,6 +110,7 @@ function showButtons()
 		forgeButton,
 		imbuementTrackerButton,
 		wheelButton,
+		proficiencyButton,
 		optionsButton,
 		logoutButton,
 		verticalSeparator

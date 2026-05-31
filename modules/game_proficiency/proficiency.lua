@@ -106,6 +106,24 @@ local function hasWeaponProficiencyProtocol()
                type(g_game.sendWeaponProficiencyApply) == 'function'
 end
 
+local function sendWeaponProficiencyAction(actionType, itemId)
+    if not hasWeaponProficiencyProtocol() then
+        return false
+    end
+
+    g_game.sendWeaponProficiencyAction(actionType, itemId or 0)
+    return true
+end
+
+local function sendWeaponProficiencyApply(itemId, levels, perkPositions)
+    if not hasWeaponProficiencyProtocol() then
+        return false
+    end
+
+    g_game.sendWeaponProficiencyApply(itemId, levels, perkPositions)
+    return true
+end
+
 local function getPlayerWheelVocation()
     local player = g_game.getLocalPlayer()
     if not player then
@@ -263,12 +281,28 @@ local function setProficiencyButtonState(state)
 end
 
 local function createProficiencyButton()
+    WeaponProficiency.buttonOwned = false
+
+    if modules.game_sidebuttons then
+        local button = modules.game_sidebuttons.proficiencyButton
+        if not button and modules.game_sidebuttons.buttonsWindow then
+            button = modules.game_sidebuttons.buttonsWindow:recursiveGetChildById('proficiencyButton')
+        end
+        if button then
+            button:setTooltip(tr('Open Weapon Proficiency'))
+            button.onClick = toggle
+            return button
+        end
+    end
+
     if modules.game_mainpanel and modules.game_mainpanel.addToggleButton then
+        WeaponProficiency.buttonOwned = true
         return modules.game_mainpanel.addToggleButton('ProficiencyButton', tr('Open Weapon Proficiency'),
             '/images/options/button_proficiency', toggle, false, 21, true)
     end
 
     if modules.client_topmenu and modules.client_topmenu.addRightGameToggleButton then
+        WeaponProficiency.buttonOwned = true
         return modules.client_topmenu.addRightGameToggleButton('ProficiencyButton', tr('Open Weapon Proficiency'),
             '/images/options/button_proficiency', toggle, false, 21)
     end
@@ -299,13 +333,6 @@ function scheduleAutoSelect(delay)
 end
 
 function onGameStart()
-    if not hasWeaponProficiencyProtocol() then
-        scheduleEvent(function()
-            g_modules.getModule("game_proficiency"):unload()
-        end, 100)
-        return
-    end
-
     WeaponProficiency.allProficiencyRequested = false
     WeaponProficiency.saveWeaponMissing = false
     WeaponProficiency.firstItemRequested = nil
@@ -321,6 +348,10 @@ function onGameStart()
 
     WeaponProficiency.button = createProficiencyButton()
     setProficiencyButtonState(false)
+
+    if not hasWeaponProficiencyProtocol() then
+        return
+    end
 
     -- Initialize topbar proficiency widget
     initTopBarProficiency()
@@ -357,7 +388,7 @@ function initTopBarProficiency(attempts)
                     local leftSlotItem = player:getInventoryItem(InventorySlotLeft)
                     if leftSlotItem then
                         local itemId = leftSlotItem:getId()
-                        g_game.sendWeaponProficiencyAction(0, itemId)
+                        sendWeaponProficiencyAction(0, itemId)
                     end
                 end
                 updateTopBarProficiency()
@@ -470,7 +501,7 @@ function updateTopBarProficiency()
         WeaponProficiency.currentEquippedExp = exp
         WeaponProficiency.currentEquippedMaxExp = nextLevelExp
     else
-        g_game.sendWeaponProficiencyAction(0, itemId)
+        sendWeaponProficiencyAction(0, itemId)
     end
 end
 
@@ -482,11 +513,15 @@ function onGameEnd()
         WeaponProficiency.window:hide()
     end
 
-    -- Remove button from main panel
     if WeaponProficiency.button then
-        WeaponProficiency.button:destroy()
+        if WeaponProficiency.buttonOwned then
+            WeaponProficiency.button:destroy()
+        else
+            setProficiencyButtonState(false)
+        end
         WeaponProficiency.button = nil
     end
+    WeaponProficiency.buttonOwned = false
 
     WeaponProficiency:reset()
 end
@@ -871,7 +906,9 @@ function requestOpenWindow(redirectItem)
 
     -- Request all proficiencies from server
     if not WeaponProficiency.allProficiencyRequested then
-        g_game.sendWeaponProficiencyAction(1) -- Request all weapons
+        if not sendWeaponProficiencyAction(1) then -- Request all weapons
+            return
+        end
         WeaponProficiency.allProficiencyRequested = true
         WeaponProficiency.firstItemRequested = redirectItem
     end
@@ -1562,7 +1599,7 @@ function WeaponProficiency:selectItem(itemId, marketItem)
     end
 
     -- Request proficiency info from server if needed - use cacheId (originalId)
-    g_game.sendWeaponProficiencyAction(0, cacheId)
+    sendWeaponProficiencyAction(0, cacheId)
 end
 
 -- Display proficiency data for selected item
@@ -2363,7 +2400,7 @@ function WeaponProficiency:onResetClick()
     -- This is more reliable than using action type 2 (reset)
     if self.selectedItemId then
         -- Send empty arrays to clear all perks
-        g_game.sendWeaponProficiencyApply(self.selectedItemId, {}, {})
+        sendWeaponProficiencyApply(self.selectedItemId, {}, {})
     end
 
     -- Clear local cache and refresh display
@@ -2433,7 +2470,7 @@ function WeaponProficiency:applyPendingSelections()
 
     -- Send to server using the protocol function with two parallel arrays
     -- g_game.sendWeaponProficiencyApply(itemId, levelsArray, perkPositionsArray)
-    g_game.sendWeaponProficiencyApply(self.selectedItemId, levels, perkPositions)
+    sendWeaponProficiencyApply(self.selectedItemId, levels, perkPositions)
 
     -- Update cache with ALL applied perks (convert back to server format: 1-indexed)
     -- This includes both cached perks and new pending selections
@@ -2464,7 +2501,7 @@ function WeaponProficiency:applyPendingSelections()
         -- Request updated proficiency info from server to confirm
         scheduleEvent(function()
             if self.selectedItemId then
-                g_game.sendWeaponProficiencyAction(0, self.selectedItemId)
+                sendWeaponProficiencyAction(0, self.selectedItemId)
             end
         end, 200)
     end
