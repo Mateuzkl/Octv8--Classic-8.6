@@ -42,10 +42,13 @@ NonClosableMiniWindow
       @onClick: modules.game_skills.toggle()
 
       $pressed:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
 
     UIWidget
       id: battleButton
@@ -58,10 +61,13 @@ NonClosableMiniWindow
       @onClick: modules.game_battle.toggle()
 
       $pressed:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
 
     UIWidget
       id: exphButton
@@ -74,10 +80,13 @@ NonClosableMiniWindow
       @onClick: modules.game_huntanalyzer.toggle()
 
       $pressed:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
 
     UIWidget
       id: vipButton
@@ -90,10 +99,13 @@ NonClosableMiniWindow
       @onClick: modules.game_viplist.toggle()
 
       $pressed:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
 
     UIWidget
       id: spellsButton
@@ -106,10 +118,13 @@ NonClosableMiniWindow
       @onClick: modules.game_spelllist.toggle()
 
       $pressed:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
 
     UIWidget
       id: botButton
@@ -123,10 +138,13 @@ NonClosableMiniWindow
       @onClick: modules.game_bot.toggle()
 
       $pressed:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
 
     UIWidget
       id: ciclopediaButton
@@ -139,6 +157,9 @@ NonClosableMiniWindow
       @onClick: if modules.game_ciclopedia then modules.game_ciclopedia.toggle() end
 
       $pressed:
+        image-clip: 0 20 20 20
+
+      $on:
         image-clip: 0 20 20 20
 
       $checked:
@@ -155,10 +176,13 @@ NonClosableMiniWindow
       @onClick: if modules.game_unjustifiedpoints then modules.game_unjustifiedpoints.toggle() end
 
       $pressed:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
 
     UIWidget
       id: preyButton
@@ -171,10 +195,13 @@ NonClosableMiniWindow
       @onClick: if modules.game_prey then modules.game_prey.toggle() end
 
       $pressed:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
 
     UIWidget
       id: preyTrackerButton
@@ -187,14 +214,18 @@ NonClosableMiniWindow
       @onClick: if modules.game_prey then modules.game_prey.toggleTracker() end
 
       $pressed:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
 
     UIWidget
       id: forgeButton
-      image-source: /modules/game_forge/images/icon-fusion
+      image-source: buttons/forge
+      image-clip: 0 0 20 20
       anchors.left: parent.left
       anchors.top: botButton.bottom
       margin-left: 5
@@ -204,14 +235,17 @@ NonClosableMiniWindow
       @onClick: if modules.game_forge then modules.game_forge.toggle() end
 
       $pressed:
-        image-color: #bbbbbb
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-color: #bbbbbb
+        image-clip: 20 0 20 20
 
     UIWidget
       id: imbuementTrackerButton
-      image-source: /images/topbuttons/imbuementtracker
+      image-source: buttons/imbuementtracker
       anchors.left: forgeButton.right
       anchors.top: forgeButton.top
       margin-left: 3
@@ -221,14 +255,18 @@ NonClosableMiniWindow
       @onClick: if modules.game_imbuementtracker then modules.game_imbuementtracker.toggle() end
 
       $pressed:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
 
     UIWidget
       id: wheelButton
       image-source: buttons/wheel
+      image-clip: 0 0 20 20
       anchors.left: imbuementTrackerButton.right
       anchors.top: forgeButton.top
       margin-left: 3
@@ -237,10 +275,13 @@ NonClosableMiniWindow
       @onClick: if modules.game_wheel then modules.game_wheel.toggle() end
 
       $pressed:
-        image-color: #bbbbbb
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-color: #bbbbbb
+        image-clip: 20 0 20 20
 
     UIWidget
       id: fullButtons
@@ -248,12 +289,12 @@ NonClosableMiniWindow
       anchors.right: parent.right
       anchors.top: parent.top
       margin-right: 3
-      size: 42 20
-      image-clip: 0 0 42 20
+      size: 44 20
+      image-clip: 0 0 44 20
       @onClick: modules.game_sidebuttons.toggle()
 
       $checked:
-        image-clip: 0 20 42 20
+        image-clip: 0 20 44 20
 
     UIWidget
       id: logoutButton
@@ -267,10 +308,13 @@ NonClosableMiniWindow
       @onClick: modules.game_interface.tryLogout()
 
       $pressed:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
 
     UIWidget
       id: optionsButton
@@ -283,10 +327,13 @@ NonClosableMiniWindow
       @onClick: modules.client_options.toggle()
 
       $pressed:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
+
+      $on:
+        image-clip: 20 0 20 20
 
       $checked:
-        image-clip: 0 20 20 20
+        image-clip: 20 0 20 20
 
     Button
       id: stopButton
