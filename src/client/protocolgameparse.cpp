@@ -3096,6 +3096,7 @@ void ProtocolGame::parseImbuementWindow(const InputMessagePtr& msg)
         }
         case Otc::IMBUEMENT_WINDOW_SELECT_ITEM: {
             const uint16_t itemId = msg->getU16();
+            const std::string& itemName = msg->getString();
             const uint8_t tier = msg->getU8();
             const uint8_t slots = msg->getU8();
             std::map<int, std::tuple<Imbuement, int, int>> activeSlots;
@@ -3124,7 +3125,7 @@ void ProtocolGame::parseImbuementWindow(const InputMessagePtr& msg)
                 neededItems.push_back(Item::create(needItemId, count));
             }
 
-            g_lua.callGlobalField("g_game", "onImbuementItem", itemId, tier, slots, activeSlots, imbuements, neededItems);
+            g_lua.callGlobalField("g_game", "onImbuementItem", itemId, tier, slots, activeSlots, imbuements, neededItems, itemName);
             break;
         }
     }
