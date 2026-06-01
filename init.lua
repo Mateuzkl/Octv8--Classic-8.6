@@ -1,6 +1,6 @@
 -- CONFIG
 APP_NAME = "tibiaotcv8"  -- important, change it, it's name for config dir and files in appdata
-APP_VERSION = 1342       -- client version for updater and login to identify outdated client
+APP_VERSION = 860       -- client version for updater and login to identify outdated client
 DEFAULT_LAYOUT = "default" -- on android it's forced to "mobile", check code bellow
 
 -- If you don't use updater or other service, set it to updater = ""
@@ -92,8 +92,9 @@ if type(Services.crash) == 'string' and Services.crash:len() > 4 and g_modules.g
 end
 
 -- run updater, must use data.zip
+local updaterModule = g_modules.getModule("updater")
 if type(Services.updater) == 'string' and Services.updater:len() > 4 
-  and g_resources.isLoadedFromArchive() and g_modules.getModule("updater") then
+  and g_resources.isLoadedFromArchive() and updaterModule then
   g_modules.ensureModuleLoaded("updater")
   return Updater.init(loadModules)
 end

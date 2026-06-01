@@ -1,0 +1,20 @@
+{
+  "host": "127.0.0.1",
+  "port": 8080,
+  "api_path": "/updater",
+  "files_path": "/files/",
+  "public_files_url": "",
+  "title": "Tibia Otcv8 Classic",
+  "include": ["init.lua", "data", "modules"],
+  "executables": ["otclient_gl_x64.exe"],
+  "launcher_executable": "otclient_gl_x64.exe",
+  "copy_dlls": true,
+  "compression_level": 1,
+  "keep_files": false,
+  "protect_files": true,
+  "protect_extensions": [".lua", ".otui", ".otmod", ".otml", ".json", ".css"],
+  "protection_seed": "tibiaotcv8-local-protection",
+  "embed_data_zip": true,
+  "protect_embedded_zip": false,
+  "keep_release_data_zip": false
+}

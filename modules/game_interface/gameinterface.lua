@@ -2,12 +2,18 @@ gameRootPanel = nil
 gameMapPanel = nil
 gameRightPanels = nil
 gameLeftPanels = nil
+gameRightWidePanel = nil
+gameLeftWidePanel = nil
 gameBottomPanel = nil
 gameBottomActionPanel = nil
 gameLeftActionPanel = nil
 gameRightActionPanel = nil
 gameLeftActions = nil
 gameTopBar = nil
+leftIncreaseSidePanels = nil
+leftDecreaseSidePanels = nil
+rightIncreaseSidePanels = nil
+rightDecreaseSidePanels = nil
 logoutButton = nil
 mouseGrabberWidget = nil
 countWindow = nil
@@ -17,6 +23,64 @@ bottomSplitter = nil
 limitedZoom = false
 hookedMenuOptions = {}
 lastDirTime = g_clock.millis()
+
+local MAX_LEFT_COLUMNS = 2
+local MAX_RIGHT_COLUMNS = 2
+
+local function getLeftColumnCount()
+	return math.max(0, g_settings.getNumber("leftPanels") - 1)
+end
+
+local function getRightColumnCount()
+	return math.max(1, g_settings.getNumber("rightPanels"))
+end
+
+local function updateSidePanelButtons()
+	if not leftIncreaseSidePanels then
+		return
+	end
+
+	local leftCount = getLeftColumnCount()
+	local rightCount = getRightColumnCount()
+
+	leftIncreaseSidePanels:setEnabled(leftCount < MAX_LEFT_COLUMNS)
+	leftDecreaseSidePanels:setEnabled(leftCount > 0 and not g_app.isMobile())
+	rightIncreaseSidePanels:setEnabled(rightCount < MAX_RIGHT_COLUMNS)
+	rightDecreaseSidePanels:setEnabled(rightCount > 1)
+
+	leftIncreaseSidePanels:setTooltip(tr("Show left column"))
+	leftDecreaseSidePanels:setTooltip(tr("Hide left column"))
+	rightIncreaseSidePanels:setTooltip(tr("Show right column"))
+	rightDecreaseSidePanels:setTooltip(tr("Hide right column"))
+end
+
+local function setSideColumnCount(side, count)
+	if side == "left" then
+		count = math.max(0, math.min(MAX_LEFT_COLUMNS, count))
+		if modules.client_options and modules.client_options.setOption then
+			modules.client_options.setOption("leftPanels", count + 1)
+		else
+			g_settings.set("leftPanels", count + 1)
+			refreshViewMode()
+		end
+	else
+		count = math.max(1, math.min(MAX_RIGHT_COLUMNS, count))
+		if modules.client_options and modules.client_options.setOption then
+			modules.client_options.setOption("rightPanels", count)
+		else
+			g_settings.set("rightPanels", count)
+			refreshViewMode()
+		end
+	end
+
+	if modules.client_options and modules.client_options.validateMinimapPosition then
+		modules.client_options.validateMinimapPosition()
+	elseif modules.game_minimap and modules.game_minimap.applyMinimapPosition then
+		modules.game_minimap.applyMinimapPosition()
+	end
+
+	updateSidePanelButtons()
+end
 
 function init()
 	g_ui.importStyle("styles/countwindow")
@@ -43,20 +107,40 @@ function init()
 	gameMapPanel = gameRootPanel:getChildById("gameMapPanel")
 	gameRightPanels = gameRootPanel:getChildById("gameRightPanels")
 	gameLeftPanels = gameRootPanel:getChildById("gameLeftPanels")
+	gameRightWidePanel = gameRootPanel:getChildById("gameRightWidePanel")
+	gameLeftWidePanel = gameRootPanel:getChildById("gameLeftWidePanel")
+
+	-- Keep the wide (minimap) panels the same width as their side columns.
+	connect(gameRightPanels, {
+		onGeometryChange = function ()
+			if gameRightWidePanel and gameRightPanels then
+				gameRightWidePanel:setWidth(gameRightPanels:getWidth())
+			end
+		end
+	})
+	connect(gameLeftPanels, {
+		onGeometryChange = function ()
+			if gameLeftWidePanel and gameLeftPanels then
+				gameLeftWidePanel:setWidth(gameLeftPanels:getWidth())
+			end
+		end
+	})
+
 	gameBottomPanel = gameRootPanel:getChildById("gameBottomPanel")
 	gameBottomActionPanel = gameRootPanel:getChildById("gameBottomActionPanel")
 	gameRightActionPanel = gameRootPanel:getChildById("gameRightActionPanel")
 	gameLeftActionPanel = gameRootPanel:getChildById("gameLeftActionPanel")
 	gameTopBar = gameRootPanel:getChildById("gameTopBar")
 	gameLeftActions = gameRootPanel:getChildById("gameLeftActions")
-
-	connect(gameLeftPanel, {
-		onVisibilityChange = onLeftPanelVisibilityChange
-	})
+	leftIncreaseSidePanels = gameRootPanel:getChildById("leftIncreaseSidePanels")
+	leftDecreaseSidePanels = gameRootPanel:getChildById("leftDecreaseSidePanels")
+	rightIncreaseSidePanels = gameRootPanel:getChildById("rightIncreaseSidePanels")
+	rightDecreaseSidePanels = gameRootPanel:getChildById("rightDecreaseSidePanels")
 
 	logoutButton = modules.client_topmenu.addLeftButton("logoutButton", tr("Exit"), "/images/topbuttons/logout", tryLogout, true)
 
 	gameRightPanels:addChild(g_ui.createWidget("GameSidePanel"))
+	updateSidePanelButtons()
 	setupLeftActions()
 	refreshViewMode()
 	bindKeys()
@@ -1186,6 +1270,22 @@ local function removeLeftPanel()
 	gameLeftPanels:removeChild(panel)
 end
 
+function onIncreaseLeftPanels()
+	setSideColumnCount("left", getLeftColumnCount() + 1)
+end
+
+function onDecreaseLeftPanels()
+	setSideColumnCount("left", getLeftColumnCount() - 1)
+end
+
+function onIncreaseRightPanels()
+	setSideColumnCount("right", getRightColumnCount() + 1)
+end
+
+function onDecreaseRightPanels()
+	setSideColumnCount("right", getRightColumnCount() - 1)
+end
+
 function getBottomPanel()
 	return gameBottomPanel
 end
@@ -1204,6 +1304,77 @@ end
 
 function getTopBar()
 	return gameTopBar
+end
+
+function getWideRightPanel()
+	return gameRightWidePanel
+end
+
+function getWideLeftPanel()
+	return gameLeftWidePanel
+end
+
+-- Target width for a side's columns, based on the configured column count (not
+-- the live child count, which can lag a frame behind). Uses a single column's
+-- width as the unit and accounts for the -1 horizontalBox spacing.
+function getSideColumnsWidth(side)
+	local panels = (side == 'left') and gameLeftPanels or gameRightPanels
+	if not panels then
+		return 0
+	end
+
+	local count
+	if side == 'left' then
+		count = g_settings.getNumber('leftPanels') - 1
+	else
+		count = g_settings.getNumber('rightPanels')
+	end
+
+	local n = panels:getChildCount()
+	if count < 1 then
+		count = math.max(1, n)
+	end
+
+	local colW = 176
+	if n > 0 then
+		local p = panels:getChildByIndex(1)
+		if p and p:getWidth() > 0 then
+			colW = p:getWidth()
+		end
+	end
+
+	return count * colW - math.max(0, count - 1)
+end
+
+-- Force the wide (minimap) panels to match the current width of their columns.
+function syncWidePanels()
+	if gameRightWidePanel then
+		gameRightWidePanel:setWidth(getSideColumnsWidth('right'))
+	end
+	if gameLeftWidePanel then
+		gameLeftWidePanel:setWidth(getSideColumnsWidth('left'))
+	end
+end
+
+-- Make sure a side has at least `count` columns open. Note leftPanels is stored
+-- with a +1 offset (refreshViewMode subtracts 1), so a real count maps to
+-- count + 1; rightPanels is stored as the real count.
+function ensureMinPanels(side, count)
+	if not modules.client_options then
+		return
+	end
+
+	if side == 'right' then
+		if g_settings.getNumber("rightPanels") < count then
+			modules.client_options.setOption("rightPanels", count)
+		end
+	elseif side == 'left' then
+		if (g_settings.getNumber("leftPanels") - 1) < count then
+			modules.client_options.setOption("leftPanels", count + 1)
+		end
+	end
+
+	refreshViewMode()
 end
 
 function refreshViewMode()
@@ -1234,6 +1405,9 @@ function refreshViewMode()
 			leftPanels = leftPanels + 1
 		end
 	end
+
+	updateSidePanelButtons()
+	syncWidePanels()
 
 	if not g_game.isOnline() then
 		return
@@ -1337,6 +1511,8 @@ function refreshViewMode()
 	end
 
 	updateSize()
+	updateSidePanelButtons()
+	syncWidePanels()
 end
 
 function limitZoom()

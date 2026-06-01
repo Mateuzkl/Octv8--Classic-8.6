@@ -84,10 +84,22 @@ UIWidget
       @onSetup: self.image:setImageSource("/images/game/mobile/chat")
     
   Panel
-    id: gameLeftPanels
+    id: gameLeftWidePanel
     focusable: false
     anchors.top: parent.top
-    anchors.bottom: parent.bottom    
+    $!mobile:
+      anchors.left: parent.left
+    $mobile:
+      anchors.left: gameLeftActions.right
+    layout:
+      type: verticalBox
+      fit-children: true
+
+  Panel
+    id: gameLeftPanels
+    focusable: false
+    anchors.top: gameLeftWidePanel.bottom
+    anchors.bottom: parent.bottom
     $!mobile:
       anchors.left: parent.left
     $mobile:
@@ -115,14 +127,23 @@ UIWidget
       fit-children: true
       
   Panel
-    id: gameRightPanels
+    id: gameRightWidePanel
     anchors.right: parent.right
     anchors.top: parent.top
+    focusable: false
+    layout:
+      type: verticalBox
+      fit-children: true
+
+  Panel
+    id: gameRightPanels
+    anchors.right: parent.right
+    anchors.top: gameRightWidePanel.bottom
     anchors.bottom: parent.bottom
     focusable: false
     layout:
       type: horizontalBox
-      fit-children: true      
+      fit-children: true
       spacing: -1
 
   Panel
@@ -140,7 +161,73 @@ UIWidget
     layout:
       type: horizontalBox
       fit-children: true
-    
+
+  Button
+    id: leftIncreaseSidePanels
+    anchors.left: gameLeftPanels.right
+    anchors.top: parent.top
+    margin-top: 24
+    image-source: /images/ui/topstats_button_panel
+    image-clip: 27 0 9 27
+    size: 9 27
+    !tooltip: tr('Show left column')
+    @onClick: modules.game_interface.onIncreaseLeftPanels()
+
+    $hover:
+      image-clip: 27 0 9 27
+
+    $disabled:
+      image-clip: 36 0 9 27
+
+  Button
+    id: leftDecreaseSidePanels
+    anchors.left: leftIncreaseSidePanels.left
+    anchors.top: leftIncreaseSidePanels.bottom
+    image-source: /images/ui/topstats_button_panel
+    image-clip: 36 26 9 27
+    size: 9 27
+    !tooltip: tr('Hide left column')
+    @onClick: modules.game_interface.onDecreaseLeftPanels()
+
+    $hover:
+      image-clip: 36 26 9 27
+
+    $disabled:
+      image-clip: 27 27 9 27
+
+  Button
+    id: rightIncreaseSidePanels
+    anchors.right: gameRightPanels.left
+    anchors.top: parent.top
+    margin-top: 24
+    image-source: /images/ui/topstats_button_panel
+    image-clip: 0 0 9 27
+    size: 9 27
+    !tooltip: tr('Show right column')
+    @onClick: modules.game_interface.onIncreaseRightPanels()
+
+    $hover:
+      image-clip: 0 0 9 27
+
+    $disabled:
+      image-clip: 9 0 9 27
+
+  Button
+    id: rightDecreaseSidePanels
+    anchors.right: rightIncreaseSidePanels.right
+    anchors.top: rightIncreaseSidePanels.bottom
+    image-source: /images/ui/topstats_button_panel
+    image-clip: 9 27 9 27
+    size: 9 27
+    !tooltip: tr('Hide right column')
+    @onClick: modules.game_interface.onDecreaseRightPanels()
+
+    $hover:
+      image-clip: 9 27 9 27
+
+    $disabled:
+      image-clip: 0 27 9 27
+
   Splitter
     id: bottomSplitter
     anchors.left: gameLeftPanels.right

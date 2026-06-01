@@ -31,6 +31,7 @@
 #include <framework/http/http.h>
 #include <queue>
 #include <regex>
+#include <cstring>
 
 #if !defined(ANDROID)
 #include <boost/process.hpp>
@@ -47,6 +48,28 @@
 
 ResourceManager g_resources;
 static const std::string INIT_FILENAME = "init.lua";
+
+#if !defined(ANDROID)
+static const std::string EMBEDDED_DATA_MAGIC = "OTCV8_EMBEDDED_DATA_V1";
+static const uint64_t MAX_EMBEDDED_DATA_SIZE = 1024ULL * 1024ULL * 1024ULL;
+
+static uint32_t readLittleEndian32(const uint8_t* data)
+{
+    return (uint32_t)data[0] |
+        ((uint32_t)data[1] << 8) |
+        ((uint32_t)data[2] << 16) |
+        ((uint32_t)data[3] << 24);
+}
+
+static uint64_t readLittleEndian64(const uint8_t* data)
+{
+    uint64_t value = 0;
+    for (int i = 7; i >= 0; --i) {
+        value = (value << 8) | data[i];
+    }
+    return value;
+}
+#endif
 
 void ResourceManager::init(const char *argv0)
 {
@@ -315,7 +338,7 @@ bool ResourceManager::loadDataFromSelf(bool unmountIfMounted) {
     file.seekg(0, std::ios_base::end);
     std::size_t size = file.tellg();
     file.seekg(0, std::ios_base::beg);
-    if (size < 1024 || size > 1024 * 1024 * 128) {
+    if (size < 1024 || size > MAX_EMBEDDED_DATA_SIZE) {
         file.close();
         return false;
     }
@@ -323,13 +346,43 @@ bool ResourceManager::loadDataFromSelf(bool unmountIfMounted) {
     std::vector<uint8_t> v(1 + size);
     file.read((char*)&v[0], size);
     file.close();
-    for (size_t i = 0, end = size - 128; i < end; ++i) {
-        if (v[i] == 0x50 && v[i + 1] == 0x4b && v[i + 2] == 0x03 && v[i + 3] == 0x04 && v[i + 4] == 0x14) {
-            uint32_t compSize = *(uint32_t*)&v[i + 18];
-            uint32_t decompSize = *(uint32_t*)&v[i + 22];
-            if (compSize < 1024 * 1024 * 512 && decompSize < 1024 * 1024 * 512) {
-                data = std::make_shared<std::vector<uint8_t>>(&v[i], &v[v.size() - 1]);
-                break;
+
+    const size_t footerSize = EMBEDDED_DATA_MAGIC.size() + sizeof(uint64_t) + sizeof(uint32_t);
+    if (size > footerSize) {
+        const size_t footerStart = size - footerSize;
+        if (std::memcmp(v.data() + footerStart, EMBEDDED_DATA_MAGIC.data(), EMBEDDED_DATA_MAGIC.size()) == 0) {
+            const uint8_t* footerData = v.data() + footerStart + EMBEDDED_DATA_MAGIC.size();
+            uint64_t packedSize = readLittleEndian64(footerData);
+            uint32_t expectedChecksum = readLittleEndian32(footerData + sizeof(uint64_t));
+
+            if (packedSize > 0 && packedSize <= MAX_EMBEDDED_DATA_SIZE && packedSize <= footerStart) {
+                const size_t packedStart = footerStart - static_cast<size_t>(packedSize);
+                std::string packedData((char*)v.data() + packedStart, static_cast<size_t>(packedSize));
+                uint32_t checksum = ::crc32(0, Z_NULL, 0);
+                checksum = ::crc32(checksum, (const Bytef*)packedData.data(), packedData.size());
+
+                if (checksum == expectedChecksum) {
+                    if (packedData.size() >= 4 && packedData.substr(0, 4).compare("ENC3") == 0) {
+                        if (!decryptBuffer(packedData)) {
+                            return false;
+                        }
+                    }
+
+                    data = std::make_shared<std::vector<uint8_t>>(packedData.begin(), packedData.end());
+                }
+            }
+        }
+    }
+
+    if (!data) {
+        for (size_t i = 0, end = size - 128; i < end; ++i) {
+            if (v[i] == 0x50 && v[i + 1] == 0x4b && v[i + 2] == 0x03 && v[i + 3] == 0x04 && v[i + 4] == 0x14) {
+                uint32_t compSize = readLittleEndian32(&v[i + 18]);
+                uint32_t decompSize = readLittleEndian32(&v[i + 22]);
+                if (compSize < 1024 * 1024 * 512 && decompSize < 1024 * 1024 * 512) {
+                    data = std::make_shared<std::vector<uint8_t>>(&v[i], &v[v.size() - 1]);
+                    break;
+                }
             }
         }
     }
@@ -402,7 +455,12 @@ std::string ResourceManager::readFileContents(const std::string& fileName, bool 
         return buffer;
     }
 
-    static std::string unencryptedExtensions[] = { ".otml", ".otmm", ".dmp", ".log", ".txt", ".dll", ".exe", ".zip" };
+    static std::string unencryptedExtensions[] = {
+        ".cfg", ".css", ".dat", ".dmp", ".dll", ".exe", ".frag", ".html",
+        ".json", ".log", ".ogg", ".otfi", ".otfont", ".otml", ".otmm",
+        ".otb", ".png", ".rar", ".rc", ".rcss", ".rml", ".spr", ".ttf",
+        ".txt", ".zip"
+    };
 
     if (!decryptBuffer(buffer)) {
         bool ignore = (m_customEncryption == 0);

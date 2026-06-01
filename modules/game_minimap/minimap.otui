@@ -247,13 +247,15 @@ NonClosableMiniWindow
   &autoOpen: 3
 
   NonClosableMiniWindowContents
+    anchors.fill: parent
+    anchors.right: parent.right
     margin-top: 4
-    margin-left: 8
+    margin-left: 4
+    margin-right: 2
     image-source: /images/ui/panel_flat
     image-border: 1
     image-size: 108 108
 
-  
     Minimap
       id: minimap
       margin-top: 1
@@ -262,42 +264,159 @@ NonClosableMiniWindow
       height: 106
       anchors.left: parent.left
       anchors.top: parent.top
-      
-    
+
+      UIButton
+        id: minimapMoveLeft
+        size: 20 20
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        margin-left: 2
+        image-source: /images/ui/arrow-left-button
+        image-clip: 0 20 20 20
+        opacity: 0.45
+        !tooltip: tr('Move minimap left')
+        @onClick: modules.game_minimap.moveMinimapLeft()
+
+        $hover:
+          opacity: 1.0
+
+        $disabled:
+          image-clip: 0 0 20 20
+          opacity: 0.25
+
+        $pressed:
+          image-clip: 0 40 20 20
+
+      UIButton
+        id: minimapMoveRight
+        size: 20 20
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        margin-right: 2
+        image-source: /images/ui/arrow-right-button
+        image-clip: 0 20 20 20
+        opacity: 0.45
+        !tooltip: tr('Move minimap right')
+        @onClick: modules.game_minimap.moveMinimapRight()
+
+        $hover:
+          opacity: 1.0
+
+        $disabled:
+          image-clip: 0 0 20 20
+          opacity: 0.25
+
+        $pressed:
+          image-clip: 0 40 20 20
+
+      // --- Wide (2-column) controls, anchored to the map corners. Hidden in 1-column. ---
+      MinimapResetButton
+        id: resetWidget
+        visible: false
+        !text: tr('Center')
+        anchors.left: parent.left
+        anchors.top: parent.top
+        margin-left: 4
+        margin-top: 4
+        @onClick: self:getParent():reset()
+
+      UIButton
+        id: floorUpWidget
+        visible: false
+        image-source: /images/game/minimap/floor_up
+        image-clip: 0 0 20 20
+        size: 20 20
+        anchors.right: parent.right
+        anchors.top: parent.top
+        margin-right: 4
+        margin-top: 4
+        @onClick: self:getParent():floorUp(1)
+        $pressed:
+          image-clip: 0 20 20 20
+
+      UIButton
+        id: floorDownWidget
+        visible: false
+        image-source: /images/game/minimap/floor_down
+        image-clip: 0 0 20 20
+        size: 20 20
+        anchors.right: parent.right
+        anchors.top: floorUpWidget.bottom
+        margin-right: 4
+        margin-top: 2
+        @onClick: self:getParent():floorDown(1)
+        $pressed:
+          image-clip: 0 20 20 20
+
+      UIButton
+        id: zoomOutWidget
+        visible: false
+        image-source: /images/game/minimap/zoom-out
+        image-clip: 0 0 20 20
+        size: 20 20
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        margin-right: 4
+        margin-bottom: 4
+        @onClick: self:getParent():zoomOut()
+        $pressed:
+          image-clip: 0 20 20 20
+
+      UIButton
+        id: zoomInWidget
+        visible: false
+        image-source: /images/game/minimap/zoom-in
+        image-clip: 0 0 20 20
+        size: 20 20
+        anchors.right: parent.right
+        anchors.bottom: zoomOutWidget.top
+        margin-right: 4
+        margin-bottom: 2
+        @onClick: self:getParent():zoomIn()
+        $pressed:
+          image-clip: 0 20 20 20
+
+    // --- Compact (1-column / original) controls. Hidden in 2-column. ---
     UIWidget
       id: circle
       image-source: /images/game/minimap/circle
-      anchors.left: prev.right
-      anchors.top: prev.top
+      anchors.left: minimap.right
+      anchors.top: minimap.top
       size: 43 43
       margin-left: 10
 
     InvisibleMinimapButton
+      id: panLeft
       anchors.right: circle.right
       anchors.verticalCenter: circle.verticalCenter
       @onClick: self:getParent().minimap:move(-10, 0)
-    
+
     InvisibleMinimapButton
+      id: panRight
       anchors.left: circle.left
       anchors.verticalCenter: circle.verticalCenter
       @onClick: self:getParent().minimap:move(10, 0)
-    
+
     InvisibleMinimapButton
+      id: panUp
       anchors.top: circle.top
       anchors.horizontalCenter: circle.horizontalCenter
       @onClick: self:getParent().minimap:move(0, 10)
-    
+
     InvisibleMinimapButton
+      id: panDown
       anchors.bottom: circle.bottom
       anchors.horizontalCenter: circle.horizontalCenter
       @onClick: self:getParent().minimap:move(0, -10)
-    
+
     InvisibleMinimapButton
+      id: panReset
       anchors.verticalCenter: circle.verticalCenter
       anchors.horizontalCenter: circle.horizontalCenter
       @onClick: self:getParent().minimap:reset()
-  
+
     UIButton
+      id: compactZoomOut
       image-source: /images/game/minimap/zoom-out
       image-clip: 0 0 20 20
       anchors.left: circle.left
@@ -305,11 +424,11 @@ NonClosableMiniWindow
       size: 20 20
       margin-top: 2
       @onClick: self:getParent().minimap:zoomOut()
-
       $pressed:
         image-clip: 0 20 20 20
-    
+
     UIButton
+      id: compactZoomIn
       image-source: /images/game/minimap/zoom-in
       image-clip: 0 0 20 20
       size: 20 20
@@ -317,11 +436,11 @@ NonClosableMiniWindow
       anchors.top: prev.bottom
       margin-top: 3
       @onClick: self:getParent().minimap:zoomIn()
-
       $pressed:
         image-clip: 0 20 20 20
-    
+
     UIButton
+      id: compactFloorUp
       image-source: /images/game/minimap/floor_up
       image-clip: 0 0 20 20
       size: 20 20
@@ -329,11 +448,11 @@ NonClosableMiniWindow
       anchors.top: circle.bottom
       margin-top: 3
       @onClick: self:getParent().minimap:floorUp(1)
-
       $pressed:
         image-clip: 0 20 20 20
-    
+
     UIButton
+      id: compactFloorDown
       image-source: /images/game/minimap/floor_down
       image-clip: 0 0 20 20
       size: 20 20
@@ -341,11 +460,11 @@ NonClosableMiniWindow
       anchors.top: prev.bottom
       margin-top: 2
       @onClick: self:getParent().minimap:floorDown(1)
-
       $pressed:
         image-clip: 0 20 20 20
-    
+
     Button
+      id: compactCentre
       !text: tr('Centre')
       anchors.left: circle.left
       anchors.top: prev.bottom
@@ -358,7 +477,7 @@ NonClosableMiniWindow
       size: 20 20
       anchors.right: prev.left
       anchors.top: prev.top
-      margin-top: -2
+      margin-top: 5
       margin-right: 11
       !tooltip: tr('Open big minimap')
       icon-source: /images/topbuttons/bigmap

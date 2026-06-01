@@ -48,6 +48,7 @@ local defaultOptions = {
 	enableAudio = true,
 	backgroundFrameRate = 60,
 	containerPanel = 8,
+	minimapPosition = 1,
 	displayNames = true,
 	rightPanels = 1,
 	showPrivateMessagesOnScreen = true,
@@ -139,8 +140,8 @@ function init()
 	end
 
 	subWindows.general = createSubWindow("generalWindow", tr("General Options"), "game", {
-		width = 250,
-		height = 380
+		width = 280,
+		height = 510
 	})
 	subWindows.graphics = createSubWindow("graphicsWindow", tr("Graphics"), "graphics", {
 		width = 270,
@@ -208,7 +209,110 @@ function toggleSubWindow(name)
 			win:show()
 			win:raise()
 			win:focus()
+
+			if name == "general" then
+				updatePanelCheckboxes()
+			end
 		end
+	end
+end
+
+-- Side-panel column controls (General Options).
+-- leftPanels is stored with a +1 offset (refreshViewMode subtracts 1), so the
+-- real left column count is getNumber('leftPanels') - 1 (range 0..2).
+-- rightPanels is stored as the real count (range 1..2).
+function updatePanelCheckboxes()
+	local win = subWindows and subWindows.general
+	if not win then
+		return
+	end
+
+	local lc = g_settings.getNumber('leftPanels') - 1
+	local rc = g_settings.getNumber('rightPanels')
+
+	local function set(id, checked)
+		local w = win:recursiveGetChildById(id)
+		if w then
+			w:setChecked(checked)
+		end
+	end
+
+	set('leftAll', lc >= 2)
+	set('left1', lc >= 1)
+	set('left2', lc >= 2)
+	set('rightAll', rc >= 2)
+	set('right1', rc >= 2)
+	set('right2', true)
+end
+
+-- If the minimap is set to span 2 columns on a side that no longer has 2
+-- columns, keep it on the same side when possible and fall back safely.
+local function checkMinimapRevert()
+	local p = g_settings.getNumber('minimapPosition')
+	local leftCount = g_settings.getNumber('leftPanels') - 1
+	local rightCount = g_settings.getNumber('rightPanels')
+	local nextPosition = p
+
+	if p == 4 and leftCount < 2 then
+		nextPosition = (leftCount >= 1) and 3 or 1
+	elseif p == 2 and rightCount < 2 then
+		nextPosition = 1
+	end
+
+	if nextPosition ~= p then
+		setOption('minimapPosition', nextPosition)
+
+		local win = subWindows and subWindows.general
+		if win then
+			local w = win:recursiveGetChildById('minimapPosition')
+			if w then
+				w:setCurrentIndex(nextPosition, true)
+			end
+		end
+	elseif modules.game_minimap and modules.game_minimap.applyMinimapPosition then
+		modules.game_minimap.applyMinimapPosition()
+	end
+end
+
+function validateMinimapPosition()
+	checkMinimapRevert()
+end
+
+function setLeftColumns(which)
+	local lc = g_settings.getNumber('leftPanels') - 1
+
+	if which == 'all' then
+		lc = (lc >= 2) and 0 or 2
+	elseif which == '1' then
+		lc = (lc >= 1) and 0 or 1
+	elseif which == '2' then
+		lc = (lc >= 2) and 1 or 2
+	end
+
+	setOption('leftPanels', lc + 1)
+	updatePanelCheckboxes()
+	checkMinimapRevert()
+
+	if modules.game_minimap and modules.game_minimap.applyMinimapPosition then
+		modules.game_minimap.applyMinimapPosition()
+	end
+end
+
+function setRightColumns(which)
+	local rc = g_settings.getNumber('rightPanels')
+
+	if which == 'all' or which == '1' then
+		rc = (rc >= 2) and 1 or 2
+	else
+		rc = math.max(1, rc)
+	end
+
+	setOption('rightPanels', rc)
+	updatePanelCheckboxes()
+	checkMinimapRevert()
+
+	if modules.game_minimap and modules.game_minimap.applyMinimapPosition then
+		modules.game_minimap.applyMinimapPosition()
 	end
 end
 
@@ -483,6 +587,10 @@ function setOption(key, value, force)
 
 	if key == "classicView" or key == "rightPanels" or key == "leftPanels" or key == "cacheMap" or key == "hdmodeBox" then
 		modules.game_interface.refreshViewMode()
+	elseif key == "minimapPosition" then
+		if modules.game_minimap and modules.game_minimap.applyMinimapPosition then
+			modules.game_minimap.applyMinimapPosition()
+		end
 	elseif key:find("actionbar") then
 		if modules.game_actionbar then
 			modules.game_actionbar.refresh()

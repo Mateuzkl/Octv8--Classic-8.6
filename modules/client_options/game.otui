@@ -1,7 +1,35 @@
 OptionPanel
 
   FlatPanel
+    id: sidePanelsBg
+    height: 36
+
+    Label
+      id: minimapPosLabel
+      color: #BEBEBE
+      anchors.left: parent.left
+      anchors.top: parent.top
+      margin-left: 6
+      margin-top: 10
+      !text: tr("Minimap position:")
+
+    ComboBox
+      id: minimapPosition
+      width: 130
+      anchors.right: parent.right
+      anchors.verticalCenter: minimapPosLabel.verticalCenter
+      margin-right: 6
+      @onOptionChange: modules.client_options.setOption(self:getId(), self.currentIndex)
+      @onSetup: |
+        self:addOption("Right - 1 column")
+        self:addOption("Right - 2 columns")
+        self:addOption("Left - 1 column")
+        self:addOption("Left - 2 columns")
+        self:setCurrentIndex(math.max(1, g_settings.getNumber("minimapPosition")), true)
+
+  FlatPanel
     height: 22
+    margin-top: 8
 
     OptionCheckBox
       id: classicControl

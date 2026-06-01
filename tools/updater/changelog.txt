@@ -1,0 +1,3 @@
+Auto updater local configurado.
+Janela de atualizacao com changelog.
+Pacote data.zip gerado automaticamente para o OTCv8 Classic.

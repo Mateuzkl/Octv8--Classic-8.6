@@ -2,7 +2,7 @@ MainWindow
   id: wheelWindow
   !text: tr('Wheel Of Destiny')
   anchors.centerIn: parent
-  size: 1000 680
+  size: 1080 704
   @onEscape: hide()
   @onEnter: onWheelOfDestinyApply(true)
 
@@ -12,11 +12,8 @@ MainWindow
     image-source: /images/game/wheel/menuBg
     image-border: 1
     anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.right: parent.right
+    anchors.horizontalCenter: parent.horizontalCenter
     margin-top: 12
-    margin-left: 12
-    margin-right: 12
 
     Button
       id: wheelMenu
