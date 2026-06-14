@@ -261,7 +261,7 @@ end
 local function updateWildcardBalance(wildcards)
 	bonusRerolls = wildcards
 	if preyWindow and preyWindow.wildCards then
-		preyWindow.wildCards:setText(tostring(wildcards))
+		preyWindow.wildCards.text:setText(tostring(wildcards))
 	end
 end
 
@@ -982,6 +982,9 @@ function onPreySelection(slot, bonusType, bonusValue, bonusGrade, names, outfits
 end
 
 function onResourceBalance(type, balance)
+	type = tonumber(type)
+	balance = tonumber(balance) or 0
+
 	if type == 0 then
 		bankGold = balance
 	elseif type == 1 then
@@ -989,11 +992,11 @@ function onResourceBalance(type, balance)
 	elseif type == 10 then
 		bonusRerolls = balance
 
-		preyWindow.wildCards:setText(balance)
+		preyWindow.wildCards.text:setText(tostring(balance))
 	end
 
 	if type == 0 or type == 1 then
-		preyWindow.gold:setText(comma_value(bankGold + inventoryGold))
+		preyWindow.gold.text:setText(comma_value(bankGold + inventoryGold))
 	end
 end
 
