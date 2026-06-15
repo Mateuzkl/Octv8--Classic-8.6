@@ -42,6 +42,10 @@ local PREY_FLAG_LOCKED = 2
 local preyDescription = {}
 local preySlots = {}
 
+local RESOURCE_BANK_BALANCE = ResourceTypes and ResourceTypes.BANK_BALANCE or 0
+local RESOURCE_GOLD_EQUIPPED = ResourceTypes and ResourceTypes.GOLD_EQUIPPED or 1
+local RESOURCE_PREY_WILDCARDS = ResourceTypes and ResourceTypes.PREY_WILDCARDS or 10
+
 function bonusDescription(bonusType, bonusValue, bonusGrade)
 	if bonusType == PREY_BONUS_DAMAGE_BOOST then
 		return "Damage bonus (" .. bonusGrade .. "/10)"
@@ -263,6 +267,27 @@ local function updateWildcardBalance(wildcards)
 	if preyWindow and preyWindow.wildCards then
 		preyWindow.wildCards.text:setText(tostring(wildcards))
 	end
+end
+
+local function updateGoldBalance()
+	if preyWindow and preyWindow.gold then
+		preyWindow.gold.text:setText(comma_value(bankGold + inventoryGold))
+	end
+end
+
+local function syncResourceBalance(resourceType)
+	local player = g_game.getLocalPlayer()
+	if not player or not player.getResourceBalance then
+		return
+	end
+
+	onResourceBalance(resourceType, player:getResourceBalance(resourceType))
+end
+
+local function syncPreyBalances()
+	syncResourceBalance(RESOURCE_BANK_BALANCE)
+	syncResourceBalance(RESOURCE_GOLD_EQUIPPED)
+	syncResourceBalance(RESOURCE_PREY_WILDCARDS)
 end
 
 local function setRerollPriceLabel(priceWidget, isFree)
@@ -492,6 +517,7 @@ function show()
 		preyButton:setOn(true)
 	end
 	requestOpen()
+	syncPreyBalances()
 end
 
 function toggle()
@@ -985,18 +1011,14 @@ function onResourceBalance(type, balance)
 	type = tonumber(type)
 	balance = tonumber(balance) or 0
 
-	if type == 0 then
+	if type == RESOURCE_BANK_BALANCE then
 		bankGold = balance
-	elseif type == 1 then
+		updateGoldBalance()
+	elseif type == RESOURCE_GOLD_EQUIPPED then
 		inventoryGold = balance
-	elseif type == 10 then
-		bonusRerolls = balance
-
-		preyWindow.wildCards.text:setText(tostring(balance))
-	end
-
-	if type == 0 or type == 1 then
-		preyWindow.gold.text:setText(comma_value(bankGold + inventoryGold))
+		updateGoldBalance()
+	elseif type == RESOURCE_PREY_WILDCARDS then
+		updateWildcardBalance(balance)
 	end
 end
 
