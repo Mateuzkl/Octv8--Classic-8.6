@@ -1011,13 +1011,17 @@ function onResourceBalance(type, balance)
 	type = tonumber(type)
 	balance = tonumber(balance) or 0
 
-	if type == RESOURCE_BANK_BALANCE then
+	local bankBalanceType = RESOURCE_BANK_BALANCE or 0
+	local equippedGoldType = RESOURCE_GOLD_EQUIPPED or 1
+	local preyWildcardsType = RESOURCE_PREY_WILDCARDS or 10
+
+	if type == bankBalanceType then
 		bankGold = balance
 		updateGoldBalance()
-	elseif type == RESOURCE_GOLD_EQUIPPED then
+	elseif type == equippedGoldType then
 		inventoryGold = balance
 		updateGoldBalance()
-	elseif type == RESOURCE_PREY_WILDCARDS then
+	elseif type == preyWildcardsType then
 		updateWildcardBalance(balance)
 	end
 end
