@@ -1,10 +1,10 @@
 CyclopediaOpcode = {
-	Info = 0x48,
-	Category = 0x49,
-	Monster = 0x4A,
-	Charm = 0x4C,
-	Tracker = 0x4D,
-	Send = 0x48
+	Info = 0x39,
+	Category = 0x3A,
+	Monster = 0x3B,
+	Charm = 0x3E,
+	Tracker = 0x3F,
+	Send = 0x39
 }
 
 protoData = protoData or {}
@@ -205,6 +205,7 @@ local function dispatchBestiaryProtocol(protocol, msg)
 	if parser then
 		parser(protocol, msg)
 	end
+	return true
 end
 
 function unregisterBestiaryProtocol()
@@ -718,6 +719,8 @@ function updateBestiaryTracker(msg)
 			raceId = raceId,
 			outfit = raceOutfit,
 			kills = msg:getU32(),
+			firstUnlock = msg:getU16(),
+			secondUnlock = msg:getU16(),
 			toKill = msg:getU16(),
 			progress = msg:getU8()
 		}
@@ -799,12 +802,11 @@ function initBestiary(contentContainer)
 	--- Extras
 	connect(g_game, {
 		onEnterGame = registerBestiaryProtocol, 
-		onPendingGame = registerBestiaryProtocol
+		onPendingGame = registerBestiaryProtocol,
+		onGameStart = registerBestiaryProtocol
 	})
 	
-	if g_game.isOnline() then
-        registerBestiaryProtocol()
-    end
+	registerBestiaryProtocol()
 
 	-- Protocolling request
 	requestBestiaryData() -- We request the bestiary data

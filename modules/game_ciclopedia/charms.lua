@@ -451,12 +451,11 @@ function initCharms()
 	
 	connect(g_game, {
 		onEnterGame = registerCharmsProtocol, 
-		onPendingGame = registerCharmsProtocol
+		onPendingGame = registerCharmsProtocol,
+		onGameStart = registerCharmsProtocol
 	})
 	
-	if g_game.isOnline() then
-        registerCharmsProtocol()
-    end
+	registerCharmsProtocol()
 
 	-- We make the request
 	requestBestiaryInfo()

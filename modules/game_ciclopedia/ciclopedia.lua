@@ -7,9 +7,10 @@ function init()
 	connect(g_game, { 
 		onEnterGame = registerBestiaryProtocol,
 		onPendingGame = registerBestiaryProtocol,
+		onGameStart = registerBestiaryProtocol,
 		onGameEnd = onCiclopediaGameEnd
 	})
-	if g_game.isOnline() and registerBestiaryProtocol then
+	if registerBestiaryProtocol then
 		registerBestiaryProtocol()
 	end
     
@@ -31,6 +32,7 @@ function terminate()
 	disconnect(g_game, { 
 		onEnterGame = registerBestiaryProtocol,
 		onPendingGame = registerBestiaryProtocol,
+		onGameStart = registerBestiaryProtocol,
 		onGameEnd = onCiclopediaGameEnd
 	})
 	
@@ -44,7 +46,7 @@ function terminate()
 	elseif unregisterBestiaryProtocol then
 		unregisterBestiaryProtocol()
 	else
-		ProtocolGame.unregisterOpcode(0x48)
+		ProtocolGame.unregisterOpcode(CyclopediaOpcode and CyclopediaOpcode.Send or 0x39)
 	end
 	window:destroy()
 	
