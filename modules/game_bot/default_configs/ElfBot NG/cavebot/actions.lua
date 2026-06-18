@@ -465,6 +465,7 @@ end)
 CaveBot.registerAction("usewith", "#EEB292", function(value, retries, prev)
   local pos = regexMatch(value, "\\s*([0-9]+)\\s*,\\s*([0-9]+)\\s*,\\s*([0-9]+)\\s*,\\s*([0-9]+)")
   if not pos[1] then
+    local itemid = tonumber(value)
     if not itemid then
       warn("Invalid cavebot usewith action value. It should be (itemid,x,y,z) or item id, is: " .. value)
       return false

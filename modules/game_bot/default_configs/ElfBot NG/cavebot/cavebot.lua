@@ -254,7 +254,6 @@ local function reverseTable(t, max)
 end
 
 function rpairs(t)
-  test()
 	return function(t, i)
 		i = i - 1
 		if i ~= 0 then

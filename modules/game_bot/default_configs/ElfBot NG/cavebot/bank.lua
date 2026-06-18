@@ -57,7 +57,7 @@ CaveBot.Extensions.Bank.setup = function()
       CaveBot.delay(storage.extras.talkDelay*3)
       return true
     elseif actionType == "withdraw" then
-      CaveBot.Conversation("hi", "withdraw", value, "yes")
+      CaveBot.Conversation("hi", "withdraw", amount, "yes")
       CaveBot.delay(storage.extras.talkDelay*4)
       return true
     else

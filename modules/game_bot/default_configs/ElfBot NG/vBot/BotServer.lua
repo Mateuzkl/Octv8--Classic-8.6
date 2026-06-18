@@ -30,7 +30,11 @@ config.mwalls = {}
 
 if not storage.BotServerChannel then
   math.randomseed(os.time())
-  storage.BotServerChannel = tostring(math.random(1000000000000,9999999999999))
+  local channel = ""
+  for i = 1, 13 do
+    channel = channel .. tostring(math.random(0, 9))
+  end
+  storage.BotServerChannel = channel
 end
 
 local channel = tostring(storage.BotServerChannel)
@@ -77,7 +81,11 @@ if rootWidget then
     storage.BotServerChannel = text
   end
   botServerWindow.Data.Random.onClick = function(widget)
-    storage.BotServerChannel = tostring(math.random(1000000000000,9999999999999))
+    local channel = ""
+    for i = 1, 13 do
+      channel = channel .. tostring(math.random(0, 9))
+    end
+    storage.BotServerChannel = channel
     botServerWindow.Data.Channel:setText(storage.BotServerChannel)
   end
   botServerWindow.Features.Feature1:setOn(config.manaInfo)
@@ -116,9 +124,12 @@ if rootWidget then
   end
 end
 
+local botServerListenersInitialized = false
 function initBotServerListenFunctions()
   if not BotServer._websocket then return end
   if not config.enabled then return end
+  if botServerListenersInitialized then return end
+  botServerListenersInitialized = true
 
   -- list
   BotServer.listen("list", function(name, data)

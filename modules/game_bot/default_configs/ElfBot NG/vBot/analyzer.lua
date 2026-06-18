@@ -51,7 +51,7 @@ storage.bestHeal = storage.bestHeal or 0
 local lootedItems = {}
 local useData = {}
 local usedItems ={}
-local lastDataSend = {0, 0}
+local lastDataSend = {totalDmg = 0, totalHeal = 0}
 local analyzerButton
 local killList = {}
 local membersData = {}
@@ -791,8 +791,8 @@ local function sendData()
     -- validation
     if lastDataSend.totalDmg ~= t[1] and lastDataSend.totalHeal ~= t[2] then
       BotServer.send("partyHunt", t)
-      lastDataSend[1] = t[1]
-      lastDataSend[2] = t[2]
+      lastDataSend.totalDmg = t[1]
+      lastDataSend.totalHeal = t[2]
     end
   end
 end
@@ -1247,6 +1247,7 @@ end
 local regex = "You lose ([0-9]*) hitpoints due to an attack by ([a-z]*) ([a-z A-z-]*)"
 onTextMessage(function(mode, text)
   local value = getFirstNumberInText(text)
+  if not value then return end
     if mode == 21 then -- damage dealt
       totalDmg = totalDmg + value
         table.insert(dmgTable, {d = value, t = now})
