@@ -1,0 +1,5454 @@
+{
+  "buySupplies": {
+    "_migrated": true,
+    "talkDelay": 500,
+    "reachRetries": 0,
+    "tradeRetries": 0,
+    "currentNpcIdx": 1,
+    "enabled": true,
+    "items": [
+
+    ]
+  },
+  "lostSystem": {
+    "minPlayers": 1,
+    "detectionRadius": 8,
+    "isLostActive": false,
+    "checkPlayers": true,
+    "ignoreAllies": true,
+    "checkMonsters": false,
+    "minMonsters": 1,
+    "enabled": false,
+    "monsterNames": [
+
+    ]
+  },
+  "healingSystemEnabled": false,
+  "analyzers": {
+    "lootChannel": true,
+    "trackedLoot": [
+
+    ],
+    "rarityFrames": true,
+    "trackedBoss": [
+
+    ],
+    "customPrices": [
+
+    ],
+    "outfits": [
+
+    ]
+  },
+  "newHealer": {
+    "priorities": [
+      {
+        "name": "Custom Spell",
+        "enabled": false,
+        "custom": true
+      },
+      {
+        "name": "Exura Gran Sio",
+        "enabled": true,
+        "strong": true
+      },
+      {
+        "name": "Exura Sio",
+        "enabled": true,
+        "normal": true
+      },
+      {
+        "area": true,
+        "name": "Exura Gran Mas Res",
+        "enabled": true
+      },
+      {
+        "health": true,
+        "name": "Health Item",
+        "enabled": true
+      },
+      {
+        "name": "Mana Item",
+        "enabled": true,
+        "mana": true
+      }
+    ],
+    "groups": [
+
+    ],
+    "customPlayers": [
+
+    ],
+    "conditions": {
+      "botserver": false,
+      "druids": false,
+      "paladins": true,
+      "guild": false,
+      "sorcerers": false,
+      "party": true,
+      "friends": false,
+      "knights": true
+    },
+    "vocations": [
+
+    ],
+    "enabled": false,
+    "settings": [
+      {
+        "type": "HealItem",
+        "value": 268,
+        "text": "Mana Item "
+      },
+      {
+        "type": "HealScroll",
+        "value": 6,
+        "text": "Item Range: "
+      },
+      {
+        "type": "HealItem",
+        "value": 3160,
+        "text": "Health Item "
+      },
+      {
+        "type": "HealScroll",
+        "value": 2,
+        "text": "Mas Res Players: "
+      },
+      {
+        "type": "HealScroll",
+        "value": 80,
+        "text": "Heal Friend at: "
+      },
+      {
+        "type": "HealScroll",
+        "value": 80,
+        "text": "Use Gran Sio at: "
+      },
+      {
+        "type": "HealScroll",
+        "value": 80,
+        "text": "Min Player HP%: "
+      },
+      {
+        "type": "HealScroll",
+        "value": 50,
+        "text": "Min Player MP%: "
+      }
+    ]
+  },
+  "antiInvisible": {
+    "attackType": "runa",
+    "spellOrRune": "3175",
+    "monsters": [
+      "Warlock"
+    ],
+    "debug": false,
+    "pvpSafe": true,
+    "repeatAttacks": 3,
+    "checkRadius": 8,
+    "attackDelay": 500,
+    "enabled": false,
+    "attackInterval": 200
+  },
+  "EditSpellsHasteSpell": "utani hur",
+  "healing3": {
+    "min": 30,
+    "priority": 3,
+    "text": "exura gran",
+    "on": false,
+    "delay": 2000,
+    "title": "HP%",
+    "mana": 0
+  },
+  "novoAtkUltraSafe": {
+    "holesIds": [
+
+    ],
+    "alliesAreSafe": true,
+    "alwaysUnsafeNearHazard": false,
+    "spells": {
+      "cfg_1": {
+        "rotation": [
+
+        ],
+        "schemaVersion": 2
+      },
+      "cfg_3": {
+        "rotation": [
+          {
+            "name": "exori max frigo",
+            "delay": 30000,
+            "distance": 5,
+            "hpMinPercent": 0,
+            "manaMinPercent": 30,
+            "type": "magia",
+            "safeSpell": true,
+            "priority": 1,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exori frigo",
+            "delay": 2000,
+            "distance": 5,
+            "hpMinPercent": 0,
+            "manaMinPercent": 15,
+            "type": "magia",
+            "safeSpell": true,
+            "priority": 2,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "3155",
+            "delay": 2000,
+            "distance": 7,
+            "hpMinPercent": 0,
+            "manaMinPercent": 20,
+            "type": "runa",
+            "safeSpell": true,
+            "priority": 3,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exevo ulus frigo",
+            "delay": 22000,
+            "distance": 2,
+            "hpMinPercent": 0,
+            "manaMinPercent": 40,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 1,
+            "quantity": 4,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exevo gran frigo hur",
+            "delay": 8000,
+            "distance": 2,
+            "hpMinPercent": 0,
+            "manaMinPercent": 35,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 2,
+            "quantity": 4,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exevo tera hur",
+            "delay": 4000,
+            "distance": 3,
+            "hpMinPercent": 0,
+            "manaMinPercent": 25,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 3,
+            "quantity": 4,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "3161",
+            "delay": 2000,
+            "distance": 7,
+            "hpMinPercent": 0,
+            "manaMinPercent": 20,
+            "type": "runa",
+            "safeSpell": false,
+            "priority": 4,
+            "quantity": 4,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2000,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 5,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2200,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 6,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2400,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 7,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2600,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 8,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2800,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 9,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 3000,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 10,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          }
+        ]
+      },
+      "cfg_4": {
+        "rotation": [
+          {
+            "name": "exori max flam",
+            "delay": 30000,
+            "distance": 5,
+            "hpMinPercent": 0,
+            "manaMinPercent": 30,
+            "type": "magia",
+            "safeSpell": true,
+            "priority": 1,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exori flam",
+            "delay": 2000,
+            "distance": 5,
+            "hpMinPercent": 0,
+            "manaMinPercent": 15,
+            "type": "magia",
+            "safeSpell": true,
+            "priority": 2,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "3155",
+            "delay": 2000,
+            "distance": 7,
+            "hpMinPercent": 0,
+            "manaMinPercent": 10,
+            "type": "runa",
+            "safeSpell": true,
+            "priority": 3,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "utevo gran res ven",
+            "delay": 1800000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 10,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 1,
+            "quantity": 3,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exevo gran mas flam",
+            "delay": 60000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 40,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 2,
+            "quantity": 3,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exevo flam hur",
+            "delay": 8000,
+            "distance": 3,
+            "hpMinPercent": 0,
+            "manaMinPercent": 30,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 3,
+            "quantity": 4,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exevo vis hur",
+            "delay": 8000,
+            "distance": 3,
+            "hpMinPercent": 0,
+            "manaMinPercent": 30,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 4,
+            "quantity": 4,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "3161",
+            "delay": 2000,
+            "distance": 7,
+            "hpMinPercent": 0,
+            "manaMinPercent": 20,
+            "type": "runa",
+            "safeSpell": false,
+            "priority": 5,
+            "quantity": 4,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2200,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 6,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2400,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 7,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2600,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 8,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2800,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 9,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 3000,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 10,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          }
+        ]
+      },
+      "cfg_6": {
+        "rotation": [
+          {
+            "name": "exori med pug",
+            "delay": 4000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": true,
+            "priority": 1,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 1500,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": true,
+            "priority": 2,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 1800,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": true,
+            "priority": 3,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "utevo gran res tio",
+            "delay": 600000,
+            "distance": 0,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 1,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exori gran pug",
+            "delay": 16000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 2,
+            "quantity": 2,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exori mas pug",
+            "delay": 4000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 3,
+            "quantity": 2,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exori med pug",
+            "delay": 4000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 4,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exori mas nia",
+            "delay": 8000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 5,
+            "quantity": 2,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exori gran mas nia",
+            "delay": 24000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 6,
+            "quantity": 3,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2400,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 7,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2600,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 8,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2800,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 9,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 3000,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 10,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          }
+        ]
+      },
+      "cfg_2": {
+        "rotation": [
+          {
+            "name": "utevo gran res eq",
+            "delay": 60000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 20,
+            "type": "magia",
+            "safeSpell": true,
+            "priority": 1,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exeta amp res",
+            "delay": 10000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 10,
+            "type": "magia",
+            "safeSpell": true,
+            "priority": 2,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exori hur",
+            "delay": 6000,
+            "distance": 3,
+            "hpMinPercent": 0,
+            "manaMinPercent": 20,
+            "type": "magia",
+            "safeSpell": true,
+            "priority": 3,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "utevo gran res eq",
+            "delay": 60000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 20,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 1,
+            "quantity": 3,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exeta amp res",
+            "delay": 10000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 10,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 2,
+            "quantity": 3,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "utito tempo",
+            "delay": 10000,
+            "distance": 1,
+            "hpMinPercent": 35,
+            "manaMinPercent": 30,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 3,
+            "quantity": 3,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exori gran",
+            "delay": 6000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 30,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 4,
+            "quantity": 3,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exori",
+            "delay": 6000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 20,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 5,
+            "quantity": 2,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exori min",
+            "delay": 4000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 25,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 6,
+            "quantity": 3,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2400,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 7,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2600,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 8,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2800,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 9,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 3000,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 10,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          }
+        ]
+      },
+      "cfg_5": {
+        "rotation": [
+          {
+            "name": "exori gran con",
+            "delay": 6000,
+            "distance": 7,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": true,
+            "priority": 1,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exori con",
+            "delay": 2000,
+            "distance": 7,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": true,
+            "priority": 2,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 1800,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": true,
+            "priority": 3,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "utevo gran res sac",
+            "delay": 600000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 1,
+            "quantity": 3,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exana amp res",
+            "delay": 16000,
+            "distance": 1,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 2,
+            "quantity": 3,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exevo mas san",
+            "delay": 6000,
+            "distance": 3,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 3,
+            "quantity": 2,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "3161",
+            "delay": 2000,
+            "distance": 7,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "runa",
+            "safeSpell": false,
+            "priority": 4,
+            "quantity": 2,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "exori gran con",
+            "delay": 6000,
+            "distance": 7,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 5,
+            "quantity": 2,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2200,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 6,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2400,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 7,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2600,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 8,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 2800,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 9,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          },
+          {
+            "name": "",
+            "delay": 3000,
+            "distance": 8,
+            "hpMinPercent": 0,
+            "manaMinPercent": 0,
+            "type": "magia",
+            "safeSpell": false,
+            "priority": 10,
+            "quantity": 1,
+            "monsterNames": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "configs": {
+      "nextId": 7,
+      "namesNormalized": true,
+      "migrated": true,
+      "list": [
+        {
+          "name": "Config 1",
+          "id": "cfg_1"
+        },
+        {
+          "name": "EK 500",
+          "id": "cfg_2"
+        },
+        {
+          "name": "ED 500",
+          "id": "cfg_3"
+        },
+        {
+          "name": "MS",
+          "id": "cfg_4"
+        },
+        {
+          "name": "RP 500",
+          "id": "cfg_5"
+        },
+        {
+          "name": "MONK 500",
+          "id": "cfg_6"
+        }
+      ]
+    },
+    "meta": {
+      "activeProfile": "cfg_1"
+    },
+    "enableRotate": false,
+    "lockTarget": false,
+    "anchorEnabled": false,
+    "checkAdjacent": true,
+    "proximityRadius": 2,
+    "adjacentRadius": 4,
+    "tickMs": 400,
+    "ultraSafeEnabled": false,
+    "stairsAndLaddersIds": [
+      386,
+      1948,
+      5542,
+      16693,
+      16692,
+      1723,
+      7771
+    ],
+    "profileData": {
+      "cfg_1": {
+        "anchor": [
+
+        ],
+        "setup": {
+          "checkAdjacent": true,
+          "proximityRadius": 2,
+          "alwaysUnsafeNearHazard": false,
+          "tickMs": 400,
+          "stairsAndLaddersIds": [
+            386,
+            1948,
+            5542,
+            16693,
+            16692,
+            1723,
+            7771
+          ],
+          "adjacentRadius": 4,
+          "holesIds": [
+
+          ],
+          "ultraSafeEnabled": false,
+          "checkPZ": true,
+          "alliesAreSafe": true,
+          "enableRotate": false,
+          "lockTarget": false,
+          "sewerIds": [
+            435
+          ]
+        },
+        "lost": {
+          "checkPlayers": true,
+          "ignoreAllies": true,
+          "minPlayers": 1,
+          "checkMonsters": false,
+          "minMonsters": 1,
+          "detectionRadius": 8,
+          "enabled": false,
+          "monsterNames": [
+
+          ]
+        }
+      }
+    },
+    "anchorMinMonsters": 3,
+    "anchorRadius": 3,
+    "checkPZ": true,
+    "enabled": false,
+    "presetsInstalled": true,
+    "sewerIds": [
+      435
+    ]
+  },
+  "nextBpIds": [
+    {
+      "id": 2854
+    }
+  ],
+  "caveBotTasker": {
+    "max": 0,
+    "count": 0,
+    "monster": "",
+    "inProgress": false,
+    "taskName": ""
+  },
+  "cavebotStats": {
+    "stamina": [
+      {
+        "labelContinue": "staminaok",
+        "name": "Stamina1",
+        "hours": 16,
+        "minStamina": 960,
+        "minutes": 0,
+        "enabled": true,
+        "labelRest": "descansar"
+      }
+    ],
+    "cap": [
+      {
+        "labelSair": "loot",
+        "labelContinuar": "capboas",
+        "minCap": 500,
+        "enabled": true,
+        "name": "Cap1"
+      }
+    ],
+    "time": [
+      {
+        "minuteEnd": 59,
+        "name": "Time1",
+        "labelInside": "hunt",
+        "labelOutside": "wait",
+        "hourEnd": 23,
+        "invert": true,
+        "hourStart": 0,
+        "minuteStart": 0,
+        "enabled": true
+      }
+    ],
+    "level": [
+      {
+        "name": "Level1",
+        "labelContinuar": "hunt",
+        "minLevel": 1000,
+        "enabled": true,
+        "labelSair": "reset"
+      }
+    ]
+  },
+  "SwapSetMana": {
+    "SET2": {
+      "body": 0,
+      "right-hand": 0,
+      "feet": 0,
+      "left-hand": 0,
+      "head": 0,
+      "legs": 0,
+      "ammo": 0
+    },
+    "autoSwapEnabled": false,
+    "safeRange": 8,
+    "prioritySet": "SET1",
+    "SET1": {
+      "body": 0,
+      "right-hand": 0,
+      "feet": 0,
+      "left-hand": 0,
+      "head": 0,
+      "legs": 0,
+      "ammo": 0
+    },
+    "scenarios": {
+      "SET1": {
+        "pkRangeEnabled": false,
+        "pkMin": 1,
+        "pkMax": 200,
+        "targetEnabled": false,
+        "targetHpEnabled": false,
+        "targetHpBelow": 40,
+        "hasEnemy": false,
+        "enemyNames": [
+
+        ],
+        "hpEnabled": false,
+        "manaEnabled": false,
+        "manaBelow": 40,
+        "hasMonster": false,
+        "monsterMin": 1,
+        "monsterMax": 200,
+        "hpBelow": 40,
+        "playersRangeEnabled": true,
+        "playersMin": 0,
+        "playersMax": 200,
+        "monsterNames": [
+
+        ]
+      },
+      "SET2": {
+        "pkRangeEnabled": false,
+        "pkMin": 1,
+        "pkMax": 200,
+        "targetEnabled": false,
+        "targetHpEnabled": false,
+        "targetHpBelow": 40,
+        "hasEnemy": false,
+        "enemyNames": [
+
+        ],
+        "hpEnabled": false,
+        "manaEnabled": false,
+        "manaBelow": 40,
+        "hasMonster": false,
+        "monsterMin": 1,
+        "monsterMax": 200,
+        "hpBelow": 40,
+        "playersRangeEnabled": true,
+        "playersMin": 1,
+        "playersMax": 200,
+        "monsterNames": [
+
+        ]
+      }
+    }
+  },
+  "swapSetConfig": {
+    "SET2": {
+      "body": 0,
+      "right-hand": 0,
+      "feet": 0,
+      "left-hand": 0,
+      "head": 0,
+      "legs": 0,
+      "ammo": 0
+    },
+    "autoSwapEnabled": false,
+    "safeRange": 8,
+    "prioritySet": "SET1",
+    "SET1": {
+      "body": 0,
+      "right-hand": 0,
+      "feet": 0,
+      "left-hand": 0,
+      "head": 0,
+      "legs": 0,
+      "ammo": 0
+    },
+    "scenarios": {
+      "SET1": {
+        "pkRangeEnabled": false,
+        "pkMin": 1,
+        "pkMax": 200,
+        "targetEnabled": false,
+        "targetHpEnabled": false,
+        "targetHpBelow": 40,
+        "hasEnemy": false,
+        "enemyNames": [
+
+        ],
+        "hpEnabled": false,
+        "manaEnabled": false,
+        "manaBelow": 40,
+        "hasMonster": false,
+        "monsterMin": 1,
+        "monsterMax": 200,
+        "hpBelow": 40,
+        "playersRangeEnabled": true,
+        "playersMin": 0,
+        "playersMax": 200,
+        "monsterNames": [
+
+        ]
+      },
+      "SET2": {
+        "pkRangeEnabled": false,
+        "pkMin": 1,
+        "pkMax": 200,
+        "targetEnabled": false,
+        "targetHpEnabled": false,
+        "targetHpBelow": 40,
+        "hasEnemy": false,
+        "enemyNames": [
+
+        ],
+        "hpEnabled": false,
+        "manaEnabled": false,
+        "manaBelow": 40,
+        "hasMonster": false,
+        "monsterMin": 1,
+        "monsterMax": 200,
+        "hpBelow": 40,
+        "playersRangeEnabled": true,
+        "playersMin": 1,
+        "playersMax": 200,
+        "monsterNames": [
+
+        ]
+      }
+    }
+  },
+  "autoBuffManaMin": 15,
+  "painelDeIcones": {
+    "modules": {
+      "safeRuneSpell": {
+        "iconPosY": 0,
+        "params": {
+          "runeId": 3155,
+          "safeRadius": 2,
+          "mode": "both",
+          "maxDistance": 7,
+          "delayMs": 280,
+          "spell": "exori gran con"
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3155,
+        "enabled": false,
+        "iconPosX": 29
+      },
+      "navModuleOff": {
+        "iconPosY": 63,
+        "params": {
+          "keepSynced": true
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 10280,
+        "enabled": false,
+        "iconPosX": 0
+      },
+      "uhSelf": {
+        "iconPosY": 0,
+        "params": {
+          "manaMin": 0,
+          "runeId": 3161,
+          "hpPercent": 55,
+          "delayMs": 350
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3161,
+        "enabled": false,
+        "iconPosX": 22
+      },
+      "pvpModuleOff": {
+        "iconPosY": 69,
+        "params": {
+          "keepSynced": true
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 16778,
+        "enabled": false,
+        "iconPosX": 0
+      },
+      "blessSystem": {
+        "iconPosY": 0,
+        "params": {
+          "delayMs": 1200,
+          "autoWhenZero": false,
+          "buyAtLogin": false,
+          "buyCommand": "!bless"
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3241,
+        "enabled": false,
+        "iconPosX": 84
+      },
+      "paralyzeRune": {
+        "iconPosY": 91,
+        "params": {
+          "manaMin": 20,
+          "runeId": 3160,
+          "delayMs": 250,
+          "maxDistance": 7,
+          "minMonsters": 1
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3160,
+        "enabled": false,
+        "iconPosX": 7
+      },
+      "sdRune": {
+        "iconPosY": 100,
+        "params": {
+          "manaMin": 10,
+          "runeId": 3155,
+          "delayMs": 180,
+          "maxDistance": 7,
+          "minMonsters": 1
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3155,
+        "enabled": false,
+        "iconPosX": 4
+      },
+      "avalancheRune": {
+        "iconPosY": 32,
+        "params": {
+          "manaMin": 10,
+          "runeId": 3161,
+          "delayMs": 220,
+          "maxDistance": 7,
+          "minMonsters": 1
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3161,
+        "enabled": false,
+        "iconPosX": 6
+      },
+      "amuletModuleOff": {
+        "iconPosY": 12,
+        "params": {
+          "keepSynced": true
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3057,
+        "enabled": false,
+        "iconPosX": 6
+      },
+      "sewerSystem": {
+        "iconPosY": 99,
+        "params": {
+          "sewerId": 435,
+          "runeId": 3180,
+          "maxDistance": 6
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 2128,
+        "enabled": false,
+        "iconPosX": 90
+      },
+      "mwWest": {
+        "iconPosY": 99,
+        "params": {
+          "delayMs": 600,
+          "runeId": 3180
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 2128,
+        "enabled": false,
+        "iconPosX": 96
+      },
+      "stoneShowerRune": {
+        "iconPosY": 0,
+        "params": {
+          "manaMin": 10,
+          "runeId": 3175,
+          "delayMs": 220,
+          "maxDistance": 7,
+          "minMonsters": 1
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3175,
+        "enabled": false,
+        "iconPosX": 14
+      },
+      "cavebotControl": {
+        "iconPosY": 28,
+        "params": {
+          "keepSynced": true
+        },
+        "iconText": "",
+        "showIcon": false,
+        "iconItemId": 3081,
+        "enabled": false,
+        "iconPosX": 2
+      },
+      "fullChaseSystem": {
+        "iconPosY": 54,
+        "params": {
+          "searchRange": 7,
+          "ropeId": 3003,
+          "nearTargetDistance": 2,
+          "actionLockMs": 200,
+          "showStopMsg": false,
+          "laddersIds": [
+            1948,
+            1968
+          ],
+          "ropeHolesIds": [
+            17238,
+            12202,
+            12935,
+            386,
+            421,
+            21966,
+            14238
+          ],
+          "pathMaxDistance": 10,
+          "sewersIds": [
+            435
+          ],
+          "targetLostSeconds": 5
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 1949,
+        "enabled": false,
+        "iconPosX": 88
+      },
+      "guildPotHelper": {
+        "iconPosY": 88,
+        "params": {
+          "hpRequestBelow": 50,
+          "manaRequestBelow": 50,
+          "chatMode": "default",
+          "guildChannel": "",
+          "requestTrigger": "pt",
+          "requestCooldownMs": 2000,
+          "potionId": 268,
+          "giveDelayMs": 900
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 268,
+        "enabled": false,
+        "iconPosX": 88
+      },
+      "exivaSystem": {
+        "iconPosY": 65,
+        "params": {
+          "prefix": "exiva",
+          "onlyPlayers": false,
+          "maxDistance": 8,
+          "delayMs": 1000
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3200,
+        "enabled": false,
+        "iconPosX": 88
+      },
+      "aolSystem": {
+        "iconPosY": 0,
+        "params": {
+          "buyCooldownMs": 4000,
+          "disableCavebotNoAol": false,
+          "enableCavebotWithAol": false,
+          "disableTargetbotNoAol": false,
+          "enableTargetbotWithAol": false,
+          "aolId": 3057,
+          "delayMs": 1200,
+          "buyCommand": "!aol"
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3057,
+        "enabled": false,
+        "iconPosX": 79
+      },
+      "ringModuleOff": {
+        "iconPosY": 83,
+        "params": {
+          "keepSynced": true
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3048,
+        "enabled": false,
+        "iconPosX": 4
+      },
+      "revideSystem": {
+        "iconPosY": 53,
+        "params": {
+          "ignoredNicknames": "",
+          "targetTimeoutMs": 2500,
+          "showDebug": false,
+          "huntMode": false,
+          "restoreHuntOnIdle": false,
+          "forceSafeFight": false,
+          "forceChase": false,
+          "ignorePartyAttackers": false,
+          "ignoreSameGuildAttackers": false
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 33278,
+        "enabled": false,
+        "iconPosX": 94
+      },
+      "gfbRune": {
+        "iconPosY": 61,
+        "params": {
+          "manaMin": 10,
+          "runeId": 3191,
+          "delayMs": 220,
+          "maxDistance": 7,
+          "minMonsters": 1
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3191,
+        "enabled": false,
+        "iconPosX": 5
+      },
+      "swapSetModuleOff": {
+        "iconPosY": 100,
+        "params": {
+          "keepSynced": true
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 8061,
+        "enabled": false,
+        "iconPosX": 0
+      },
+      "safeSpells": {
+        "iconPosY": 42,
+        "params": {
+          "safeRadius": 2,
+          "delayMs": 320,
+          "maxDistance": 7,
+          "spell": "exori gran con"
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3271,
+        "enabled": false,
+        "iconPosX": 95
+      },
+      "holdTarget": {
+        "iconPosY": 74,
+        "params": {
+          "maxDistance": 8,
+          "minMonsters": 1,
+          "reacquireDelay": 450
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 2854,
+        "enabled": false,
+        "iconPosX": 5
+      },
+      "knightAttackSpell": {
+        "iconPosY": 83,
+        "params": {
+          "manaMin": 15,
+          "maxDistance": 1,
+          "requireTarget": false,
+          "delayMs": 900,
+          "minMonsters": 1,
+          "spell": "exori"
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3271,
+        "enabled": false,
+        "iconPosX": 8
+      },
+      "mwSouthEast": {
+        "iconPosY": 75,
+        "params": {
+          "delayMs": 600,
+          "runeId": 3180
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 2128,
+        "enabled": false,
+        "iconPosX": 100
+      },
+      "levitateSystem": {
+        "iconPosY": 67,
+        "params": {
+          "mode": "up",
+          "spellUp": "exani hur up",
+          "delayMs": 1200,
+          "spellDown": "exani hur down"
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3197,
+        "enabled": false,
+        "iconPosX": 94
+      },
+      "mwSouth": {
+        "iconPosY": 64,
+        "params": {
+          "delayMs": 600,
+          "runeId": 3180
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 2128,
+        "enabled": false,
+        "iconPosX": 100
+      },
+      "paladinAttackSpell": {
+        "iconPosY": 82,
+        "params": {
+          "manaMin": 15,
+          "maxDistance": 6,
+          "requireTarget": false,
+          "delayMs": 900,
+          "minMonsters": 1,
+          "spell": "exori con"
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3447,
+        "enabled": false,
+        "iconPosX": 0
+      },
+      "mwNorth": {
+        "iconPosY": 26,
+        "params": {
+          "delayMs": 600,
+          "runeId": 3180
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 2128,
+        "enabled": false,
+        "iconPosX": 100
+      },
+      "mwSouthWest": {
+        "iconPosY": 88,
+        "params": {
+          "delayMs": 600,
+          "runeId": 3180
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 2128,
+        "enabled": false,
+        "iconPosX": 100
+      },
+      "druidAttackSpell": {
+        "iconPosY": 44,
+        "params": {
+          "manaMin": 20,
+          "maxDistance": 7,
+          "requireTarget": false,
+          "delayMs": 900,
+          "minMonsters": 1,
+          "spell": "exevo tera hur"
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3191,
+        "enabled": false,
+        "iconPosX": 5
+      },
+      "antiPushCoin": {
+        "iconPosY": 42,
+        "params": {
+          "maxStack": 7,
+          "dropAmount": 1,
+          "delayMs": 1100,
+          "itemId": 3031
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3031,
+        "enabled": false,
+        "iconPosX": 88
+      },
+      "sorcererAttackSpell": {
+        "iconPosY": 100,
+        "params": {
+          "manaMin": 20,
+          "maxDistance": 7,
+          "requireTarget": false,
+          "delayMs": 900,
+          "minMonsters": 1,
+          "spell": "exevo vis hur"
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3155,
+        "enabled": false,
+        "iconPosX": 8
+      },
+      "fireBomb": {
+        "iconPosY": 32,
+        "params": {
+          "manaMin": 10,
+          "runeId": 3197,
+          "mode": "target",
+          "maxDistance": 7,
+          "delayMs": 800
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3197,
+        "enabled": false,
+        "iconPosX": 88
+      },
+      "superdashControl": {
+        "iconPosY": 91,
+        "params": [
+
+        ],
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3079,
+        "enabled": false,
+        "iconPosX": 0
+      },
+      "attackSpell": {
+        "iconPosY": 23,
+        "params": {
+          "maxDistance": 7,
+          "needTarget": false,
+          "delayMs": 350,
+          "minMonsters": 1,
+          "spell": "exori gran con"
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3271,
+        "enabled": false,
+        "iconPosX": 5
+      },
+      "exetaRes": {
+        "iconPosY": 52,
+        "params": {
+          "manaMin": 20,
+          "hpBelow": 92,
+          "delayMs": 1200,
+          "spell": "exeta res"
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3420,
+        "enabled": false,
+        "iconPosX": 9
+      },
+      "targetbotControl": {
+        "iconPosY": 88,
+        "params": {
+          "keepSynced": true
+        },
+        "iconText": "",
+        "showIcon": false,
+        "iconItemId": 16712,
+        "enabled": false,
+        "iconPosX": 33
+      },
+      "utamoVita": {
+        "iconPosY": 27,
+        "params": {
+          "manaMin": 25,
+          "hpAboveCancel": 80,
+          "hpBelow": 60,
+          "cancelSpell": "utamo ina",
+          "delayMs": 1000,
+          "renewOnly": false,
+          "spell": "utamo vita"
+        },
+        "enabled": false,
+        "showIcon": true,
+        "iconItemId": 3548,
+        "iconText": "",
+        "iconPosX": 11
+      },
+      "manaTraining": {
+        "iconPosY": 78,
+        "params": {
+          "manaMin": 80,
+          "delayMs": 1400,
+          "spell": "utevo lux"
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 268,
+        "enabled": false,
+        "iconPosX": 94
+      },
+      "mwNorthWest": {
+        "iconPosY": 53,
+        "params": {
+          "delayMs": 600,
+          "runeId": 3180
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 2128,
+        "enabled": false,
+        "iconPosX": 100
+      },
+      "attackModuleOff": {
+        "iconPosY": 13,
+        "params": {
+          "keepSynced": true
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3271,
+        "enabled": false,
+        "iconPosX": 0
+      },
+      "macheteAuto": {
+        "iconPosY": 78,
+        "params": {
+          "itemId": 3308,
+          "delayMs": 600,
+          "range": 1
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3308,
+        "enabled": false,
+        "iconPosX": 88
+      },
+      "mwNorthEast": {
+        "iconPosY": 38,
+        "params": {
+          "delayMs": 600,
+          "runeId": 3180
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 2128,
+        "enabled": false,
+        "iconPosX": 100
+      },
+      "hpToolsModuleOff": {
+        "iconPosY": 49,
+        "params": {
+          "keepSynced": true
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3162,
+        "enabled": false,
+        "iconPosX": 0
+      },
+      "magnetSystem": {
+        "iconPosY": 88,
+        "params": {
+          "delayMs": 450,
+          "range": 1
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 2526,
+        "enabled": false,
+        "iconPosX": 94
+      },
+      "sdTarget": {
+        "iconPosY": 0,
+        "params": {
+          "manaMin": 10,
+          "runeId": 3155,
+          "delayMs": 180,
+          "maxDistance": 7,
+          "minMonsters": 1
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3155,
+        "enabled": false,
+        "iconPosX": 6
+      },
+      "followModuleOff": {
+        "iconPosY": 38,
+        "params": {
+          "keepSynced": true
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 1949,
+        "enabled": false,
+        "iconPosX": 0
+      },
+      "coletarSystem": {
+        "iconPosY": 66,
+        "params": {
+          "minCap": 200,
+          "itemIds": "3031,2854,6529",
+          "delayMs": 180,
+          "range": 1
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3031,
+        "enabled": false,
+        "iconPosX": 10
+      },
+      "mwEast": {
+        "iconPosY": 28,
+        "params": {
+          "delayMs": 600,
+          "runeId": 3180
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 2128,
+        "enabled": false,
+        "iconPosX": 94
+      },
+      "thunderstormRune": {
+        "iconPosY": 40,
+        "params": {
+          "manaMin": 10,
+          "runeId": 3202,
+          "delayMs": 220,
+          "maxDistance": 7,
+          "minMonsters": 1
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3202,
+        "enabled": false,
+        "iconPosX": 11
+      },
+      "safeRunes": {
+        "iconPosY": 0,
+        "params": {
+          "runeId": 3155,
+          "safeRadius": 2,
+          "maxDistance": 7,
+          "delayMs": 280
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3155,
+        "enabled": false,
+        "iconPosX": 53
+      },
+      "fullSpell": {
+        "iconPosY": 0,
+        "params": {
+          "stepDelay": 350,
+          "safeRadius": 2,
+          "maxDistance": 7,
+          "spellList": "exori gran con;exori gran"
+        },
+        "iconText": "",
+        "showIcon": true,
+        "iconItemId": 3197,
+        "enabled": false,
+        "iconPosX": 46
+      }
+    },
+    "ui": {
+      "iconLayoutVersion": 5,
+      "category": "Todos",
+      "search": ""
+    }
+  },
+  "kelusUserControlWebhook": {
+    "globalIps": {
+      "72.61.39.63": {
+        "lastSeenAt": 1780868222,
+        "lastUserKey": "imperial|[help]",
+        "firstUserKey": "imperial|teste",
+        "totalSeen": 12,
+        "firstSeenAt": 1780862527
+      }
+    },
+    "users": {
+      "imperial|[help]": {
+        "playerName": "[HELP]",
+        "lastSeenAt": 1780868222,
+        "serverName": "Imperial",
+        "macs": {
+          "B0:25:AA:20:30:79": {
+            "lastSeenAt": 1780868222,
+            "totalSeen": 6,
+            "firstSeenAt": 1780863764
+          },
+          "BC:A8:A6:BF:F5:5E": {
+            "lastSeenAt": 1780868222,
+            "totalSeen": 6,
+            "firstSeenAt": 1780863764
+          },
+          "BE:A8:A6:BF:F5:5E": {
+            "lastSeenAt": 1780868222,
+            "totalSeen": 6,
+            "firstSeenAt": 1780863764
+          },
+          "BC:A8:A6:BF:F5:5F": {
+            "lastSeenAt": 1780868222,
+            "totalSeen": 6,
+            "firstSeenAt": 1780863764
+          }
+        },
+        "totalStarts": 6,
+        "ips": {
+          "72.61.39.63": {
+            "lastSeenAt": 1780868222,
+            "totalSeen": 6,
+            "firstSeenAt": 1780863764
+          }
+        },
+        "firstSeenAt": 1780863764
+      },
+      "imperial|teste": {
+        "playerName": "Teste",
+        "lastSeenAt": 1780863293,
+        "serverName": "Imperial",
+        "macs": {
+          "B0:25:AA:20:30:79": {
+            "lastSeenAt": 1780863293,
+            "totalSeen": 6,
+            "firstSeenAt": 1780862527
+          },
+          "BC:A8:A6:BF:F5:5E": {
+            "lastSeenAt": 1780863293,
+            "totalSeen": 6,
+            "firstSeenAt": 1780862527
+          },
+          "BE:A8:A6:BF:F5:5E": {
+            "lastSeenAt": 1780863293,
+            "totalSeen": 6,
+            "firstSeenAt": 1780862527
+          },
+          "BC:A8:A6:BF:F5:5F": {
+            "lastSeenAt": 1780863293,
+            "totalSeen": 6,
+            "firstSeenAt": 1780862527
+          }
+        },
+        "totalStarts": 6,
+        "ips": {
+          "72.61.39.63": {
+            "lastSeenAt": 1780863293,
+            "totalSeen": 6,
+            "firstSeenAt": 1780862527
+          }
+        },
+        "firstSeenAt": 1780862527
+      }
+    },
+    "globalMacs": {
+      "B0:25:AA:20:30:79": {
+        "lastSeenAt": 1780868222,
+        "lastUserKey": "imperial|[help]",
+        "firstUserKey": "imperial|teste",
+        "totalSeen": 12,
+        "firstSeenAt": 1780862527
+      },
+      "BC:A8:A6:BF:F5:5E": {
+        "lastSeenAt": 1780868222,
+        "lastUserKey": "imperial|[help]",
+        "firstUserKey": "imperial|teste",
+        "totalSeen": 12,
+        "firstSeenAt": 1780862527
+      },
+      "BE:A8:A6:BF:F5:5E": {
+        "lastSeenAt": 1780868222,
+        "lastUserKey": "imperial|[help]",
+        "firstUserKey": "imperial|teste",
+        "totalSeen": 12,
+        "firstSeenAt": 1780862527
+      },
+      "BC:A8:A6:BF:F5:5F": {
+        "lastSeenAt": 1780868222,
+        "lastUserKey": "imperial|[help]",
+        "firstUserKey": "imperial|teste",
+        "totalSeen": 12,
+        "firstSeenAt": 1780862527
+      }
+    },
+    "blockedByMac": "",
+    "blockedByNickname": "",
+    "lastSentAt": 1780868223,
+    "lastError": "",
+    "blockReason": "",
+    "blockedAt": 0
+  },
+  "dropper": {
+    "trashItems": [
+      {
+        "count": 1,
+        "id": 283
+      },
+      {
+        "count": 1,
+        "id": 284
+      },
+      {
+        "count": 1,
+        "id": 285
+      }
+    ],
+    "enabled": false,
+    "capItems": [
+      {
+        "count": 1,
+        "id": 21175
+      }
+    ],
+    "useItems": [
+      {
+        "count": 1,
+        "id": 21203
+      },
+      {
+        "count": 1,
+        "id": 14758
+      }
+    ]
+  },
+  "manaitem3": {
+    "title": "MP%",
+    "delay": 1000,
+    "on": false,
+    "priority": 6,
+    "item": 238,
+    "min": 0
+  },
+  "stamina1": {
+    "title": "STA",
+    "delay": 1000,
+    "on": false,
+    "priority": 1,
+    "item": 31335,
+    "min": 30
+  },
+  "fooditem1": {
+    "priority": 1,
+    "title": "FOOD",
+    "hp": 80,
+    "allowHidden": true,
+    "on": false,
+    "delayMinutes": 1,
+    "item": 3582,
+    "mp": 80
+  },
+  "hpitem2": {
+    "title": "HP%",
+    "delay": 1000,
+    "on": false,
+    "priority": 2,
+    "item": 3160,
+    "min": 0
+  },
+  "UniversalBPManager": {
+    "enabled": false,
+    "bpConfigs": [
+      {
+        "name": "Backpack 1",
+        "autoOpen": true,
+        "id": 0,
+        "keepSlotFree": false,
+        "targetItem": 0
+      },
+      {
+        "name": "Backpack 2",
+        "autoOpen": true,
+        "id": 0,
+        "keepSlotFree": false,
+        "targetItem": 0
+      },
+      {
+        "name": "Backpack 3",
+        "autoOpen": true,
+        "id": 0,
+        "keepSlotFree": false,
+        "targetItem": 0
+      }
+    ]
+  },
+  "manaitem1": {
+    "title": "MP%",
+    "delay": 1000,
+    "on": false,
+    "priority": 4,
+    "item": 23373,
+    "min": 0
+  },
+  "autoBuffFilters": {
+    "executeWithTarget": true,
+    "executeInPZ": false
+  },
+  "recoveryDelay": 1000,
+  "hpToolsProfiles": {
+    "configs": {
+      "cfg_1": {
+        "data": {
+          "partyBlacklist": [
+
+          ],
+          "healingSystemEnabled": false,
+          "stamina2": {
+            "title": "STA",
+            "delay": 1000,
+            "on": false,
+            "min": 20,
+            "item": 31335,
+            "priority": 2
+          },
+          "toolsEnabled": true,
+          "manaitem3": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "min": 0,
+            "item": 238,
+            "priority": 6
+          },
+          "stamina1": {
+            "title": "STA",
+            "delay": 1000,
+            "on": false,
+            "min": 30,
+            "item": 31335,
+            "priority": 1
+          },
+          "manaitem2": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "min": 0,
+            "item": 238,
+            "priority": 5
+          },
+          "acceptPartyOnlyLeaders": false,
+          "fooditem1": {
+            "priority": 1,
+            "title": "FOOD",
+            "hp": 80,
+            "item": 3582,
+            "on": false,
+            "delayMinutes": 1,
+            "allowHidden": true,
+            "mp": 80
+          },
+          "hpitem2": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "min": 0,
+            "item": 3160,
+            "priority": 2
+          },
+          "manaitem1": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "min": 0,
+            "item": 23373,
+            "priority": 4
+          },
+          "healing3": {
+            "min": 30,
+            "delay": 2000,
+            "text": "exura gran",
+            "on": false,
+            "priority": 3,
+            "title": "HP%",
+            "mana": 0
+          },
+          "hpitem1": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "min": 0,
+            "item": 3160,
+            "priority": 1
+          },
+          "fooditem2": {
+            "priority": 2,
+            "title": "FOOD",
+            "hp": 65,
+            "item": 3582,
+            "on": false,
+            "delayMinutes": 1,
+            "allowHidden": true,
+            "mp": 65
+          },
+          "fooditem3": {
+            "priority": 3,
+            "title": "FOOD",
+            "hp": 50,
+            "item": 3582,
+            "on": false,
+            "delayMinutes": 1,
+            "allowHidden": true,
+            "mp": 50
+          },
+          "curarFriends": {
+            "itemHeal": {
+              "itemId": 3160,
+              "useBelow": 50,
+              "distance": 3
+            },
+            "customList": [
+
+            ],
+            "distance": 6,
+            "filters": {
+              "vipList": true,
+              "partyMembers": true,
+              "guildMembers": false,
+              "customList": false
+            },
+            "delay": 1000,
+            "hpPercent": 70,
+            "spell": "exura sio \"",
+            "enabled": false,
+            "healMode": "spell"
+          },
+          "healing2": {
+            "min": 60,
+            "delay": 1000,
+            "text": "exura vita",
+            "on": false,
+            "priority": 2,
+            "title": "HP%",
+            "mana": 0
+          },
+          "healing1": {
+            "min": 80,
+            "delay": 1000,
+            "text": "exura",
+            "on": false,
+            "priority": 1,
+            "title": "HP%",
+            "mana": 0
+          },
+          "hpitem3": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "min": 0,
+            "item": 3160,
+            "priority": 3
+          },
+          "partyLeaders": [
+
+          ]
+        },
+        "name": "Config 1"
+      },
+      "cfg_3": {
+        "data": {
+          "partyBlacklist": [
+
+          ],
+          "healingSystemEnabled": false,
+          "stamina2": {
+            "title": "STA",
+            "delay": 1000,
+            "on": false,
+            "priority": 2,
+            "item": 31335,
+            "min": 20
+          },
+          "toolsEnabled": true,
+          "manaitem3": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 6,
+            "item": 238,
+            "min": 0
+          },
+          "stamina1": {
+            "title": "STA",
+            "delay": 1000,
+            "on": false,
+            "priority": 1,
+            "item": 31335,
+            "min": 30
+          },
+          "manaitem2": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 5,
+            "item": 238,
+            "min": 0
+          },
+          "acceptPartyOnlyLeaders": false,
+          "fooditem1": {
+            "priority": 1,
+            "title": "FOOD",
+            "hp": 80,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 80
+          },
+          "hpitem2": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 2,
+            "item": 3160,
+            "min": 0
+          },
+          "manaitem1": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 4,
+            "item": 23373,
+            "min": 0
+          },
+          "healing3": {
+            "min": 30,
+            "priority": 3,
+            "text": "exura gran",
+            "on": false,
+            "delay": 2000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "hpitem1": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 1,
+            "item": 3160,
+            "min": 0
+          },
+          "fooditem2": {
+            "priority": 2,
+            "title": "FOOD",
+            "hp": 65,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 65
+          },
+          "fooditem3": {
+            "priority": 3,
+            "title": "FOOD",
+            "hp": 50,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 50
+          },
+          "curarFriends": {
+            "itemHeal": {
+              "itemId": 3160,
+              "useBelow": 50,
+              "distance": 3
+            },
+            "delay": 1000,
+            "distance": 6,
+            "filters": {
+              "vipList": true,
+              "partyMembers": true,
+              "guildMembers": false,
+              "customList": false
+            },
+            "healMode": "spell",
+            "hpPercent": 70,
+            "spell": "exura sio \"",
+            "enabled": false,
+            "customList": [
+
+            ]
+          },
+          "healing2": {
+            "min": 60,
+            "priority": 2,
+            "text": "exura vita",
+            "on": false,
+            "delay": 1000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "healing1": {
+            "min": 80,
+            "priority": 1,
+            "text": "exura",
+            "on": false,
+            "delay": 1000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "hpitem3": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 3,
+            "item": 3160,
+            "min": 0
+          },
+          "partyLeaders": [
+
+          ]
+        },
+        "name": "ED 500"
+      },
+      "cfg_4": {
+        "data": {
+          "partyBlacklist": [
+
+          ],
+          "healingSystemEnabled": false,
+          "stamina2": {
+            "title": "STA",
+            "delay": 1000,
+            "on": false,
+            "priority": 2,
+            "item": 31335,
+            "min": 20
+          },
+          "toolsEnabled": true,
+          "manaitem3": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 6,
+            "item": 238,
+            "min": 0
+          },
+          "stamina1": {
+            "title": "STA",
+            "delay": 1000,
+            "on": false,
+            "priority": 1,
+            "item": 31335,
+            "min": 30
+          },
+          "manaitem2": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 5,
+            "item": 238,
+            "min": 0
+          },
+          "acceptPartyOnlyLeaders": false,
+          "fooditem1": {
+            "priority": 1,
+            "title": "FOOD",
+            "hp": 80,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 80
+          },
+          "hpitem2": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 2,
+            "item": 3160,
+            "min": 0
+          },
+          "manaitem1": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 4,
+            "item": 23373,
+            "min": 0
+          },
+          "healing3": {
+            "min": 30,
+            "priority": 3,
+            "text": "exura gran",
+            "on": false,
+            "delay": 2000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "hpitem1": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 1,
+            "item": 3160,
+            "min": 0
+          },
+          "fooditem2": {
+            "priority": 2,
+            "title": "FOOD",
+            "hp": 65,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 65
+          },
+          "fooditem3": {
+            "priority": 3,
+            "title": "FOOD",
+            "hp": 50,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 50
+          },
+          "curarFriends": {
+            "itemHeal": {
+              "itemId": 3160,
+              "useBelow": 50,
+              "distance": 3
+            },
+            "delay": 1000,
+            "distance": 6,
+            "filters": {
+              "vipList": true,
+              "partyMembers": true,
+              "guildMembers": false,
+              "customList": false
+            },
+            "healMode": "spell",
+            "hpPercent": 70,
+            "spell": "exura sio \"",
+            "enabled": false,
+            "customList": [
+
+            ]
+          },
+          "healing2": {
+            "min": 60,
+            "priority": 2,
+            "text": "exura vita",
+            "on": false,
+            "delay": 1000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "healing1": {
+            "min": 80,
+            "priority": 1,
+            "text": "exura",
+            "on": false,
+            "delay": 1000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "hpitem3": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 3,
+            "item": 3160,
+            "min": 0
+          },
+          "partyLeaders": [
+
+          ]
+        },
+        "name": "MS"
+      },
+      "cfg_6": {
+        "data": {
+          "partyBlacklist": [
+
+          ],
+          "healingSystemEnabled": false,
+          "stamina2": {
+            "title": "STA",
+            "delay": 1000,
+            "on": false,
+            "priority": 2,
+            "item": 31335,
+            "min": 20
+          },
+          "toolsEnabled": true,
+          "manaitem3": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 6,
+            "item": 238,
+            "min": 0
+          },
+          "stamina1": {
+            "title": "STA",
+            "delay": 1000,
+            "on": false,
+            "priority": 1,
+            "item": 31335,
+            "min": 30
+          },
+          "manaitem2": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 5,
+            "item": 238,
+            "min": 0
+          },
+          "acceptPartyOnlyLeaders": false,
+          "fooditem1": {
+            "priority": 1,
+            "title": "FOOD",
+            "hp": 80,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 80
+          },
+          "hpitem2": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 2,
+            "item": 3160,
+            "min": 0
+          },
+          "manaitem1": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 4,
+            "item": 23373,
+            "min": 0
+          },
+          "healing3": {
+            "min": 30,
+            "priority": 3,
+            "text": "exura gran",
+            "on": false,
+            "delay": 2000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "hpitem1": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 1,
+            "item": 3160,
+            "min": 0
+          },
+          "fooditem2": {
+            "priority": 2,
+            "title": "FOOD",
+            "hp": 65,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 65
+          },
+          "fooditem3": {
+            "priority": 3,
+            "title": "FOOD",
+            "hp": 50,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 50
+          },
+          "curarFriends": {
+            "itemHeal": {
+              "itemId": 3160,
+              "useBelow": 50,
+              "distance": 3
+            },
+            "delay": 1000,
+            "distance": 6,
+            "filters": {
+              "vipList": true,
+              "partyMembers": true,
+              "guildMembers": false,
+              "customList": false
+            },
+            "healMode": "spell",
+            "hpPercent": 70,
+            "spell": "exura sio \"",
+            "enabled": false,
+            "customList": [
+
+            ]
+          },
+          "healing2": {
+            "min": 60,
+            "priority": 2,
+            "text": "exura vita",
+            "on": false,
+            "delay": 1000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "healing1": {
+            "min": 80,
+            "priority": 1,
+            "text": "exura",
+            "on": false,
+            "delay": 1000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "hpitem3": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 3,
+            "item": 3160,
+            "min": 0
+          },
+          "partyLeaders": [
+
+          ]
+        },
+        "name": "MONK 500"
+      },
+      "cfg_2": {
+        "data": {
+          "partyBlacklist": [
+
+          ],
+          "healingSystemEnabled": false,
+          "stamina2": {
+            "title": "STA",
+            "delay": 1000,
+            "on": false,
+            "priority": 2,
+            "item": 31335,
+            "min": 20
+          },
+          "toolsEnabled": true,
+          "manaitem3": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 6,
+            "item": 238,
+            "min": 0
+          },
+          "stamina1": {
+            "title": "STA",
+            "delay": 1000,
+            "on": false,
+            "priority": 1,
+            "item": 31335,
+            "min": 30
+          },
+          "manaitem2": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 5,
+            "item": 238,
+            "min": 0
+          },
+          "acceptPartyOnlyLeaders": false,
+          "fooditem1": {
+            "priority": 1,
+            "title": "FOOD",
+            "hp": 80,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 80
+          },
+          "hpitem2": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 2,
+            "item": 3160,
+            "min": 0
+          },
+          "manaitem1": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 4,
+            "item": 23373,
+            "min": 0
+          },
+          "healing3": {
+            "min": 30,
+            "priority": 3,
+            "text": "",
+            "on": false,
+            "delay": 2000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "hpitem1": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 1,
+            "item": 3160,
+            "min": 0
+          },
+          "fooditem2": {
+            "priority": 2,
+            "title": "FOOD",
+            "hp": 65,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 65
+          },
+          "fooditem3": {
+            "priority": 3,
+            "title": "FOOD",
+            "hp": 50,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 50
+          },
+          "curarFriends": {
+            "itemHeal": {
+              "itemId": 3160,
+              "useBelow": 50,
+              "distance": 3
+            },
+            "delay": 1000,
+            "distance": 6,
+            "filters": {
+              "vipList": true,
+              "partyMembers": true,
+              "guildMembers": false,
+              "customList": false
+            },
+            "healMode": "spell",
+            "hpPercent": 70,
+            "spell": "exura sio \"",
+            "enabled": false,
+            "customList": [
+
+            ]
+          },
+          "healing2": {
+            "min": 60,
+            "priority": 2,
+            "text": "exura gran ico",
+            "on": false,
+            "delay": 1000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "healing1": {
+            "min": 80,
+            "priority": 1,
+            "text": "exura ico",
+            "on": false,
+            "delay": 1000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "hpitem3": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 3,
+            "item": 3160,
+            "min": 0
+          },
+          "partyLeaders": [
+
+          ]
+        },
+        "name": "EK 500"
+      },
+      "cfg_5": {
+        "data": {
+          "partyBlacklist": [
+
+          ],
+          "healingSystemEnabled": false,
+          "stamina2": {
+            "title": "STA",
+            "delay": 1000,
+            "on": false,
+            "priority": 2,
+            "item": 31335,
+            "min": 20
+          },
+          "toolsEnabled": true,
+          "manaitem3": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 6,
+            "item": 238,
+            "min": 0
+          },
+          "stamina1": {
+            "title": "STA",
+            "delay": 1000,
+            "on": false,
+            "priority": 1,
+            "item": 31335,
+            "min": 30
+          },
+          "manaitem2": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 5,
+            "item": 238,
+            "min": 0
+          },
+          "acceptPartyOnlyLeaders": false,
+          "fooditem1": {
+            "priority": 1,
+            "title": "FOOD",
+            "hp": 80,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 80
+          },
+          "hpitem2": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 2,
+            "item": 3160,
+            "min": 0
+          },
+          "manaitem1": {
+            "title": "MP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 4,
+            "item": 23373,
+            "min": 0
+          },
+          "healing3": {
+            "min": 30,
+            "priority": 3,
+            "text": "exura gran san",
+            "on": false,
+            "delay": 2000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "hpitem1": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 1,
+            "item": 3160,
+            "min": 0
+          },
+          "fooditem2": {
+            "priority": 2,
+            "title": "FOOD",
+            "hp": 65,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 65
+          },
+          "fooditem3": {
+            "priority": 3,
+            "title": "FOOD",
+            "hp": 50,
+            "allowHidden": true,
+            "on": false,
+            "delayMinutes": 1,
+            "item": 3582,
+            "mp": 50
+          },
+          "curarFriends": {
+            "itemHeal": {
+              "itemId": 3160,
+              "useBelow": 50,
+              "distance": 3
+            },
+            "delay": 1000,
+            "distance": 6,
+            "filters": {
+              "vipList": true,
+              "partyMembers": true,
+              "guildMembers": false,
+              "customList": false
+            },
+            "healMode": "spell",
+            "hpPercent": 70,
+            "spell": "exura sio \"",
+            "enabled": false,
+            "customList": [
+
+            ]
+          },
+          "healing2": {
+            "min": 60,
+            "priority": 2,
+            "text": "exura san",
+            "on": false,
+            "delay": 1000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "healing1": {
+            "min": 80,
+            "priority": 1,
+            "text": "exura",
+            "on": false,
+            "delay": 1000,
+            "title": "HP%",
+            "mana": 0
+          },
+          "hpitem3": {
+            "title": "HP%",
+            "delay": 1000,
+            "on": false,
+            "priority": 3,
+            "item": 3160,
+            "min": 0
+          },
+          "partyLeaders": [
+
+          ]
+        },
+        "name": "RP 500"
+      }
+    },
+    "order": [
+      "cfg_1",
+      "cfg_2",
+      "cfg_3",
+      "cfg_4",
+      "cfg_5",
+      "cfg_6"
+    ],
+    "meta": {
+      "activeProfile": "cfg_1"
+    },
+    "presetsInstalled": true,
+    "nextId": 7
+  },
+  "caitLure": {
+    "pauseTargetbot": false,
+    "orbitEnabled": false,
+    "orbitRadius": 2,
+    "orbitInterval": 800,
+    "smartTarget": false,
+    "smartRange": 6,
+    "smartInterval": 500,
+    "debug": false,
+    "enabled": false,
+    "anchorMin": 4,
+    "releaseBelow": 2,
+    "radius": 4,
+    "autoReturn": true,
+    "pauseCavebot": false
+  },
+  "specialDeposit": {
+    "items": [
+
+    ],
+    "height": 380
+  },
+  "autoTradeMessage": "I'm using OTClientV8!",
+  "recoverySpell": "utura gran",
+  "toolsEnabled": false,
+  "antiParalyzeFilters": {
+    "executeWithMonster": true,
+    "executeInPZ": false
+  },
+  "alarms": {
+    "playerAttack": [
+
+    ],
+    "customMessage": {
+      "value": ""
+    },
+    "lowMana": {
+      "value": 20
+    },
+    "ignoreFriends": [
+
+    ],
+    "damageTaken": [
+
+    ],
+    "defaultMsg": [
+
+    ],
+    "creatureDetected": [
+
+    ],
+    "privateMsg": [
+
+    ],
+    "flashClient": [
+
+    ],
+    "lowHealth": {
+      "value": 20
+    },
+    "playerDetected": [
+
+    ],
+    "creatureName": {
+      "value": ""
+    }
+  },
+  "bestHit": 0,
+  "autoBuffEnabled": false,
+  "foodItems": [
+    {
+      "count": 1,
+      "id": 3582
+    },
+    {
+      "count": 1,
+      "id": 3577
+    },
+    {
+      "count": 1,
+      "id": 3607
+    },
+    {
+      "count": 1,
+      "id": 3585
+    },
+    {
+      "count": 1,
+      "id": 3592
+    },
+    {
+      "count": 1,
+      "id": 3600
+    },
+    {
+      "count": 1,
+      "id": 3601
+    }
+  ],
+  "toolsMacrosEnabled": {
+    "hideEffects": false,
+    "hideMessages": false,
+    "autoMount": false,
+    "exetaLoot": false
+  },
+  "partyEnabled": false,
+  "_configs": {
+    "targetbot_configs": {
+      "enabled": false,
+      "selected": "Any"
+    },
+    "cavebot_configs": {
+      "enabled": false
+    }
+  },
+  "partyLeaders": [
+
+  ],
+  "autoHasteManaMin": 0,
+  "autoHasteFilters": {
+    "executeWithMonster": true,
+    "executeInPZ": false
+  },
+  "caveBot": {
+    "forceRefill": false,
+    "backStop": false,
+    "backTrainers": false,
+    "backOffline": false
+  },
+  "playerList": {
+    "enemyList": [
+
+    ],
+    "blackList": [
+
+    ],
+    "marks": false,
+    "groupMembers": true,
+    "highlight": false,
+    "friendList": [
+
+    ],
+    "outfits": false
+  },
+  "stamina2": {
+    "title": "STA",
+    "delay": 1000,
+    "on": false,
+    "priority": 2,
+    "item": 31335,
+    "min": 20
+  },
+  "castDelay": 3600000,
+  "autoEquip": [
+    {
+      "title": "Auto Equip",
+      "slot": 9,
+      "on": false,
+      "item2": 3089,
+      "item1": 3052
+    },
+    {
+      "title": "Auto Equip",
+      "slot": 0,
+      "on": false,
+      "item2": 0,
+      "item1": 0
+    }
+  ],
+  "hpitem1": {
+    "title": "HP%",
+    "delay": 1000,
+    "on": false,
+    "priority": 1,
+    "item": 3160,
+    "min": 0
+  },
+  "castEnabled": false,
+  "bestHeal": 0,
+  "swapSetProfiles": {
+    "configs": {
+      "cfg_1": {
+        "data": {
+          "SET2": {
+            "body": 0,
+            "right-hand": 0,
+            "feet": 0,
+            "left-hand": 0,
+            "head": 0,
+            "legs": 0,
+            "ammo": 0
+          },
+          "autoSwapEnabled": false,
+          "safeRange": 8,
+          "prioritySet": "SET1",
+          "SET1": {
+            "body": 0,
+            "right-hand": 0,
+            "feet": 0,
+            "left-hand": 0,
+            "head": 0,
+            "legs": 0,
+            "ammo": 0
+          },
+          "scenarios": {
+            "SET1": {
+              "pkRangeEnabled": false,
+              "pkMin": 1,
+              "pkMax": 200,
+              "targetEnabled": false,
+              "targetHpEnabled": false,
+              "targetHpBelow": 40,
+              "hasEnemy": false,
+              "enemyNames": [
+
+              ],
+              "hpEnabled": false,
+              "manaEnabled": false,
+              "manaBelow": 40,
+              "hasMonster": false,
+              "monsterMin": 1,
+              "monsterMax": 200,
+              "hpBelow": 40,
+              "playersRangeEnabled": true,
+              "playersMin": 0,
+              "playersMax": 200,
+              "monsterNames": [
+
+              ]
+            },
+            "SET2": {
+              "pkRangeEnabled": false,
+              "pkMin": 1,
+              "pkMax": 200,
+              "targetEnabled": false,
+              "targetHpEnabled": false,
+              "targetHpBelow": 40,
+              "hasEnemy": false,
+              "enemyNames": [
+
+              ],
+              "hpEnabled": false,
+              "manaEnabled": false,
+              "manaBelow": 40,
+              "hasMonster": false,
+              "monsterMin": 1,
+              "monsterMax": 200,
+              "hpBelow": 40,
+              "playersRangeEnabled": true,
+              "playersMin": 1,
+              "playersMax": 200,
+              "monsterNames": [
+
+              ]
+            }
+          }
+        },
+        "name": "Config 1"
+      }
+    },
+    "meta": {
+      "activeProfile": "cfg_1"
+    },
+    "order": [
+      "cfg_1"
+    ],
+    "nextId": 2
+  },
+  "recoveryFilters": {
+    "executeWithTarget": true,
+    "executeInPZ": false
+  },
+  "Ring/Amulet Settings": {
+    "defaultLeftItemId": 3051,
+    "HPUNEQUIP": 80,
+    "selectedItem": "Ring",
+    "oldVersion": true,
+    "HPEQUIP": 50,
+    "enabled": false,
+    "defaultRightItemId": 3007
+  },
+  "imbuementConfig": {
+    "useProtection": true,
+    "items": {
+      "3552": [
+
+      ],
+      "3351": [
+
+      ],
+      "7424": [
+
+      ],
+      "3557": [
+
+      ],
+      "3357": [
+
+      ],
+      "3425": [
+
+      ]
+    }
+  },
+  "_icons": {
+    "PIC_fireBomb": {
+      "y": 0.32,
+      "x": 0.88,
+      "enabled": false
+    },
+    "PIC_magnetSystem": {
+      "y": 0.88,
+      "x": 0.94,
+      "enabled": false
+    },
+    "PIC_sewerSystem": {
+      "y": 0.99,
+      "x": 0.9,
+      "enabled": false
+    },
+    "PIC_mwEast": {
+      "y": 0.28,
+      "x": 0.94,
+      "enabled": false
+    },
+    "PIC_mwNorth": {
+      "y": 0.26,
+      "x": 1,
+      "enabled": false
+    },
+    "PIC_mwNorthEast": {
+      "y": 0.38,
+      "x": 1,
+      "enabled": false
+    },
+    "PIC_mwNorthWest": {
+      "y": 0.53,
+      "x": 1,
+      "enabled": false
+    },
+    "PIC_mwSouth": {
+      "y": 0.64,
+      "x": 1,
+      "enabled": false
+    },
+    "PIC_mwSouthEast": {
+      "y": 0.75,
+      "x": 1,
+      "enabled": false
+    },
+    "PIC_mwSouthWest": {
+      "y": 0.88,
+      "x": 1,
+      "enabled": false
+    },
+    "PIC_mwWest": {
+      "y": 0.99,
+      "x": 0.96,
+      "enabled": false
+    },
+    "PIC_sdTarget": {
+      "y": 0,
+      "x": 0.06,
+      "enabled": false
+    },
+    "PIC_attackSpell": {
+      "y": 0.23,
+      "x": 0.05,
+      "enabled": false
+    },
+    "PIC_avalancheRune": {
+      "y": 0.32,
+      "x": 0.06,
+      "enabled": false
+    },
+    "PIC_druidAttackSpell": {
+      "y": 0.44,
+      "x": 0.05,
+      "enabled": false
+    },
+    "PIC_gfbRune": {
+      "y": 0.61,
+      "x": 0.05,
+      "enabled": false
+    },
+    "PIC_holdTarget": {
+      "y": 0.74,
+      "x": 0.05,
+      "enabled": false
+    },
+    "PIC_knightAttackSpell": {
+      "y": 0.83,
+      "x": 0.08,
+      "enabled": false
+    },
+    "tI": {
+      "y": 0.25,
+      "x": 0.01
+    },
+    "PIC_paralyzeRune": {
+      "y": 0.91,
+      "x": 0.07,
+      "enabled": false
+    },
+    "PIC_sdRune": {
+      "y": 1,
+      "x": 0.04,
+      "enabled": false
+    },
+    "PIC_sorcererAttackSpell": {
+      "y": 1,
+      "x": 0.08,
+      "enabled": false
+    },
+    "cI": {
+      "y": 0.05,
+      "x": 0.01
+    },
+    "PIC_stoneShowerRune": {
+      "y": 0,
+      "x": 0.14,
+      "enabled": false
+    },
+    "PIC_thunderstormRune": {
+      "y": 0.4,
+      "x": 0.11,
+      "enabled": false
+    },
+    "PIC_amuletModuleOff": {
+      "y": 0.12,
+      "x": 0.06,
+      "enabled": false
+    },
+    "PIC_attackModuleOff": {
+      "y": 0.13,
+      "x": 0,
+      "enabled": false
+    },
+    "PIC_cavebotControl": {
+      "y": 0.28,
+      "x": 0.02,
+      "enabled": false
+    },
+    "PIC_followModuleOff": {
+      "y": 0.38,
+      "x": 0,
+      "enabled": false
+    },
+    "PIC_hpToolsModuleOff": {
+      "y": 0.49,
+      "x": 0,
+      "enabled": false
+    },
+    "PIC_navModuleOff": {
+      "y": 0.63,
+      "x": 0,
+      "enabled": false
+    },
+    "PIC_pvpModuleOff": {
+      "y": 0.69,
+      "x": 0,
+      "enabled": false
+    },
+    "PIC_ringModuleOff": {
+      "y": 0.83,
+      "x": 0.04,
+      "enabled": false
+    },
+    "PIC_superdashControl": {
+      "y": 0.91,
+      "x": 0,
+      "enabled": false
+    },
+    "PIC_swapSetModuleOff": {
+      "y": 1,
+      "x": 0,
+      "enabled": false
+    },
+    "PIC_targetbotControl": {
+      "y": 0.88,
+      "x": 0.33,
+      "enabled": false
+    },
+    "PIC_uhSelf": {
+      "y": 0,
+      "x": 0.22,
+      "enabled": false
+    },
+    "PIC_macheteAuto": {
+      "y": 0.78,
+      "x": 0.88,
+      "enabled": false
+    },
+    "PIC_utamoVita": {
+      "y": 0.27,
+      "x": 0.11,
+      "enabled": false
+    },
+    "PIC_revideSystem": {
+      "y": 0.53,
+      "x": 0.94,
+      "enabled": false
+    },
+    "PIC_paladinAttackSpell": {
+      "y": 0.82,
+      "x": 0,
+      "enabled": false
+    },
+    "PIC_levitateSystem": {
+      "y": 0.67,
+      "x": 0.94,
+      "enabled": false
+    },
+    "PIC_fullSpell": {
+      "y": 0,
+      "x": 0.46,
+      "enabled": false
+    },
+    "PIC_safeRuneSpell": {
+      "y": 0,
+      "x": 0.29,
+      "enabled": false
+    },
+    "PIC_safeRunes": {
+      "y": 0,
+      "x": 0.53,
+      "enabled": false
+    },
+    "PIC_safeSpells": {
+      "y": 0.42,
+      "x": 0.95,
+      "enabled": false
+    },
+    "PIC_aolSystem": {
+      "y": 0,
+      "x": 0.79,
+      "enabled": false
+    },
+    "PIC_fullChaseSystem": {
+      "y": 0.54,
+      "x": 0.88,
+      "enabled": false
+    },
+    "PIC_blessSystem": {
+      "y": 0,
+      "x": 0.84,
+      "enabled": false
+    },
+    "PIC_exetaRes": {
+      "y": 0.52,
+      "x": 0.09,
+      "enabled": false
+    },
+    "PIC_exivaSystem": {
+      "y": 0.65,
+      "x": 0.88,
+      "enabled": false
+    },
+    "PIC_manaTraining": {
+      "y": 0.78,
+      "x": 0.94,
+      "enabled": false
+    },
+    "PIC_guildPotHelper": {
+      "y": 0.88,
+      "x": 0.88,
+      "enabled": false
+    },
+    "PIC_antiPushCoin": {
+      "y": 0.42,
+      "x": 0.88,
+      "enabled": false
+    },
+    "PIC_coletarSystem": {
+      "y": 0.66,
+      "x": 0.1,
+      "enabled": false
+    }
+  },
+  "recoveryManaMin": 0,
+  "pvpSystem": {
+    "pushSystem": {
+      "pushDelay": 1060,
+      "runeId": 3188,
+      "mode": "marcacao",
+      "destroyField": {
+        "runeId": 3148,
+        "enabled": false,
+        "fieldItems": [
+          {
+            "count": 1,
+            "id": 1492
+          },
+          {
+            "count": 1,
+            "id": 1493
+          },
+          {
+            "count": 1,
+            "id": 1502
+          },
+          {
+            "count": 1,
+            "id": 1503
+          }
+        ]
+      },
+      "numpad": {
+        "keys": {
+          "1": "Numpad1",
+          "2": "Numpad2",
+          "3": "Numpad3",
+          "4": "Numpad4",
+          "9": "Numpad9",
+          "6": "Numpad6",
+          "7": "Numpad7",
+          "8": "Numpad8"
+        },
+        "maxDistance": 7,
+        "autoRetreat": true
+      },
+      "marcacao": {
+        "showMarkers": true,
+        "hotkey": "PageUp",
+        "autoPush": false
+      },
+      "enabled": false,
+      "walls": {
+        "wgCursor": {
+          "runeId": 3156,
+          "enabled": false,
+          "hotkey": "F6"
+        },
+        "renewal": {
+          "castIntervalMs": 1000,
+          "mwDurationSec": 20,
+          "wgDurationSec": 20,
+          "mwDelayMs": 150,
+          "wgDelayMs": 150,
+          "retryMs": 120
+        },
+        "mwFront": {
+          "hotkey": "F7",
+          "runeId": 3180,
+          "enabled": false,
+          "distance": 1
+        },
+        "mwTrap": {
+          "runeId": 3180,
+          "hotkey": "F10",
+          "traps": [
+
+          ],
+          "step": 0,
+          "enabled": false
+        },
+        "mwFeet": {
+          "runeId": 3180,
+          "enabled": false,
+          "hotkey": "F9"
+        },
+        "wallIds": [
+          2128,
+          2129,
+          2130
+        ],
+        "mwBack": {
+          "hotkey": "F8",
+          "runeId": 3180,
+          "enabled": false,
+          "distance": 1
+        },
+        "mwCursor": {
+          "runeId": 3180,
+          "enabled": false,
+          "hotkey": "F5"
+        }
+      },
+      "cancelDelayOnRetreat": true,
+      "blockingItems": [
+        {
+          "count": 1,
+          "id": 3147
+        },
+        {
+          "count": 1,
+          "id": 2595
+        },
+        {
+          "count": 1,
+          "id": 2118
+        },
+        {
+          "count": 1,
+          "id": 2119
+        },
+        {
+          "count": 1,
+          "id": 2120
+        },
+        {
+          "count": 1,
+          "id": 2129
+        }
+      ],
+      "useRune": false
+    }
+  },
+  "ingame_hotkeys": "",
+  "EditSpellsAntiParalyze": "utani hur",
+  "novoFollow": {
+    "defaultsApplied": true,
+    "combo": {
+      "spellText": "",
+      "runeId": 100,
+      "mode": "spell",
+      "triggerWord": "",
+      "enabled": false
+    },
+    "tools": {
+      "macheteId": 3308,
+      "ropeId": 3003,
+      "shovelId": 3457
+    },
+    "followEnabled": false,
+    "useTargets": [
+
+    ],
+    "cavebotPause": {
+      "enabled": false,
+      "mcNames": "",
+      "distance": 4
+    },
+    "leaderName": "",
+    "followName": "",
+    "pingConfig": {
+      "auto": false,
+      "manualMs": 100
+    },
+    "routeFallback": {
+      "stepMs": 80,
+      "enabled": false,
+      "waypoints": [
+
+      ],
+      "rawText": ""
+    },
+    "floorChangers": {
+      "ropeSpots": {
+        "up": [
+          386,
+          12202,
+          21965,
+          21966
+        ],
+        "down": [
+
+        ]
+      },
+      "stairs": {
+        "up": [
+          16690,
+          1958,
+          7548,
+          7544,
+          1953,
+          1952,
+          1950,
+          1947,
+          7542,
+          855,
+          856,
+          1978,
+          1977,
+          6911,
+          6915,
+          1954,
+          5259,
+          20492,
+          1956,
+          775,
+          5257,
+          5258,
+          22566,
+          22747,
+          30757,
+          20225,
+          17395,
+          1964,
+          1966,
+          20255,
+          29113,
+          28357,
+          30912,
+          30906,
+          30908,
+          30914,
+          30916,
+          30904,
+          30918,
+          20750,
+          20491,
+          20496,
+          31130,
+          31129
+        ],
+        "down": [
+          482,
+          414,
+          437,
+          7731,
+          413,
+          434,
+          859,
+          438,
+          6127,
+          566,
+          7476,
+          4826,
+          484,
+          433,
+          369,
+          20259,
+          19960,
+          411,
+          8690,
+          4825,
+          6130,
+          601,
+          1067,
+          567,
+          7768,
+          1067,
+          411,
+          600
+        ]
+      },
+      "holes": {
+        "up": [
+
+        ],
+        "down": [
+          293,
+          35500,
+          294,
+          595,
+          1949,
+          4728,
+          385,
+          9853,
+          37000,
+          37001,
+          35499,
+          35497,
+          29979,
+          25047,
+          25048,
+          25049,
+          25050,
+          25051,
+          25052,
+          25053,
+          25054,
+          25055,
+          25056,
+          25057,
+          25058,
+          21046,
+          21048
+        ]
+      },
+      "ladders": {
+        "up": [
+          1948,
+          5542,
+          16693,
+          16692,
+          8065,
+          8263,
+          7771,
+          20573,
+          20475,
+          31262,
+          21297,
+          1968
+        ],
+        "down": [
+          432,
+          412,
+          469,
+          1080
+        ]
+      },
+      "sewers": {
+        "up": [
+
+        ],
+        "down": [
+          435,
+          21298
+        ]
+      }
+    },
+    "hudSetup": {
+      "posX": 980,
+      "visible": false,
+      "waveStep": 0,
+      "posY": 160,
+      "buttons": [
+        {
+          "key": "follow",
+          "name": "Follow",
+          "state": false,
+          "mode": "toggle",
+          "commandOn": "!follow on",
+          "commandDirect": "",
+          "commandOff": "!follow off"
+        },
+        {
+          "key": "cavebot",
+          "name": "CaveBot",
+          "state": false,
+          "mode": "toggle",
+          "commandOn": "!cavebot on",
+          "commandDirect": "",
+          "commandOff": "!cavebot off"
+        },
+        {
+          "key": "target",
+          "name": "TargetBot",
+          "state": false,
+          "mode": "toggle",
+          "commandOn": "!target on",
+          "commandDirect": "",
+          "commandOff": "!target off"
+        },
+        {
+          "key": "sd",
+          "name": "SD",
+          "state": false,
+          "mode": "toggle",
+          "commandOn": "!sd on",
+          "commandDirect": "",
+          "commandOff": "!sd off"
+        },
+        {
+          "key": "paralyze",
+          "name": "Paralyze",
+          "state": false,
+          "mode": "toggle",
+          "commandOn": "!paralyze on",
+          "commandDirect": "",
+          "commandOff": "!paralyze off"
+        },
+        {
+          "key": "antpush",
+          "name": "AntiPush",
+          "state": false,
+          "mode": "toggle",
+          "commandOn": "!antpush on",
+          "commandDirect": "",
+          "commandOff": "!antpush off"
+        },
+        {
+          "key": "combo",
+          "name": "Combo",
+          "state": false,
+          "mode": "direct",
+          "commandOn": "",
+          "commandDirect": "{trigger}",
+          "commandOff": ""
+        }
+      ],
+      "sendMode": "default",
+      "guildChannel": "",
+      "collapsed": false
+    },
+    "levitate": {
+      "cooldownMs": 1200,
+      "upSpell": "exani hur \"up\"",
+      "enabled": true,
+      "downSpell": "exani hur \"down\""
+    },
+    "navLeaderEnabled": false,
+    "enabled": true,
+    "doorTargets": [
+
+    ]
+  },
+  "acceptPartyOnlyLeaders": false,
+  "ringAmuletProfiles": {
+    "configs": {
+      "cfg_1": {
+        "data": {
+          "amuletsEnabled": false,
+          "swapDelay": 1000,
+          "rings": [
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            }
+          ],
+          "priority": {
+            "monsterDetect": {
+              "monsterList": [
+
+              ],
+              "ring": 0,
+              "amulet": 0,
+              "ringEquipped": 0,
+              "amuletEquipped": 0,
+              "enabled": false,
+              "minMonsters": 1
+            },
+            "playerDetect": {
+              "ring": 0,
+              "amulet": 0,
+              "ringEquipped": 0,
+              "amuletEquipped": 0,
+              "enabled": false,
+              "minPlayers": 1
+            },
+            "pkDetect": {
+              "ring": 0,
+              "amulet": 0,
+              "ringEquipped": 0,
+              "amuletEquipped": 0,
+              "enabled": false,
+              "minPks": 1
+            },
+            "whiteList": [
+
+            ],
+            "enemyDetect": {
+              "enemyList": [
+
+              ],
+              "ring": 0,
+              "amulet": 0,
+              "ringEquipped": 0,
+              "amuletEquipped": 0,
+              "enabled": false,
+              "includeEnemyGuild": false
+            }
+          },
+          "amulets": [
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            }
+          ],
+          "enabled": false,
+          "ringsEnabled": false
+        },
+        "name": "Config 1"
+      },
+      "cfg_2": {
+        "data": {
+          "amuletsEnabled": true,
+          "swapDelay": 650,
+          "rings": [
+            {
+              "hpMax": 100,
+              "hpMin": 51,
+              "itemId": 3051,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 3051
+            },
+            {
+              "hpMax": 50,
+              "hpMin": 0,
+              "itemId": 3048,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 3048
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            }
+          ],
+          "priority": {
+            "monsterDetect": {
+              "monsterList": [
+
+              ],
+              "ring": 0,
+              "amulet": 0,
+              "ringEquipped": 0,
+              "amuletEquipped": 0,
+              "enabled": false,
+              "minMonsters": 1
+            },
+            "playerDetect": {
+              "ring": 0,
+              "amulet": 0,
+              "ringEquipped": 0,
+              "amuletEquipped": 0,
+              "enabled": false,
+              "minPlayers": 1
+            },
+            "pkDetect": {
+              "ring": 3048,
+              "amulet": 3081,
+              "ringEquipped": 3048,
+              "amuletEquipped": 3081,
+              "enabled": true,
+              "minPks": 1
+            },
+            "whiteList": [
+
+            ],
+            "enemyDetect": {
+              "enemyList": [
+
+              ],
+              "ring": 3048,
+              "amulet": 3081,
+              "ringEquipped": 3048,
+              "amuletEquipped": 3081,
+              "enabled": true,
+              "includeEnemyGuild": true
+            }
+          },
+          "amulets": [
+            {
+              "hpMax": 55,
+              "hpMin": 0,
+              "itemId": 3081,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 3081
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 56,
+              "itemId": 3055,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 3055
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            }
+          ],
+          "enabled": false,
+          "ringsEnabled": true
+        },
+        "name": "Ring Invertido"
+      },
+      "cfg_3": {
+        "data": {
+          "amuletsEnabled": true,
+          "swapDelay": 450,
+          "rings": [
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 3048,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 3048
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            }
+          ],
+          "priority": {
+            "monsterDetect": {
+              "monsterList": [
+
+              ],
+              "ring": 0,
+              "amulet": 0,
+              "ringEquipped": 0,
+              "amuletEquipped": 0,
+              "enabled": false,
+              "minMonsters": 1
+            },
+            "playerDetect": {
+              "ring": 0,
+              "amulet": 0,
+              "ringEquipped": 0,
+              "amuletEquipped": 0,
+              "enabled": false,
+              "minPlayers": 1
+            },
+            "pkDetect": {
+              "ring": 3048,
+              "amulet": 3081,
+              "ringEquipped": 3048,
+              "amuletEquipped": 3081,
+              "enabled": true,
+              "minPks": 1
+            },
+            "whiteList": [
+
+            ],
+            "enemyDetect": {
+              "enemyList": [
+
+              ],
+              "ring": 3048,
+              "amulet": 3081,
+              "ringEquipped": 3048,
+              "amuletEquipped": 3081,
+              "enabled": true,
+              "includeEnemyGuild": true
+            }
+          },
+          "amulets": [
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 3081,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 3081
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            },
+            {
+              "hpMax": 100,
+              "hpMin": 0,
+              "itemId": 0,
+              "mpMin": 0,
+              "mpMax": 100,
+              "itemIdEquipped": 0
+            }
+          ],
+          "enabled": false,
+          "ringsEnabled": true
+        },
+        "name": "SSA/Might"
+      }
+    },
+    "order": [
+      "cfg_1",
+      "cfg_2",
+      "cfg_3"
+    ],
+    "meta": {
+      "activeProfile": "cfg_1"
+    },
+    "presetsInstalled": true,
+    "nextId": 4
+  },
+  "cavebotChecks": {
+    "_legacyMarketCleared": true,
+    "time4": {
+      "enabled": false
+    },
+    "sairTrainer": {
+      "labelSair": "sair",
+      "labelContinuar": "continuar",
+      "trainerName": "",
+      "macroActive": false,
+      "enabled": true,
+      "minStamina": 960
+    },
+    "stamina3": {
+      "minStamina": 960,
+      "enabled": false,
+      "labelContinuar": "staminaok",
+      "labelDescansar": "descansar"
+    },
+    "random": {
+      "labels": "Hunt1,Hunt2,Hunt3",
+      "currentIndex": 1,
+      "enabled": true
+    },
+    "supply": {
+      "lowLabel": "resupply",
+      "okLabel": "hunt",
+      "enabled": true,
+      "items": [
+
+      ]
+    },
+    "closeBackpacks": {
+      "enabled": true
+    },
+    "time3": {
+      "enabled": false
+    },
+    "sairTrainerMacroEnabled": false,
+    "level5": {
+      "enabled": false
+    },
+    "level2": {
+      "enabled": false
+    },
+    "level3": {
+      "enabled": false
+    },
+    "level4": {
+      "enabled": false
+    },
+    "cap3": {
+      "minCap": 500,
+      "labelSair": "loot2",
+      "labelContinuar": "capboas3",
+      "enabled": false
+    },
+    "trainer": {
+      "labelSairTrainer": "sairdotrainer",
+      "macroEnabled": false,
+      "minStamina": 960,
+      "exitTriggered": false,
+      "minHours": 16,
+      "labelTrainer": "irtreinar",
+      "enabled": true,
+      "labelContinuar": "aindanaotreinar"
+    },
+    "stamina": {
+      "minStamina": 960,
+      "enabled": true,
+      "labelContinuar": "staminaok",
+      "labelDescansar": "descansar"
+    },
+    "pz": {
+      "enabled": true,
+      "labelPZ": "Templo"
+    },
+    "buySupply3": {
+      "npcNames": "",
+      "maxPerBuy": 1000,
+      "items": [
+
+      ],
+      "enabled": true,
+      "currentNpcIdx": 1,
+      "talkDelay": 500,
+      "npcName": ""
+    },
+    "trainerMacroEnabled": false,
+    "toolWaypoints": {
+      "macheteId": 3308,
+      "ropeId": 3003,
+      "shovelId": 3457
+    },
+    "cap": {
+      "minCap": 500,
+      "labelSair": "loot",
+      "labelContinuar": "capboas",
+      "enabled": true
+    },
+    "tasker": {
+      "checkAll": true,
+      "checkAllMonsters": true,
+      "labelEntrega": "entregartask",
+      "monsters": [
+
+      ],
+      "enabled": true,
+      "labelContinuar": "continuartask"
+    },
+    "cap2": {
+      "minCap": 500,
+      "labelSair": "loot1",
+      "labelContinuar": "capboas2",
+      "enabled": false
+    },
+    "stamina2": {
+      "minStamina": 960,
+      "enabled": false,
+      "labelContinuar": "staminaok",
+      "labelDescansar": "descansar"
+    },
+    "level1": {
+      "enabled": true,
+      "labelSair": "reset",
+      "labelContinuar": "hunt",
+      "minLevel": 1000
+    },
+    "time1": {
+      "minuteEnd": 59,
+      "labelInside": "hunt",
+      "labelOutside": "wait",
+      "hourEnd": 23,
+      "enabled": true,
+      "minuteStart": 0,
+      "hourStart": 0
+    },
+    "buySupply4": {
+      "npcNames": "",
+      "maxPerBuy": 1000,
+      "items": [
+
+      ],
+      "enabled": true,
+      "currentNpcIdx": 1,
+      "talkDelay": 500,
+      "npcName": ""
+    },
+    "levitate": {
+      "upSpell": "exani hur up",
+      "downSpell": "exani hur down"
+    },
+    "buySupply2": {
+      "npcNames": "",
+      "maxPerBuy": 1000,
+      "items": [
+
+      ],
+      "enabled": true,
+      "currentNpcIdx": 1,
+      "talkDelay": 500,
+      "npcName": ""
+    },
+    "buySupply": {
+      "npcNames": "",
+      "maxPerBuy": 1000,
+      "items": [
+
+      ],
+      "enabled": true,
+      "currentNpcIdx": 1,
+      "talkDelay": 500,
+      "npcName": ""
+    },
+    "time2": {
+      "enabled": false
+    }
+  },
+  "painelDeIconesBridge": {
+    "updatedAt": 1396000,
+    "targetbotDesired": false,
+    "cavebotDesired": false
+  },
+  "_macros": {
+    "": false,
+    "Idle Mode": false
+  },
+  "autoBuffText": "utito tempo",
+  "cavebotSell": [
+    {
+      "count": 1,
+      "id": 23544
+    },
+    {
+      "count": 1,
+      "id": 3081
+    }
+  ],
+  "partyBlacklist": [
+
+  ],
+  "extras": {
+    "huntRoutes": 50,
+    "lootLast": true,
+    "bless": true,
+    "lootDelay": 200,
+    "highlightTarget": true,
+    "talkDelay": 1000,
+    "holdWgHot": "F6",
+    "shovel": 9596,
+    "holdMwHot": "F5",
+    "reUse": false,
+    "oberon": true,
+    "antiKick": true,
+    "machete": 9596,
+    "looting": 40,
+    "reachable": false,
+    "separatePm": false,
+    "stake": false,
+    "pathfinding": true,
+    "timers": true,
+    "rope": 9596,
+    "autoOpenDoors": true,
+    "joinBot": false,
+    "checkPlayer": true,
+    "scythe": 9596,
+    "title": true,
+    "suppliesControl": false,
+    "nextBackpack": true,
+    "useAll": "space",
+    "gotoMaxDistance": 30,
+    "killUnder": 1,
+    "holdMwall": true
+  },
+  "moneyItems": [
+    {
+      "count": 1,
+      "id": 3031
+    },
+    {
+      "count": 1,
+      "id": 3035
+    }
+  ],
+  "healing1": {
+    "min": 80,
+    "priority": 1,
+    "text": "exura",
+    "on": false,
+    "delay": 1000,
+    "title": "HP%",
+    "mana": 0
+  },
+  "EquipperPanel": {
+    "bosses": [
+
+    ],
+    "rules": [
+
+    ],
+    "enabled": false
+  },
+  "death": {
+    "count": 0
+  },
+  "healing2": {
+    "min": 60,
+    "priority": 2,
+    "text": "exura vita",
+    "on": false,
+    "delay": 1000,
+    "title": "HP%",
+    "mana": 0
+  },
+  "familiarEnabled": false,
+  "familiarSpell": "familiar",
+  "fooditem3": {
+    "priority": 3,
+    "title": "FOOD",
+    "hp": 50,
+    "allowHidden": true,
+    "on": false,
+    "delayMinutes": 1,
+    "item": 3582,
+    "mp": 50
+  },
+  "curarFriends": {
+    "itemHeal": {
+      "itemId": 3160,
+      "useBelow": 50,
+      "distance": 3
+    },
+    "delay": 1000,
+    "spell": "exura sio \"",
+    "filters": {
+      "vipList": true,
+      "partyMembers": true,
+      "guildMembers": false,
+      "customList": false
+    },
+    "customList": [
+
+    ],
+    "hpPercent": 70,
+    "distance": 6,
+    "enabled": false,
+    "healMode": "spell"
+  },
+  "Rune Settings": {
+    "playersinScreen": false,
+    "defaultLeftItemId": 3161,
+    "targetCount": 2,
+    "enabled": false,
+    "defaultRightItemId": 3155
+  },
+  "kill": {
+    "count": 0
+  },
+  "analyzer": {
+    "battleList": {
+      "enemy": true,
+      "players": true,
+      "guild": true,
+      "noGuild": true,
+      "monsters": true,
+      "skull": false,
+      "npc": true,
+      "party": true,
+      "enabled": true
+    },
+    "deathCounter": {
+      "actionLogout": true,
+      "actionDisableBots": false,
+      "actionForceExit": false,
+      "actionGotoTrainer": false,
+      "actionMode": "logout",
+      "trainerLabel": "Trainer",
+      "actionPending": false,
+      "logoutDeaths": 5,
+      "enabled": true
+    },
+    "hud": {
+      "posX": 18,
+      "showSkills": true,
+      "compact": false,
+      "waveStep": 0,
+      "posY": 120,
+      "systemSelection": {
+        "hpTools": true,
+        "targetbot": true,
+        "rings": true,
+        "amulets": true,
+        "cavebot": true,
+        "attack": true
+      },
+      "_systemStatusUiSyncing": false,
+      "skillSelection": {
+        "magic": true,
+        "axe": true,
+        "shielding": true,
+        "club": true,
+        "fishing": false,
+        "fist": true,
+        "sword": true,
+        "distance": true
+      },
+      "collapsed": false
+    },
+    "potExp": {
+      "delayMinutes": 1,
+      "useInPz": false,
+      "onlyNoTarget": false,
+      "useMode": "AUTO",
+      "onlyNoMonsters": false,
+      "lastUseMs": 0,
+      "lastTryMs": 0,
+      "nextItemIndex": 1,
+      "pendingUse": false,
+      "enabled": false,
+      "items": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "itemCounters": {
+      "nextScanMs": 1780869458000,
+      "slots": [
+        {
+          "delta": 0,
+          "ready": false,
+          "lastUpdateMs": 1780869398000,
+          "showOnHud": true,
+          "itemId": 0,
+          "count": 0,
+          "previousCount": 0,
+          "displayName": ""
+        },
+        {
+          "delta": 0,
+          "ready": false,
+          "lastUpdateMs": 1780869398000,
+          "showOnHud": true,
+          "itemId": 0,
+          "count": 0,
+          "previousCount": 0,
+          "displayName": ""
+        },
+        {
+          "delta": 0,
+          "ready": false,
+          "lastUpdateMs": 1780869398000,
+          "showOnHud": true,
+          "itemId": 0,
+          "count": 0,
+          "previousCount": 0,
+          "displayName": ""
+        }
+      ],
+      "intervalMinutes": 1
+    },
+    "enabled": false,
+    "killCounter": {
+      "actionLogout": true,
+      "actionDisableBots": false,
+      "actionForceExit": false,
+      "actionGotoTrainer": false,
+      "actionMode": "logout",
+      "trainerLabel": "Trainer",
+      "actionPending": false,
+      "enabled": false,
+      "killLimit": 50
+    },
+    "session": {
+      "initialExp": 2147483647,
+      "totalExpGained": 0,
+      "lastExpGain": 0,
+      "startTime": 1780862528,
+      "expHistory": [
+
+      ],
+      "initialLevel": 1103
+    }
+  },
+  "familiarDelay": 60000,
+  "fooditem2": {
+    "priority": 2,
+    "title": "FOOD",
+    "hp": 65,
+    "allowHidden": true,
+    "on": false,
+    "delayMinutes": 1,
+    "item": 3582,
+    "mp": 65
+  },
+  "familiarManaMin": 0,
+  "familiarFilters": {
+    "executeWithTarget": true,
+    "executeInPZ": false
+  },
+  "hpitem3": {
+    "title": "HP%",
+    "delay": 1000,
+    "on": false,
+    "priority": 3,
+    "item": 3160,
+    "min": 0
+  },
+  "autoHasteEnabled": false,
+  "antiParalyzeEnabled": false,
+  "antiParalyzeManaMin": 0,
+  "castText": "!cast on",
+  "recoveryEnabled": false,
+  "nextBpEnabled": false,
+  "renameContainers": {
+    "enabled": false,
+    "height": 170,
+    "purse": true,
+    "list": [
+      {
+        "min": false,
+        "item": 9601,
+        "value": "Main Backpack",
+        "enabled": true,
+        "items": [
+          3081,
+          3048
+        ]
+      },
+      {
+        "min": true,
+        "item": 2866,
+        "value": "Runes",
+        "enabled": true,
+        "items": [
+          3161,
+          3180
+        ]
+      },
+      {
+        "min": true,
+        "item": 2871,
+        "value": "Money",
+        "enabled": true,
+        "items": [
+          3031,
+          3035,
+          3043
+        ]
+      },
+      {
+        "min": true,
+        "item": 23396,
+        "value": "Purse",
+        "enabled": true,
+        "items": [
+
+        ]
+      }
+    ]
+  },
+  "fbnModule": {
+    "dance": false,
+    "fasthands": false,
+    "autoExani": false,
+    "hideText": false,
+    "antiRed": false
+  },
+  "ringAmuletSetup": {
+    "amuletsEnabled": false,
+    "swapDelay": 1000,
+    "rings": [
+      {
+        "hpMax": 100,
+        "hpMin": 0,
+        "itemId": 0,
+        "mpMin": 0,
+        "mpMax": 100,
+        "itemIdEquipped": 0
+      },
+      {
+        "hpMax": 100,
+        "hpMin": 0,
+        "itemId": 0,
+        "mpMin": 0,
+        "mpMax": 100,
+        "itemIdEquipped": 0
+      },
+      {
+        "hpMax": 100,
+        "hpMin": 0,
+        "itemId": 0,
+        "mpMin": 0,
+        "mpMax": 100,
+        "itemIdEquipped": 0
+      },
+      {
+        "hpMax": 100,
+        "hpMin": 0,
+        "itemId": 0,
+        "mpMin": 0,
+        "mpMax": 100,
+        "itemIdEquipped": 0
+      },
+      {
+        "hpMax": 100,
+        "hpMin": 0,
+        "itemId": 0,
+        "mpMin": 0,
+        "mpMax": 100,
+        "itemIdEquipped": 0
+      }
+    ],
+    "priority": {
+      "monsterDetect": {
+        "monsterList": [
+
+        ],
+        "ring": 0,
+        "amulet": 0,
+        "ringEquipped": 0,
+        "amuletEquipped": 0,
+        "enabled": false,
+        "minMonsters": 1
+      },
+      "playerDetect": {
+        "ring": 0,
+        "amulet": 0,
+        "ringEquipped": 0,
+        "amuletEquipped": 0,
+        "enabled": false,
+        "minPlayers": 1
+      },
+      "pkDetect": {
+        "ring": 0,
+        "amulet": 0,
+        "ringEquipped": 0,
+        "amuletEquipped": 0,
+        "enabled": false,
+        "minPks": 1
+      },
+      "whiteList": [
+
+      ],
+      "enemyDetect": {
+        "enemyList": [
+
+        ],
+        "ring": 0,
+        "amulet": 0,
+        "ringEquipped": 0,
+        "amuletEquipped": 0,
+        "enabled": false,
+        "includeEnemyGuild": false
+      }
+    },
+    "amulets": [
+      {
+        "hpMax": 100,
+        "hpMin": 0,
+        "itemId": 0,
+        "mpMin": 0,
+        "mpMax": 100,
+        "itemIdEquipped": 0
+      },
+      {
+        "hpMax": 100,
+        "hpMin": 0,
+        "itemId": 0,
+        "mpMin": 0,
+        "mpMax": 100,
+        "itemIdEquipped": 0
+      },
+      {
+        "hpMax": 100,
+        "hpMin": 0,
+        "itemId": 0,
+        "mpMin": 0,
+        "mpMax": 100,
+        "itemIdEquipped": 0
+      },
+      {
+        "hpMax": 100,
+        "hpMin": 0,
+        "itemId": 0,
+        "mpMin": 0,
+        "mpMax": 100,
+        "itemIdEquipped": 0
+      },
+      {
+        "hpMax": 100,
+        "hpMin": 0,
+        "itemId": 0,
+        "mpMin": 0,
+        "mpMax": 100,
+        "itemIdEquipped": 0
+      }
+    ],
+    "enabled": false,
+    "ringsEnabled": false
+  },
+  "manaitem2": {
+    "title": "MP%",
+    "delay": 1000,
+    "on": false,
+    "priority": 5,
+    "item": 238,
+    "min": 0
+  }
+}

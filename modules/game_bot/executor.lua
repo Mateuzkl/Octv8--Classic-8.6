@@ -1,6 +1,6 @@
 function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, reloadCallback, websockets)
   -- load lua and otui files
-  local configFiles = g_resources.listDirectoryFiles("/bot/" .. config, true, false)  
+  local configFiles = g_resources.listDirectoryFiles("/bot/" .. config, true, false)
   local luaFiles = {}
   local uiFiles = {}
   for i, file in ipairs(configFiles) do
@@ -12,11 +12,11 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
       table.insert(uiFiles, file)
     end
   end
-  
+
   if #luaFiles == 0 then
     return error("Config (/bot/" .. config .. ") doesn't have lua files")
   end
-  
+
   -- init bot variables
   local context = {}
   context.configDir = "/bot/".. config
@@ -25,7 +25,7 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
   context.panel = context.mainTab
   context.saveConfig = saveConfigCallback
   context.reload = reloadCallback
-  
+
   context.storage = storage
   if context.storage._macros == nil then
     context.storage._macros = {} -- active macros
@@ -75,7 +75,7 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
     onRemoveItem = {},
     onInventoryChange = {}
   }
-  
+
   -- basic functions & classes
   context.print = print
   context.bit32 = bit32
@@ -110,7 +110,7 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
   end
   context.isMobile = g_app.isMobile
   context.getVersion = g_app.getVersion
-  
+
   -- classes
   context.g_resources = g_resources
   context.g_game = g_game
@@ -139,12 +139,14 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
   context.OutputMessage = OutputMessage
   context.modules = modules
   context.Directions = Directions
+  context.scheduleEvent = scheduleEvent
+  context.removeEvent = removeEvent
 
   -- log functions
   context.info = function(text) return msgCallback("info", tostring(text)) end
   context.warn = function(text) return msgCallback("warn", tostring(text)) end
   context.error = function(text) return msgCallback("error", tostring(text)) end
-  context.warning = context.warn      
+  context.warning = context.warn
 
   -- init context
   context.now = g_clock.millis()
@@ -170,10 +172,10 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
   end
 
   return {
-    script = function()      
+    script = function()
       context.now = g_clock.millis()
       context.time = g_clock.millis()
-      
+
       for i, macro in ipairs(context._macros) do
         if macro.lastExecution + macro.timeout <= context.now and macro.enabled then
           local status, result = pcall(function()
@@ -186,7 +188,7 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
           end
         end
       end
-      
+
       while #context._scheduler > 0 and context._scheduler[1].execution <= g_clock.millis() do
         local status, result = pcall(function()
           context._scheduler[1].callback()
@@ -209,7 +211,7 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
         if hotkey then
           if hotkey.single then
             if hotkey.callback() then
-              hotkey.lastExecution = context.now            
+              hotkey.lastExecution = context.now
             end
           end
           if hotkey.switch then
@@ -223,7 +225,7 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
       onKeyUp = function(keyCode, keyboardModifiers)
         local keyDesc = determineKeyComboDesc(keyCode, keyboardModifiers)
         local hotkey = context._hotkeys[keyDesc]
-        if hotkey then        
+        if hotkey then
           if hotkey.switch then
             hotkey.switch:setOn(false)
           end
@@ -237,7 +239,7 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
         local hotkey = context._hotkeys[keyDesc]
         if hotkey and not hotkey.single then
           if hotkey.callback() then
-            hotkey.lastExecution = context.now          
+            hotkey.lastExecution = context.now
           end
         end
         for i, callback in ipairs(context._callbacks.onKeyPress) do
@@ -263,21 +265,21 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
         for i, callback in ipairs(context._callbacks.onLoginAdvice) do
           callback(message)
         end
-      end,      
+      end,
       onAddThing = function(tile, thing)
         for i, callback in ipairs(context._callbacks.onAddThing) do
           callback(tile, thing)
-        end      
+        end
       end,
       onRemoveThing = function(tile, thing)
         for i, callback in ipairs(context._callbacks.onRemoveThing) do
           callback(tile, thing)
-        end      
+        end
       end,
       onCreatureAppear = function(creature)
         for i, callback in ipairs(context._callbacks.onCreatureAppear) do
           callback(creature)
-        end      
+        end
       end,
       onCreatureDisappear = function(creature)
         for i, callback in ipairs(context._callbacks.onCreatureDisappear) do
@@ -287,17 +289,17 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
       onCreaturePositionChange = function(creature, newPos, oldPos)
         for i, callback in ipairs(context._callbacks.onCreaturePositionChange) do
           callback(creature, newPos, oldPos)
-        end      
+        end
       end,
       onCreatureHealthPercentChange = function(creature, healthPercent)
         for i, callback in ipairs(context._callbacks.onCreatureHealthPercentChange) do
           callback(creature, healthPercent)
-        end      
+        end
       end,
       onUse = function(pos, itemId, stackPos, subType)
         for i, callback in ipairs(context._callbacks.onUse) do
           callback(pos, itemId, stackPos, subType)
-        end      
+        end
       end,
       onUseWith = function(pos, itemId, target, subType)
         for i, callback in ipairs(context._callbacks.onUseWith) do
@@ -337,32 +339,32 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
       onChannelList = function(channels)
         for i, callback in ipairs(context._callbacks.onChannelList) do
           callback(channels)
-        end      
+        end
       end,
       onOpenChannel = function(channelId, channelName)
         for i, callback in ipairs(context._callbacks.onOpenChannel) do
           callback(channels)
-        end      
+        end
       end,
       onCloseChannel = function(channelId)
         for i, callback in ipairs(context._callbacks.onCloseChannel) do
           callback(channelId)
-        end      
+        end
       end,
       onChannelEvent = function(channelId, name, event)
         for i, callback in ipairs(context._callbacks.onChannelEvent) do
           callback(channelId, name, event)
-        end      
+        end
       end,
       onTurn = function(creature, direction)
         for i, callback in ipairs(context._callbacks.onTurn) do
           callback(creature, direction)
-        end      
+        end
       end,
       onWalk = function(creature, oldPos, newPos)
         for i, callback in ipairs(context._callbacks.onWalk) do
           callback(creature, oldPos, newPos)
-        end      
+        end
       end,
       onModalDialog = function(id, title, message, buttons, enterButton, escapeButton, choices, priority)
         for i, callback in ipairs(context._callbacks.onModalDialog) do
@@ -419,6 +421,6 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
           callback(player, slot, item, oldItem)
         end
       end
-    }    
+    }
   }
 end

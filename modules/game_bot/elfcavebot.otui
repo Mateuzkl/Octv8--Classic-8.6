@@ -1,0 +1,110 @@
+ElfCavebotButton < Button
+  height: 22
+  text-align: center
+
+MainWindow
+  id: elfCavebotWindow
+  text: CaveBot
+  size: 660 560
+  @onEscape: modules.game_bot.elfCavebotClose()
+
+  Panel
+    id: headerPanel
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin: 6 6 0 6
+    height: 42
+    image-source: /images/ui/panel_flat
+    image-border: 1
+
+    Label
+      id: cavebotTitle
+      text: CaveBot Control
+      anchors.top: parent.top
+      anchors.left: parent.left
+      margin-top: 5
+      margin-left: 8
+      color: #d7d7d7
+      text-auto-resize: true
+
+    Label
+      id: cavebotStatus
+      text: Off
+      anchors.top: cavebotTitle.bottom
+      anchors.left: parent.left
+      margin-top: 3
+      margin-left: 8
+      color: #ff6b6b
+      text-auto-resize: true
+
+  Panel
+    id: toolbarPanel
+    anchors.top: headerPanel.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin: 6 6 0 6
+    height: 26
+
+    ElfCavebotButton
+      id: startButton
+      text: Start
+      anchors.top: parent.top
+      anchors.left: parent.left
+      width: 72
+      @onClick: modules.game_bot.elfCavebotStart()
+
+    ElfCavebotButton
+      id: stopButton
+      text: Stop
+      anchors.top: parent.top
+      anchors.left: startButton.right
+      margin-left: 4
+      width: 72
+      @onClick: modules.game_bot.elfCavebotStop()
+
+    ElfCavebotButton
+      id: editorButton
+      text: Editor
+      anchors.top: parent.top
+      anchors.left: stopButton.right
+      margin-left: 4
+      width: 82
+      @onClick: modules.game_bot.elfCavebotToggleEditor()
+
+    ElfCavebotButton
+      id: configButton
+      text: Config
+      anchors.top: parent.top
+      anchors.left: editorButton.right
+      margin-left: 4
+      width: 82
+      @onClick: modules.game_bot.elfCavebotToggleConfig()
+
+    ElfCavebotButton
+      id: saveButton
+      text: Save
+      anchors.top: parent.top
+      anchors.left: configButton.right
+      margin-left: 4
+      width: 72
+      @onClick: modules.game_bot.elfCavebotSave()
+
+  Panel
+    id: cavebotContent
+    anchors.top: toolbarPanel.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: closeBtn.top
+    margin: 6
+    image-source: /images/ui/panel_flat
+    image-border: 1
+
+  ElfCavebotButton
+    id: closeBtn
+    text: Close
+    anchors.bottom: parent.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-bottom: 6
+    width: 84
+    @onClick: modules.game_bot.elfCavebotClose()

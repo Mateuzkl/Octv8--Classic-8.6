@@ -1,0 +1,228 @@
+ElfBotButton < Button
+  font: verdana-11px-rounded
+  height: 19
+  text-align: center
+  padding: 0
+  margin: 0
+
+ImperialElfBotWindow < MainWindow
+  size: 490 112
+  padding: 2
+  text: ElfBot NG 4.5.9 - Startup - 0 ms - 0 exp/hour
+  @onEscape: self:hide()
+
+
+
+  ElfBotButton
+    id: closeButton
+    text: X
+    anchors.top: parent.top
+    anchors.right: parent.right
+    margin-top: 0
+    margin-right: 0
+    size: 18 16
+
+  ElfBotButton
+    id: healingButton
+    text: Healing
+    anchors.left: parent.left
+    anchors.top: parent.top
+    margin-left: 0
+    margin-top: 18
+    size: 72 19
+
+  ElfBotButton
+    id: aimbotButton
+    text: Aimbot
+    anchors.left: healingButton.right
+    anchors.top: healingButton.top
+    margin-left: 2
+    size: 72 19
+
+  ElfBotButton
+    id: listsButton
+    text: Lists
+    anchors.left: aimbotButton.right
+    anchors.top: healingButton.top
+    margin-left: 2
+    size: 72 19
+
+  ElfBotButton
+    id: hudButton
+    text: HUD
+    anchors.left: listsButton.right
+    anchors.top: healingButton.top
+    margin-left: 2
+    size: 72 19
+
+  ElfBotButton
+    id: profile1Button
+    text: 1
+    anchors.left: hudButton.right
+    anchors.top: healingButton.top
+    margin-left: 2
+    size: 22 19
+
+  ElfBotButton
+    id: profile2Button
+    text: 2
+    anchors.left: profile1Button.right
+    anchors.top: healingButton.top
+    margin-left: 2
+    size: 22 19
+
+  ElfBotButton
+    id: profile3Button
+    text: 3
+    anchors.left: profile2Button.right
+    anchors.top: healingButton.top
+    margin-left: 2
+    size: 22 19
+
+  ElfBotButton
+    id: profile4Button
+    text: 4
+    anchors.left: profile3Button.right
+    anchors.top: healingButton.top
+    margin-left: 2
+    size: 22 19
+
+  ElfBotButton
+    id: profile5Button
+    text: 5
+    anchors.left: profile4Button.right
+    anchors.top: healingButton.top
+    margin-left: 2
+    size: 22 19
+
+  ElfBotButton
+    id: extrasButton
+    text: Extras
+    anchors.left: parent.left
+    anchors.top: healingButton.bottom
+    margin-left: 0
+    margin-top: 2
+    size: 72 19
+
+  ElfBotButton
+    id: hotkeysButton
+    text: Hotkeys
+    anchors.left: extrasButton.right
+    anchors.top: extrasButton.top
+    margin-left: 2
+    size: 72 19
+
+  ElfBotButton
+    id: shortkeysButton
+    text: Shortkeys
+    anchors.left: hotkeysButton.right
+    anchors.top: extrasButton.top
+    margin-left: 2
+    size: 72 19
+
+  ElfBotButton
+    id: reconnectButton
+    text: Reconnect
+    anchors.left: shortkeysButton.right
+    anchors.top: extrasButton.top
+    margin-left: 2
+    size: 72 19
+
+  ElfBotButton
+    id: saveButton
+    text: Save
+    anchors.left: reconnectButton.right
+    anchors.top: extrasButton.top
+    margin-left: 2
+    size: 46 19
+
+  ElfBotButton
+    id: customButton
+    text: Custom
+    anchors.left: saveButton.right
+    anchors.top: extrasButton.top
+    margin-left: 2
+    size: 66 19
+
+  ElfBotButton
+    id: cavebotButton
+    text: Cavebot
+    anchors.left: parent.left
+    anchors.top: extrasButton.bottom
+    margin-left: 0
+    margin-top: 2
+    size: 72 19
+
+  ElfBotButton
+    id: navigationButton
+    text: Navigation
+    anchors.left: cavebotButton.right
+    anchors.top: cavebotButton.top
+    margin-left: 2
+    size: 72 19
+
+  ElfBotButton
+    id: linksButton
+    text: Links
+    anchors.left: navigationButton.right
+    anchors.top: cavebotButton.top
+    margin-left: 2
+    size: 72 19
+
+  ElfBotButton
+    id: creatureSpyButton
+    text: Creature Spy
+    anchors.left: linksButton.right
+    anchors.top: cavebotButton.top
+    margin-left: 2
+    size: 88 19
+
+  ElfBotButton
+    id: loadButton
+    text: Load
+    anchors.left: creatureSpyButton.right
+    anchors.top: cavebotButton.top
+    margin-left: 2
+    size: 51 19
+
+  ElfBotButton
+    id: helpButton
+    text: Help
+    anchors.left: loadButton.right
+    anchors.top: cavebotButton.top
+    margin-left: 2
+    size: 51 19
+
+  ElfBotButton
+    id: targetingButton
+    text: Targeting
+    anchors.left: parent.left
+    anchors.top: cavebotButton.bottom
+    margin-left: 0
+    margin-top: 2
+    size: 72 19
+
+  ElfBotButton
+    id: proxyButton
+    text: Proxy
+    anchors.left: targetingButton.right
+    anchors.top: targetingButton.top
+    margin-left: 2
+    size: 72 19
+
+  ElfBotButton
+    id: iconsButton
+    text: Icons
+    anchors.left: proxyButton.right
+    anchors.top: targetingButton.top
+    margin-left: 2
+    size: 72 19
+
+
+  ElfBotButton
+    id: pvpButton
+    text: PVP
+    anchors.left: iconsButton.right
+    anchors.top: targetingButton.top
+    margin-left: 2
+    size: 72 19
