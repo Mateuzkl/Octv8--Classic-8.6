@@ -145,6 +145,12 @@ local function refreshWaypoints()
   local actions = callCavebotBridge("elfCavebotBridgeActions") or {}
   local count = 0
   local firstPos = nil
+  local playerPos = getPlayerPosition()
+
+  if map and playerPos and not map.elfCavebotCameraReady then
+    map:setCameraPosition(playerPos)
+    map.elfCavebotCameraReady = true
+  end
 
   for _, action in ipairs(actions) do
     count = count + 1
@@ -176,18 +182,15 @@ local function refreshWaypoints()
     end
   end
 
-  local playerPos = getPlayerPosition()
   if map then
-    if playerPos then
-      map:setCrossPosition(playerPos)
-    end
     if not map.elfCavebotCameraReady then
-      if playerPos then
-        map:setCameraPosition(playerPos)
-      elseif firstPos then
+      if firstPos then
         map:setCameraPosition(firstPos)
+        map.elfCavebotCameraReady = true
       end
-      map.elfCavebotCameraReady = true
+    end
+    if playerPos and map:getCameraPosition() then
+      map:setCrossPosition({ x = playerPos.x, y = playerPos.y, z = playerPos.z })
     end
   end
 
@@ -440,7 +443,9 @@ function elfCavebotCenterPlayer()
   local pos = getPlayerPosition()
   if map and pos then
     map:setCameraPosition(pos)
-    map:setCrossPosition(pos)
+    if map:getCameraPosition() then
+      map:setCrossPosition({ x = pos.x, y = pos.y, z = pos.z })
+    end
     map.elfCavebotCameraReady = true
   end
 end

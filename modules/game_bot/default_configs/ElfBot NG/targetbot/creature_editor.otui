@@ -1,12 +1,15 @@
 TargetBotCreatureEditorScrollBar < Panel
-  height: 28
-  margin-top: 3
+  height: 30
+  margin-top: 5
+  margin-left: 8
+  margin-right: 8
 
   Label
     id: text
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: parent.top
+    color: #202020
     text-align: center
 
   HorizontalScrollBar
@@ -20,145 +23,257 @@ TargetBotCreatureEditorScrollBar < Panel
     step: 1
 
 TargetBotCreatureEditorTextEdit < Panel
-  height: 40
-  margin-top: 7
+  height: 43
+  margin-top: 5
+  margin-left: 8
+  margin-right: 8
 
   Label
     id: text
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: parent.top
-    text-align: center
+    color: #202020
+    text-align: left
 
   TextEdit
     id: textEdit
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: prev.bottom
-    margin-top: 5
-    minimum: 0
-    maximum: 10
-    step: 1
+    margin-top: 4
+    height: 20
 
 TargetBotCreatureEditorItem < Panel
-  height: 34
-  margin-top: 7
-  margin-left: 25
-  margin-right: 25
+  height: 36
+  margin-top: 5
+  margin-left: 8
+  margin-right: 8
 
   Label
     id: text
     anchors.left: parent.left
     anchors.verticalCenter: next.verticalCenter
+    color: #202020
 
   BotItem
     id: item
     anchors.top: parent.top
     anchors.right: parent.right
 
-
 TargetBotCreatureEditorCheckBox < BotSwitch
-  height: 20
-  margin-top: 7
+  height: 22
+  margin-top: 5
+  margin-left: 8
+  margin-right: 8
+  text-align: center
+
+TargetBotClassicGroup < Panel
+  image-source: /images/ui/panel_flat
+  image-border: 1
+  background-color: #dfdfdf
+
+  Label
+    id: title
+    anchors.top: parent.top
+    anchors.left: parent.left
+    margin-top: 5
+    margin-left: 8
+    color: #202020
+    text-auto-resize: true
 
 TargetBotCreatureEditorWindow < MainWindow
-  text: TargetBot creature editor
-  width: 500
-  height: 425
+  text: Monster Targeting
+  width: 710
+  height: 540
 
   $mobile:
-    height: 300
+    height: 420
 
-  Label
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: parent.top
-    text-align: center
-    !text: tr('You can use * (any characters) and ? (any character) in target name')
+  Panel
+    id: rootPanel
+    anchors.fill: parent
+    margin: 2
+    background-color: #ececec
 
-  Label
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: prev.bottom
-    text-align: center
-    !text: tr('You can also enter multiple targets, separate them by ,')
-
-  TextEdit
-    id: name
-    anchors.top: prev.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    margin-left: 90
-    margin-top: 5
-
-  Label
-    anchors.verticalCenter: prev.verticalCenter
-    anchors.left: parent.left
-    text: Target name:
-
-  VerticalScrollBar
-    id: contentScroll
-    anchors.top: name.bottom
-    anchors.right: parent.right
-    anchors.bottom: help.top
-    step: 28
-    pixels-scroll: true
-    margin-right: -10
-    margin-top: 5
-    margin-bottom: 5
-
-  ScrollablePanel
-    id: content
-    anchors.top: name.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.bottom: help.top
-    vertical-scrollbar: contentScroll
-    margin-bottom: 10
-
-    Panel
-      id: left
+    Label
+      id: heading
       anchors.top: parent.top
       anchors.left: parent.left
-      anchors.right: parent.horizontalCenter
-      margin-top: 5
+      margin-top: 8
       margin-left: 10
-      margin-right: 10
-      layout:
-        type: verticalBox
-        fit-children: true
+      text: Monsters definition and behaviours
+      color: #202020
+      text-auto-resize: true
 
     Panel
-      id: right
-      anchors.top: parent.top
+      id: namePanel
+      anchors.top: heading.bottom
+      anchors.left: parent.left
+      anchors.right: parent.horizontalCenter
+      margin-top: 8
+      margin-left: 10
+      margin-right: 8
+      height: 72
+      image-source: /images/ui/panel_flat
+      image-border: 1
+      background-color: #f2f2f2
+
+      Label
+        id: nameLabel
+        anchors.top: parent.top
+        anchors.left: parent.left
+        margin-top: 10
+        margin-left: 10
+        text: Name
+        color: #202020
+        text-auto-resize: true
+
+      TextEdit
+        id: name
+        anchors.top: nameLabel.top
+        anchors.left: nameLabel.right
+        anchors.right: parent.right
+        margin-left: 10
+        margin-right: 10
+        height: 20
+
+      Label
+        id: hint
+        anchors.top: name.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        margin-top: 8
+        margin-left: 10
+        margin-right: 10
+        text: Use * and ? wildcards. Separate multiple targets with comma.
+        color: #404040
+        text-auto-resize: true
+
+    TargetBotClassicGroup
+      id: selectionGroup
+      anchors.top: heading.bottom
       anchors.left: parent.horizontalCenter
       anchors.right: parent.right
-      margin-top: 5
+      anchors.bottom: optionsGroup.top
+      margin-top: 8
+      margin-left: 8
+      margin-right: 10
+      margin-bottom: 8
+
+      @onSetup: self.title:setText('Target behaviour')
+
+      ScrollablePanel
+        id: right
+        anchors.top: title.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        margin: 4
+        margin-right: 16
+        vertical-scrollbar: rightScroll
+        layout:
+          type: verticalBox
+          fit-children: true
+
+      VerticalScrollBar
+        id: rightScroll
+        anchors.top: right.top
+        anchors.bottom: right.bottom
+        anchors.right: parent.right
+        margin-right: 2
+        step: 28
+        pixels-scroll: true
+
+    TargetBotClassicGroup
+      id: priorityGroup
+      anchors.top: namePanel.bottom
+      anchors.left: parent.left
+      anchors.right: parent.horizontalCenter
+      anchors.bottom: optionsGroup.top
+      margin-top: 8
+      margin-left: 10
+      margin-right: 8
+      margin-bottom: 8
+
+      @onSetup: self.title:setText('Target selection')
+
+      ScrollablePanel
+        id: left
+        anchors.top: title.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        margin: 4
+        vertical-scrollbar: leftScroll
+        layout:
+          type: verticalBox
+          fit-children: true
+
+      VerticalScrollBar
+        id: leftScroll
+        anchors.top: left.top
+        anchors.bottom: left.bottom
+        anchors.right: parent.right
+        margin-right: 2
+        step: 28
+        pixels-scroll: true
+
+    TargetBotClassicGroup
+      id: optionsGroup
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: buttonsPanel.top
       margin-left: 10
       margin-right: 10
-      layout:
-        type: verticalBox
-        fit-children: true
+      margin-bottom: 8
+      height: 82
 
-  Button
-    id: help
-    !text: tr('Help & Tutorials')
-    anchors.bottom: parent.bottom
-    anchors.left: parent.left
-    width: 150
-    @onClick: g_platform.openUrl("http://bot.otclient.ovh/")
+      @onSetup: self.title:setText('Saving & Loading settings')
 
-  Button
-    id: ok
-    !text: tr('Ok')
-    anchors.bottom: parent.bottom
-    anchors.right: next.left
-    margin-right: 10
-    width: 60
+      Button
+        id: help
+        !text: tr('Help & Tutorials')
+        anchors.top: title.bottom
+        anchors.left: parent.left
+        margin-top: 10
+        margin-left: 10
+        width: 170
+        @onClick: g_platform.openUrl("http://bot.otclient.ovh/")
 
-  Button
-    id: cancel
-    !text: tr('Cancel')
-    anchors.bottom: parent.bottom
-    anchors.right: parent.right
-    width: 60
+      Label
+        id: saveHint
+        anchors.top: title.bottom
+        anchors.left: help.right
+        anchors.right: parent.right
+        margin-top: 13
+        margin-left: 12
+        margin-right: 10
+        text: Press Ok to save this monster behaviour.
+        color: #404040
+        text-auto-resize: true
+
+    Panel
+      id: buttonsPanel
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: parent.bottom
+      margin-left: 10
+      margin-right: 10
+      margin-bottom: 8
+      height: 26
+
+      Button
+        id: ok
+        !text: tr('Ok')
+        anchors.top: parent.top
+        anchors.right: cancel.left
+        margin-right: 10
+        width: 76
+
+      Button
+        id: cancel
+        !text: tr('Cancel')
+        anchors.top: parent.top
+        anchors.right: parent.right
+        width: 76

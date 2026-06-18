@@ -3,12 +3,27 @@ TargetBot.Creature.edit = function(config, callback) -- callback = function(newC
 
   local editor = UI.createWindow('TargetBotCreatureEditorWindow')
   local values = {} -- (key, function returning value of key)
+  local nameEdit = editor:recursiveGetChildById('name')
+  local okButton = editor:recursiveGetChildById('ok')
+  local cancelButton = editor:recursiveGetChildById('cancel')
+  local priorityGroup = editor:recursiveGetChildById('priorityGroup')
+  local selectionGroup = editor:recursiveGetChildById('selectionGroup')
+  local leftPanel = priorityGroup and priorityGroup:recursiveGetChildById('left')
+  local rightPanel = selectionGroup and selectionGroup:recursiveGetChildById('right')
 
-  editor.name:setText(config.name or "")
-  table.insert(values, {"name", function() return editor.name:getText() end})
+  if not nameEdit or not okButton or not cancelButton or not leftPanel or not rightPanel then
+    editor:destroy()
+    if warn then
+      warn("TargetBot creature editor layout is missing required widgets")
+    end
+    return
+  end
+
+  nameEdit:setText(config.name or "")
+  table.insert(values, {"name", function() return nameEdit:getText() end})
 
   local addScrollBar = function(id, title, min, max, defaultValue)
-    local widget = UI.createWidget('TargetBotCreatureEditorScrollBar', editor.content.left)
+    local widget = UI.createWidget('TargetBotCreatureEditorScrollBar', leftPanel)
     widget.scroll.onValueChange = function(scroll, value)
       widget.text:setText(title .. ": " .. value)
     end
@@ -24,14 +39,14 @@ TargetBot.Creature.edit = function(config, callback) -- callback = function(newC
   end
 
   local addTextEdit = function(id, title, defaultValue)
-    local widget = UI.createWidget('TargetBotCreatureEditorTextEdit', editor.content.right)
+    local widget = UI.createWidget('TargetBotCreatureEditorTextEdit', rightPanel)
     widget.text:setText(title)
     widget.textEdit:setText(config[id] or defaultValue or "")
     table.insert(values, {id, function() return widget.textEdit:getText() end})
   end
 
   local addCheckBox = function(id, title, defaultValue)
-    local widget = UI.createWidget('TargetBotCreatureEditorCheckBox', editor.content.right)
+    local widget = UI.createWidget('TargetBotCreatureEditorCheckBox', rightPanel)
     widget.onClick = function()
       widget:setOn(not widget:isOn())
     end
@@ -45,18 +60,18 @@ TargetBot.Creature.edit = function(config, callback) -- callback = function(newC
   end
 
   local addItem = function(id, title, defaultItem)
-    local widget = UI.createWidget('TargetBotCreatureEditorItem', editor.content.right)
+    local widget = UI.createWidget('TargetBotCreatureEditorItem', rightPanel)
     widget.text:setText(title)
     widget.item:setItemId(config[id] or defaultItem)
     table.insert(values, {id, function() return widget.item:getItemId() end})
   end
 
-  editor.cancel.onClick = function()
+  cancelButton.onClick = function()
     editor:destroy()
   end
-  editor.onEscape = editor.cancel.onClick
+  editor.onEscape = cancelButton.onClick
 
-  editor.ok.onClick = function()
+  okButton.onClick = function()
     local newConfig = {}
     for _, value in ipairs(values) do
       newConfig[value[1]] = value[2]()
