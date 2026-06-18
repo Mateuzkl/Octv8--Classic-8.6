@@ -238,7 +238,9 @@ local function evalCondition(cond)
 end
 
 local function moveItemToSlot(itemId, slot)
-  local item = g_game.findPlayerItem(tonumber(itemId), -1)
+  local id = tonumber(itemId)
+  if not id then return end
+  local item = g_game.findPlayerItem(id, -1)
   if item then
     g_game.move(item, {x = 65535, y = slot, z = 0}, math.max(1, item:getCount()))
   end

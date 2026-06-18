@@ -821,9 +821,11 @@ end
       end
 
       local regex = patternCategory ~= 1 and [[^[^\(]+]] or [[^[^R]+]]
-      local type = regexMatch(patterns[patternCategory][pattern], regex)[1][1]:trim()
+      local match = regexMatch(patterns[patternCategory][pattern], regex)
+      local type = match and match[1] and match[1][1] and match[1][1]:trim() or ""
       regex = [[^[^ ]+]]
-      local categoryName = regexMatch(categories[category], regex)[1][1]:trim():lower()
+      match = regexMatch(categories[category], regex)
+      local categoryName = match and match[1] and match[1][1] and match[1][1]:trim():lower() or ""
       local specificMonsters = monsters == true and "Any Creatures" or "Creatures"
       local attackType = showItem and "rune "..itemId or spell
 
@@ -1079,14 +1081,14 @@ function getMonstersInArea(category, posOrCreature, pattern, minHp, maxHp, safeP
   if category == 1 or category == 3 or category == 4 then
     if category == 1 or category == 3 then
       local name = getTarget() and getTarget():getName()
-      if #t ~= 0 and not table.find(t, name, true) then
+      if #t ~= 0 and not table.find(t, name) then
         return 0
       end
     end
     for i, spec in pairs(getSpectators()) do
       local specHp = spec:getHealthPercent()
       local name = spec:getName():lower()
-      monsters = spec:isMonster() and specHp >= minHp and specHp <= maxHp and (#t == 0 or table.find(t, name, true)) and
+      monsters = spec:isMonster() and specHp >= minHp and specHp <= maxHp and (#t == 0 or table.find(t, name)) and
                  (g_game.getClientVersion() < 960 or spec:getType() < 3) and monsters + 1 or monsters
     end
     return monsters

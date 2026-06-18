@@ -349,7 +349,8 @@ if true then
   onKeyPress(function(keys)
     local wsadWalking = modules.game_walking.wsadWalking
     if not settings.autoOpenDoors then return end
-    local pos = player:getPosition()
+    local playerPos = player:getPosition()
+    local pos = {x = playerPos.x, y = playerPos.y, z = playerPos.z}
     if keys == 'Up' or (wsadWalking and keys == 'W') then
       pos.y = pos.y - 1
     elseif keys == 'Down' or (wsadWalking and keys == 'S') then
@@ -482,7 +483,8 @@ if true then
       if m.isOff() then return end
       if thing:getId() ~= 2129 then return end
       if tile:getText():len() > 0 then
-          table.remove(candidates, table.find(candidates,tile))
+          local idx = table.find(candidates, tile)
+          if idx then table.remove(candidates, idx) end
       end
   end)
 
@@ -565,7 +567,7 @@ if true then
     if not settings.checkPlayer then return end
 
     local re = regexMatch(text, regex)
-    if #re ~= 0 then
+    if re and #re ~= 0 then
         local name = re[1][2]
         local level = re[1][3]
         local guild = re[1][5] or ""

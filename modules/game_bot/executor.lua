@@ -343,7 +343,7 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
       end,
       onOpenChannel = function(channelId, channelName)
         for i, callback in ipairs(context._callbacks.onOpenChannel) do
-          callback(channels)
+          callback(channelId, channelName)
         end
       end,
       onCloseChannel = function(channelId)
@@ -386,9 +386,9 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
           callback(player, mana, maxMana, oldMana, oldMaxMana)
         end
       end,
-      onAddItem = function(container, slot, item)
+      onAddItem = function(container, slot, item, oldItem)
         for i, callback in ipairs(context._callbacks.onAddItem) do
-          callback(container, slot, item)
+          callback(container, slot, item, oldItem)
         end
       end,
       onRemoveItem = function(container, slot, item)
@@ -403,11 +403,6 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
       end,
       onGroupSpellCooldown = function(iconId, duration)
         for i, callback in ipairs(context._callbacks.onGroupSpellCooldown) do
-          callback(iconId, duration)
-        end
-      end,
-      onSpellCooldown = function(iconId, duration)
-        for i, callback in ipairs(context._callbacks.onSpellCooldown) do
           callback(iconId, duration)
         end
       end,

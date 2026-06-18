@@ -550,7 +550,9 @@ function elfHotkeysToggle()
   end
 end
 
-elfHotkeysInit()
+schedule(50, function()
+  elfHotkeysInit()
+end)
 
 -- exports para callbacks do OTUI e layout ElfBot
 if modules and modules.game_bot then

@@ -146,7 +146,7 @@ function addItemPanel()
     end
 
     -- check if isnt already added
-    if config[tostring(id)] then
+    if config.items[tostring(id)] then
       warn("vBot[Drop Tracker]: Item already added!")
       widget:setItemId(0)
       return
@@ -232,7 +232,8 @@ local function refreshProfileList()
       local label = UI.createWidget("ProfileLabel", SuppliesWindow.profiles)
       label:setText(k)
       label:setTooltip("Click to load this profile. \nDouble click to change the name.")
-      label.remove.onClick = function()
+      if label.remove then
+        label.remove.onClick = function()
         local childs = SuppliesWindow.profiles:getChildCount()
         if childs == 1 then
           return info("vBot[Supplies] You need at least one profile!")
@@ -240,6 +241,7 @@ local function refreshProfileList()
         profiles[k] = nil
         label:destroy()
         vBotConfigSave("supply")
+      end
       end
       label.onDoubleClick = function(widget)
         local window =

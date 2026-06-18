@@ -102,6 +102,7 @@ function CaveBot.HasLootItems()
             end
         end
     end
+    return false
 end
 
 --- Parses config and extracts loot containers.
@@ -303,7 +304,7 @@ function CaveBot.ReachDepot()
         end
     end
 
-    depositerLockerTarget = depositerLockerTarget or candidates[1].pos
+    depositerLockerTarget = depositerLockerTarget or (candidates[1] and candidates[1].pos)
 
     if depositerLockerTarget then
         if not CaveBot.MatchPosition(depositerLockerTarget) then

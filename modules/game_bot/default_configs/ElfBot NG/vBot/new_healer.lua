@@ -157,7 +157,7 @@ local function validate(widget, category)
     -- 1 - priorities | 2 - vocation
     category = category or 0
 
-    if category == 2 and not storage.extras.checkPlayer then
+    if category == 2 and not (storage.extras and storage.extras.checkPlayer) then
         label:setColor("#d9321f")
         label:setTooltip("! WARNING ! \nTurn on check players in extras to use this feature!")
         return
@@ -385,14 +385,14 @@ local function isCandidate(spec)
     end
 
     local curHp = spec:getHealthPercent()
+    local name = spec:getName()
     if curHp == 100 or (config.customPlayers[name] and curHp > config.customPlayers[name]) then
         return false
     end
 
     local specText = spec:getText()
-    local name = spec:getName()
     -- check players is enabled and spectator already verified
-    if storage.extras.checkPlayer and specText:len() > 0 then
+    if storage.extras and storage.extras.checkPlayer and specText:len() > 0 then
         if specText:find("EK") and not config.conditions.knights or
            specText:find("RP") and not config.conditions.paladins or
            specText:find("ED") and not config.conditions.druids or

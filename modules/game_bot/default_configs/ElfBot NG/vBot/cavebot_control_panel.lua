@@ -33,7 +33,7 @@ CaveBotControlPanel < Panel
 
 local panel = UI.createWidget("CaveBotControlPanel")
 
-storage.caveBot = {
+storage.caveBot = storage.caveBot or {
   forceRefill = false,
   backStop = false,
   backTrainers = false,

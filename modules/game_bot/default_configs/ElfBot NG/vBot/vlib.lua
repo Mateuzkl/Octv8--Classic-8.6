@@ -50,10 +50,13 @@ onTextMessage(function(mode, text)
     if not text:lower():find("you lose") or not text:lower():find("due to") then
         return
     end
-    local dmg = string.match(text, "%d+")
+    local dmg = tonumber(string.match(text, "%d+")) or 0
     if #dmgTable > 0 then
-        for k, v in ipairs(dmgTable) do
-            if now - v.t > 3000 then table.remove(dmgTable, k) end
+        local i = #dmgTable
+        while i > 0 do
+            local v = dmgTable[i]
+            if now - v.t > 3000 then table.remove(dmgTable, i) end
+            i = i - 1
         end
     end
     lastDmgMessage = now
@@ -367,10 +370,12 @@ function getSpellCoolDown(text)
     if not data then return false end
     local icon = modules.game_cooldown.isCooldownIconActive(data.id)
     local group = false
-    for groupId, duration in pairs(data.group) do
-        if modules.game_cooldown.isGroupCooldownIconActive(groupId) then
-            group = true
-            break
+    if data.group then
+        for groupId, duration in pairs(data.group) do
+            if modules.game_cooldown.isGroupCooldownIconActive(groupId) then
+                group = true
+                break
+            end
         end
     end
     if icon or group then
@@ -465,8 +470,8 @@ function isEnemy(c)
     if not p then return end
     if p:isLocalPlayer() then return end
 
-    if p:isPlayer() and table.find(storage.playerList.enemyList, name) or
-        (storage.playerList.marks and not isFriend(name)) or p:getEmblem() == 2 then
+    if p:isPlayer() and (table.find(storage.playerList.enemyList, name) or
+        (storage.playerList.marks and not isFriend(name)) or p:getEmblem() == 2) then
         return true
     else
         return false
