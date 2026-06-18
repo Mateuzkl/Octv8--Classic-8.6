@@ -19,7 +19,7 @@ local function setCaveBotData(hunting)
     supplyRetries = supplyRetries + 1
   else
     supplyRetries = 0
-    table.insert(vBot.CaveBotData.refillTime, os.difftime(os.time() - vBot.CaveBotData.lastRefill))
+    table.insert(vBot.CaveBotData.refillTime, os.difftime(os.time(), vBot.CaveBotData.lastRefill))
     vBot.CaveBotData.lastRefill = os.time()
     vBot.CaveBotData.refills = vBot.CaveBotData.refills + 1
   end

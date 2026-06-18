@@ -39,12 +39,13 @@ local function refreshEntries()
     depositerPanel.DepositerList:destroyChildren()
     for _, entry in ipairs(config.items) do
       local panel = g_ui.createWidget("StashItem", depositerPanel.DepositerList)
-      panel.name:setText(Item.create(entry.id):getMarketData().name)
+            panel.name:setText(entry.id > 100 and Item.create(entry.id):getMarketData().name or "Item " .. entry.id)
       for i, child in ipairs(panel:getChildren()) do
           if child:getId() ~= "slot" then
             child:setTooltip("Clear item or double click to remove entry.")
             child.onDoubleClick = function(widget)
-              table.remove(config.items, table.find(entry))
+              local idx = table.find(config.items, entry)
+              if idx then table.remove(config.items, idx) end
               panel:destroy()
             end
           end
@@ -56,7 +57,8 @@ local function refreshEntries()
       panel.item.onItemChange = function(widget)
         local id = widget:getItemId()
         if id < 100 then
-            table.remove(config.items, table.find(entry))
+            local idx = table.find(config.items, entry)
+            if idx then table.remove(config.items, idx) end
             panel:destroy()
         else
             for i, data in ipairs(config.items) do
@@ -67,7 +69,7 @@ local function refreshEntries()
             end
             entry.id = id
             panel.item:setImageSource('')
-            panel.name:setText(Item.create(entry.id):getMarketData().name)
+      panel.name:setText(entry.id > 100 and Item.create(entry.id):getMarketData().name or "Add item to select locker.")
             if entry.index == 0 then
                 local window = modules.client_textedit.show(panel.slot, {
                     title = "Set depot for "..panel.name:getText(),

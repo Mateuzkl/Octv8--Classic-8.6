@@ -96,16 +96,17 @@ CaveBot.Config.get = function(id)
 end
 
 CaveBot.Config.set = function(id, value)
-  local valueType = CaveBot.Config.get(id)
-  local panel = CaveBot.Config.ui[id]
-
-  if valueType == 'boolean' then
-    CaveBot.Config.values[id] = value
-    panel.value:setOn(value, true)
-    CaveBot.save()
-  else
-    CaveBot.Config.values[id] = value
-    panel.value:setText(value, true)
-    CaveBot.save()
+  if CaveBot.Config.values[id] == nil then
+    return warn("Invalid CaveBot.Config.set, id: " .. id)
   end
+  local panel = CaveBot.Config.ui[id]
+  local currentType = type(CaveBot.Config.values[id])
+
+  CaveBot.Config.values[id] = value
+  if currentType == "boolean" then
+    panel.value:setOn(value, true)
+  else
+    panel.value:setText(value, true)
+  end
+  CaveBot.save()
 end

@@ -190,6 +190,32 @@ local function saveAll()
 end
 
 if modules and modules.game_bot then
+  modules.game_bot.elfOther = function(action)
+    if action == "Load-Bot" then
+      if modules.game_bot.reload then modules.game_bot.reload() else reload() end
+    elseif action == "CaveBot" then
+      openMainBotTab("Cave")
+    elseif action == "Attack" then
+      openMainBotTab("Target")
+    elseif action == "HP/Tools" then
+      openMainBotTab("HP")
+    elseif action == "Painel de Icones" then
+      if ImperialElfBot_OpenIcons then ImperialElfBot_OpenIcons()
+      elseif PainelDeIconesController and PainelDeIconesController.open then PainelDeIconesController.open()
+      end
+    elseif action == "SwapSet" then
+      openMainBotTab("Main")
+    elseif action == "PVP" then
+      if PvpSystemController and PvpSystemController.open then PvpSystemController.open()
+      elseif PvpSystemController and PvpSystemController.show then PvpSystemController.show()
+      end
+    elseif action == "Ring/Amulet" then
+      openMainBotTab("Main")
+    elseif action == "Others" then
+      if extrasWindow then showWidget(extrasWindow) else openMainBotTab("Tools") end
+    end
+  end
+
   local function elfCavebotActionList()
     if CaveBotList then
       local ok, list = pcall(CaveBotList)

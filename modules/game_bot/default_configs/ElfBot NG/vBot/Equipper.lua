@@ -697,11 +697,11 @@ local function equipItem(id, slot)
 end
 
 
-local function markChild(child)
+local function markChild(widget)
     if mainWindow:isVisible() then
-        for i, child in ipairs(listPanel.list:getChildren()) do
-            if child ~= widget then
-                child:setColor('white')
+        for i, w in ipairs(listPanel.list:getChildren()) do
+            if w ~= widget then
+                w:setColor('white')
             end
         end
         widget:setColor('green')

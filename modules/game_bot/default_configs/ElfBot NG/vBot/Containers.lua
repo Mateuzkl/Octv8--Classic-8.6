@@ -449,7 +449,7 @@ if rootWidget then
             end, true, nil, contListWindow.sortList)
         contListWindow.sortList:setItems(t)
     end
-    refreshSortList(t)
+    refreshSortList(1, {})
 
     local refreshContNames = function(tFocus)
         local storageVal = config.list
@@ -541,7 +541,7 @@ onContainerOpen(function(container, previousContainer)
     local storageVal = config.list
     if storageVal and #storageVal > 0 then
         for _, entry in pairs(storageVal) do
-            if entry.enabled and string.find(container:getContainerItem():getId(), entry.item) then
+            if entry.enabled and container:getContainerItem():getId() == entry.item then
                 if entry.min then
                     containerWindow:minimize()
                 end
@@ -572,7 +572,7 @@ local function nameContainersOnLogin()
             local storageVal = config.list
             if storageVal and #storageVal > 0 then
                 for _, entry in pairs(storageVal) do
-                    if entry.enabled and string.find(container:getContainerItem():getId(), entry.item) then
+            if entry.enabled and container:getContainerItem():getId() == entry.item then
                         containerWindow:setText(entry.value)
                     end
                 end

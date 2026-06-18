@@ -38,13 +38,14 @@ CaveBot.Extensions.Tasker.setup = function()
 
     local data = string.split(value, ",")
     if not data or #data < 1 then
-        dataValidationFailed()
+        return dataValidationFailed()
     end
     local marker = tonumber(data[1])
 
     if not marker then
         dataValidationFailed()
         resetTaskData()
+        return false
     elseif marker == 1 then
         if getNpcs(3) == 0 then
             print("CaveBot[Tasker]: no NPC found in range! skipping")
@@ -53,6 +54,7 @@ CaveBot.Extensions.Tasker.setup = function()
         if #data ~= 4 and #data ~= 5 then
             dataValidationFailed()
             resetTaskData()
+            return false
         else
             taskName = data[2]:lower():trim()
             count = tonumber(data[3]:trim())
@@ -63,7 +65,7 @@ CaveBot.Extensions.Tasker.setup = function()
         end
     elseif marker == 2 then
         if #data ~= 3 then
-            dataValidationFailed()
+            return dataValidationFailed()
         else
             label1 = data[2]:lower():trim()
             label2 = data[3]:lower():trim()
@@ -74,7 +76,7 @@ CaveBot.Extensions.Tasker.setup = function()
             return false
         end
         if #data ~= 1 then
-            dataValidationFailed()
+            return dataValidationFailed()
         end
     end
 
