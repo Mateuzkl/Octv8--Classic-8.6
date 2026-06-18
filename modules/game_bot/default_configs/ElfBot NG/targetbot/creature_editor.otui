@@ -9,7 +9,6 @@ TargetBotCreatureEditorScrollBar < Panel
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: parent.top
-    color: #202020
     text-align: center
 
   HorizontalScrollBar
@@ -33,7 +32,6 @@ TargetBotCreatureEditorTextEdit < Panel
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: parent.top
-    color: #202020
     text-align: left
 
   TextEdit
@@ -54,7 +52,6 @@ TargetBotCreatureEditorItem < Panel
     id: text
     anchors.left: parent.left
     anchors.verticalCenter: next.verticalCenter
-    color: #202020
 
   BotItem
     id: item
@@ -71,7 +68,6 @@ TargetBotCreatureEditorCheckBox < BotSwitch
 TargetBotClassicGroup < Panel
   image-source: /images/ui/panel_flat
   image-border: 1
-  background-color: #dfdfdf
 
   Label
     id: title
@@ -79,7 +75,6 @@ TargetBotClassicGroup < Panel
     anchors.left: parent.left
     margin-top: 5
     margin-left: 8
-    color: #202020
     text-auto-resize: true
 
 TargetBotCreatureEditorWindow < MainWindow
@@ -94,7 +89,6 @@ TargetBotCreatureEditorWindow < MainWindow
     id: rootPanel
     anchors.fill: parent
     margin: 2
-    background-color: #ececec
 
     Label
       id: heading
@@ -103,7 +97,6 @@ TargetBotCreatureEditorWindow < MainWindow
       margin-top: 8
       margin-left: 10
       text: Monsters definition and behaviours
-      color: #202020
       text-auto-resize: true
 
     Panel
@@ -117,7 +110,6 @@ TargetBotCreatureEditorWindow < MainWindow
       height: 72
       image-source: /images/ui/panel_flat
       image-border: 1
-      background-color: #f2f2f2
 
       Label
         id: nameLabel
@@ -126,7 +118,6 @@ TargetBotCreatureEditorWindow < MainWindow
         margin-top: 10
         margin-left: 10
         text: Name
-        color: #202020
         text-auto-resize: true
 
       TextEdit
@@ -147,7 +138,6 @@ TargetBotCreatureEditorWindow < MainWindow
         margin-left: 10
         margin-right: 10
         text: Use * and ? wildcards. Separate multiple targets with comma.
-        color: #404040
         text-auto-resize: true
 
     TargetBotClassicGroup
@@ -250,7 +240,6 @@ TargetBotCreatureEditorWindow < MainWindow
         margin-left: 12
         margin-right: 10
         text: Press Ok to save this monster behaviour.
-        color: #404040
         text-auto-resize: true
 
     Panel

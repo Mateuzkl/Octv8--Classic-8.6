@@ -5,6 +5,17 @@ ElfBotButton < Button
   padding: 0
   margin: 0
 
+ElfBotCloseButton < UIButton
+  size: 12 12
+  image-source: /images/ui/miniwindow_buttons
+  image-clip: 29 1 12 12
+
+  $hover:
+    image-clip: 29 15 12 12
+
+  $pressed:
+    image-clip: 29 29 12 12
+
 ImperialElfBotWindow < MainWindow
   size: 490 112
   padding: 2
@@ -13,14 +24,12 @@ ImperialElfBotWindow < MainWindow
 
 
 
-  ElfBotButton
+  ElfBotCloseButton
     id: closeButton
-    text: X
     anchors.top: parent.top
     anchors.right: parent.right
-    margin-top: 0
-    margin-right: 0
-    size: 18 16
+    margin-top: -29
+    margin-right: -9
 
   ElfBotButton
     id: healingButton

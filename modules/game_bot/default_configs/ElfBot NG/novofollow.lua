@@ -1811,11 +1811,30 @@ tPanel < Panel
       type: verticalBox
       spacing: 4
 
+NovoFollowCloseButton < UIButton
+  size: 12 12
+  image-source: /images/ui/miniwindow_buttons
+  image-clip: 29 1 12 12
+
+  $hover:
+    image-clip: 29 15 12 12
+
+  $pressed:
+    image-clip: 29 29 12 12
+
 NovoFollowWindow < MainWindow
   !text: tr('Navigation')
-  size: 560 600
+  size: 540 580
   visible: false
   @onEscape: self:hide()
+
+  NovoFollowCloseButton
+    id: closeTopButton
+    anchors.top: parent.top
+    anchors.right: parent.right
+    margin-top: -29
+    margin-right: -9
+    @onClick: self:getParent():hide()
 
   tPanel
     id: contentPanel
@@ -2760,7 +2779,7 @@ Panel
   Button
     id: hudSetupToggleButton
     text: HUD Setup: OFF
-    width: 104
+    width: 96
     height: 18
 
   Label
@@ -2771,7 +2790,7 @@ Panel
 
   SpinBox
     id: hudPosXSpin
-    width: 58
+    width: 50
     minimum: 0
     maximum: 5000
     step: 1
@@ -2786,7 +2805,7 @@ Panel
 
   SpinBox
     id: hudPosYSpin
-    width: 58
+    width: 50
     minimum: 0
     maximum: 5000
     step: 1
@@ -2796,22 +2815,22 @@ Panel
   Label
     id: hudSendModeLabel
     text: Envio:
-    width: 40
+    width: 36
     text-align: center
 
   ComboBox
     id: hudSendModeCombo
-    width: 74
+    width: 70
 
   Label
     id: hudGuildChannelLabel
     text: Canal:
-    width: 36
+    width: 32
     text-align: center
 
   TextEdit
     id: hudGuildChannelEdit
-    width: 90
+    width: 74
     height: 20
     text-align: center
 ]], settingsPanel)

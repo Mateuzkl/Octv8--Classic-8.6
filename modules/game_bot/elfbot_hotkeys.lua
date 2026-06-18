@@ -9,6 +9,8 @@ elfHotkeysText = ""
 elfHotkeysLastSpell = 0
 elfHotkeysLastUse = 0
 
+local elfHotkeysNextEventId = 0
+
 local presets = {
   knight = [[auto 200 if [$hppc <= 85] say exura ico
 auto 200 if [$hppc <= 55] useoncreature 7643 self
@@ -348,16 +350,21 @@ local function executeCommand(cmd)
 end
 
 local function scheduleHotkey(interval, cond, action)
+  elfHotkeysNextEventId = elfHotkeysNextEventId + 1
+  local eventId = elfHotkeysNextEventId
+
   local function loop()
-    if not elfHotkeysRunning then return end
+    if not elfHotkeysRunning then
+      elfHotkeysEvents[eventId] = nil
+      return
+    end
     if g_game.isOnline() and evalCondition(cond) then
       pcall(function() executeCommand(action) end)
     end
-    local ev = scheduleEvent(loop, interval)
-    table.insert(elfHotkeysEvents, ev)
+    elfHotkeysEvents[eventId] = scheduleEvent(loop, interval)
   end
-  local ev = scheduleEvent(loop, interval)
-  table.insert(elfHotkeysEvents, ev)
+
+  elfHotkeysEvents[eventId] = scheduleEvent(loop, interval)
 end
 
 local function updateWindow()
@@ -365,21 +372,32 @@ local function updateWindow()
   local count = #splitLines(elfHotkeysText)
   if elfHotkeysWindow.status then
     if elfHotkeysRunning then
-      elfHotkeysWindow.status:setText("Status: ligado - " .. count .. " linha(s)")
-      elfHotkeysWindow.status:setColor("green")
+      local text = "Status: ligado - " .. count .. " linha(s)"
+      if elfHotkeysWindow.status:getText() ~= text then
+        elfHotkeysWindow.status:setText(text)
+      end
+      elfHotkeysWindow.status:setColor("#00ff66")
     else
-      elfHotkeysWindow.status:setText("Status: desligado - " .. count .. " linha(s)")
-      elfHotkeysWindow.status:setColor("red")
+      local text = "Status: desligado - " .. count .. " linha(s)"
+      if elfHotkeysWindow.status:getText() ~= text then
+        elfHotkeysWindow.status:setText(text)
+      end
+      elfHotkeysWindow.status:setColor("#ff5555")
     end
   end
   if elfHotkeysWindow.preview then
     local preview = elfHotkeysText
-    if preview:len() > 700 then preview = preview:sub(1, 700) .. "\n..." end
+    if preview:len() > 420 then preview = preview:sub(1, 420) .. "\n..." end
     if preview:len() == 0 then preview = "Nenhum script carregado." end
-    elfHotkeysWindow.preview:setText(preview)
+    if elfHotkeysWindow.preview:getText() ~= preview then
+      elfHotkeysWindow.preview:setText(preview)
+    end
   end
   if elfHotkeysWindow.toggleScripts then
-    elfHotkeysWindow.toggleScripts:setText(elfHotkeysRunning and "Reiniciar" or "Ligar")
+    local text = elfHotkeysRunning and "Reiniciar" or "Ligar"
+    if elfHotkeysWindow.toggleScripts:getText() ~= text then
+      elfHotkeysWindow.toggleScripts:setText(text)
+    end
   end
 end
 
@@ -446,7 +464,7 @@ end
 
 function elfHotkeysStop()
   elfHotkeysRunning = false
-  for _, ev in ipairs(elfHotkeysEvents) do
+  for _, ev in pairs(elfHotkeysEvents) do
     removeEvent(ev)
   end
   elfHotkeysEvents = {}

@@ -1,8 +1,27 @@
+ElfHotkeysCloseButton < UIButton
+  size: 12 12
+  image-source: /images/ui/miniwindow_buttons
+  image-clip: 29 1 12 12
+
+  $hover:
+    image-clip: 29 15 12 12
+
+  $pressed:
+    image-clip: 29 29 12 12
+
 ElfHotkeysWindow < MainWindow
   id: elfHotkeysWindow
   text: ElfBot Hotkeys Original
-  size: 560 310
+  size: 520 236
   @onEscape: self:hide()
+
+  ElfHotkeysCloseButton
+    id: closeButton
+    anchors.top: parent.top
+    anchors.right: parent.right
+    margin-top: -29
+    margin-right: -9
+    @onClick: modules.game_bot.elfHotkeysClose()
 
   Label
     id: info
@@ -13,16 +32,7 @@ ElfHotkeysWindow < MainWindow
     margin-right: 28
     text-wrap: true
     text-align: center
-    text: Cole as hotkeys ElfBot na caixa abaixo. Use presets ou cole manualmente, depois clique Ligar.
-
-  Button
-    id: closeButton
-    text: X
-    anchors.top: parent.top
-    anchors.right: parent.right
-    width: 24
-    height: 20
-    @onClick: modules.game_bot.elfHotkeysClose()
+    text: Cole hotkeys no formato ElfBot original. Use Editar Scripts para colar varias linhas. Depois clique Ligar.
 
   HorizontalSeparator
     anchors.top: info.bottom
@@ -43,7 +53,7 @@ ElfHotkeysWindow < MainWindow
 
   Button
     id: editScripts
-    text: Editar/Clicar aqui
+    text: Editar Scripts
     anchors.top: status.bottom
     anchors.left: parent.left
     margin-top: 8
@@ -83,7 +93,7 @@ ElfHotkeysWindow < MainWindow
 
   Label
     id: presetLabel
-    text: Presets:
+    text: Presets do PHP:
     anchors.top: editScripts.bottom
     anchors.left: parent.left
     margin-top: 10
@@ -140,14 +150,17 @@ ElfHotkeysWindow < MainWindow
     height: 22
     @onClick: modules.game_bot.elfHotkeysLoadPreset('diversas')
 
-  TextEdit
+  Label
     id: preview
     anchors.top: knightPreset.bottom
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
     margin-top: 8
-    editable: true
+    image-source: /images/ui/panel_flat
+    image-border: 1
+    padding: 4
     text-align: left
     text-wrap: true
-    text:
+    text-auto-resize: false
+    text: Nenhum script carregado.

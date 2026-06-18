@@ -1,18 +1,26 @@
+ElfHotkeysCloseButton < UIButton
+  size: 12 12
+  image-source: /images/ui/miniwindow_buttons
+  image-clip: 29 1 12 12
+
+  $hover:
+    image-clip: 29 15 12 12
+
+  $pressed:
+    image-clip: 29 29 12 12
+
 MainWindow
   id: elfHotkeysWindow
   text: ElfBot Hotkeys Original
-  size: 520 250
+  size: 520 236
   @onEscape: self:hide()
 
-  Button
+  ElfHotkeysCloseButton
     id: closeButton
-    text: X
     anchors.top: parent.top
     anchors.right: parent.right
-    margin-top: 0
-    margin-right: 0
-    width: 20
-    height: 18
+    margin-top: -29
+    margin-right: -9
     @onClick: modules.game_bot.elfHotkeysClose()
 
   Label
@@ -141,14 +149,17 @@ MainWindow
     height: 22
     @onClick: modules.game_bot.elfHotkeysLoadPreset('diversas')
 
-  TextEdit
+  Label
     id: preview
     anchors.top: knightPreset.bottom
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
     margin-top: 8
-    editable: false
+    image-source: /images/ui/panel_flat
+    image-border: 1
+    padding: 4
     text-align: left
     text-wrap: true
+    text-auto-resize: false
     text: Nenhum script carregado.
