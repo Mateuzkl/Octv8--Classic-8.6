@@ -6,8 +6,8 @@ TargetBot.Creature.edit = function(config, callback) -- callback = function(newC
   local nameEdit = editor:recursiveGetChildById('name')
   local okButton = editor:recursiveGetChildById('ok')
   local cancelButton = editor:recursiveGetChildById('cancel')
-  local priorityGroup = editor:recursiveGetChildById('priorityGroup')
-  local selectionGroup = editor:recursiveGetChildById('selectionGroup')
+  local priorityGroup = editor:recursiveGetChildById('priorityGroup') or editor
+  local selectionGroup = editor:recursiveGetChildById('selectionGroup') or editor
   local leftPanel = priorityGroup and priorityGroup:recursiveGetChildById('left')
   local rightPanel = selectionGroup and selectionGroup:recursiveGetChildById('right')
 

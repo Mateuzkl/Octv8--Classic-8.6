@@ -4,6 +4,17 @@ SettingCheckBox < CheckBox
   margin-top: 3
   font: verdana-11px-rounded
 
+HealBotCloseButton < UIButton
+  size: 12 12
+  image-source: /images/ui/miniwindow_buttons
+  image-clip: 29 1 12 12
+
+  $hover:
+    image-clip: 29 15 12 12
+
+  $pressed:
+    image-clip: 29 29 12 12
+
 SpellSourceBoxPopupMenu < ComboBoxPopupMenu
 SpellSourceBoxPopupMenuButton < ComboBoxPopupMenuButton
 SpellSourceBox < ComboBox
@@ -443,8 +454,16 @@ HealBotSettingsPanel < Panel
 
 HealWindow < MainWindow
   !text: tr('Self Healer')
-  size: 520 360
+  size: 540 360
   @onEscape: self:hide()
+
+  HealBotCloseButton
+    id: closeTopButton
+    anchors.top: parent.top
+    anchors.right: parent.right
+    margin-top: -29
+    margin-right: -9
+    @onClick: self:getParent():hide()
 
   Label
     id: title

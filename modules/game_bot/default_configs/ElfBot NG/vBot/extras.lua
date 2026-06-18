@@ -20,7 +20,12 @@ extrasWindow.onGeometryChange = function(widget, old, new)
   settings.height = new.height
 end
 
-extrasWindow:setHeight(settings.height or 360)
+local extrasWindowHeight = tonumber(settings.height) or 390
+if extrasWindowHeight < 390 then
+  extrasWindowHeight = 390
+end
+settings.height = extrasWindowHeight
+extrasWindow:setHeight(extrasWindowHeight)
 
 -- available options for dest param
 local rightPanel = extrasWindow.content.right

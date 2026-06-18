@@ -64,8 +64,8 @@ ExtrasCheckBox < BotSwitch
 
 ExtrasWindow < MainWindow
   !text: tr('Extras')
-  size: 440 360
-  padding: 25
+  size: 470 390
+  padding: 22
 
   Label
     anchors.left: parent.left
@@ -107,29 +107,31 @@ ExtrasWindow < MainWindow
       anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.horizontalCenter
+      height: 560
       margin-top: 5
       margin-left: 10
       margin-right: 10
       layout:
         type: verticalBox
-        fit-children: true
+        spacing: 2
 
     Panel
       id: right
       anchors.top: parent.top
       anchors.left: parent.horizontalCenter
       anchors.right: parent.right
+      height: 560
       margin-top: 5
       margin-left: 10
       margin-right: 10
       layout:
         type: verticalBox
-        fit-children: true
+        spacing: 2
 
     VerticalSeparator
       anchors.top: parent.top
-      anchors.bottom: parent.bottom
       anchors.left: parent.horizontalCenter
+      height: 560
 
   HorizontalSeparator
     id: separator
@@ -146,7 +148,7 @@ ExtrasWindow < MainWindow
     maximum: 600
     margin-left: 3
     margin-right: 3
-    background: #ffffff88
+    background: #4e4e4e
 
   Button
     id: closeButton
