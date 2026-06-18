@@ -190,6 +190,136 @@ local function saveAll()
 end
 
 if modules and modules.game_bot then
+  local function elfCavebotActionList()
+    if CaveBotList then
+      local ok, list = pcall(CaveBotList)
+      if ok then return list end
+    end
+    if CaveBot and CaveBot.actionList then
+      return CaveBot.actionList
+    end
+    return nil
+  end
+
+  local function elfCavebotCurrentPosition()
+    local player = g_game and g_game.getLocalPlayer and g_game.getLocalPlayer()
+    if player then
+      return player:getPosition()
+    end
+    if pos then
+      return pos()
+    end
+    return nil
+  end
+
+  local function elfCavebotPositionValue(position, exact)
+    if not position then return nil end
+    local value = position.x .. "," .. position.y .. "," .. position.z
+    if exact then
+      value = value .. ",0"
+    end
+    return value
+  end
+
+  local function elfCavebotCollectData()
+    local data = {}
+    local list = elfCavebotActionList()
+    if list then
+      for _, child in ipairs(list:getChildren()) do
+        if child.action and child.value then
+          table.insert(data, { child.action, child.value })
+        end
+      end
+    end
+
+    if CaveBot and CaveBot.Config and CaveBot.Config.save then
+      table.insert(data, { "config", json.encode(CaveBot.Config.save()) })
+    end
+
+    local extensionData = {}
+    if CaveBot and CaveBot.Extensions then
+      for extension, callbacks in pairs(CaveBot.Extensions) do
+        if callbacks.onSave then
+          local extData = callbacks.onSave()
+          if type(extData) == "table" then
+            extensionData[extension] = extData
+          end
+        end
+      end
+    end
+    table.insert(data, { "extensions", json.encode(extensionData, 2) })
+
+    return data
+  end
+
+  local function elfCavebotApplyData(name, enabled, data)
+    if type(storage._configs) ~= "table" then
+      storage._configs = {}
+    end
+    if type(storage._configs.cavebot_configs) ~= "table" then
+      storage._configs.cavebot_configs = {}
+    end
+
+    storage._configs.cavebot_configs.selected = name
+    storage._configs.cavebot_configs.enabled = enabled == true
+
+    if CaveBot and CaveBot.setOff then
+      pcall(CaveBot.setOff)
+    end
+
+    local list = elfCavebotActionList()
+    if list then
+      list:destroyChildren()
+    end
+
+    local cavebotConfig = nil
+    local extensionConfig = {}
+    for _, entry in ipairs(data or {}) do
+      if type(entry) == "table" and #entry == 2 then
+        if entry[1] == "config" then
+          local ok, decoded = pcall(function() return json.decode(entry[2]) end)
+          if ok and type(decoded) == "table" then
+            cavebotConfig = decoded
+          end
+        elseif entry[1] == "extensions" then
+          local ok, decoded = pcall(function() return json.decode(entry[2]) end)
+          if ok and type(decoded) == "table" then
+            extensionConfig = decoded
+          end
+        elseif CaveBot and CaveBot.addAction then
+          pcall(CaveBot.addAction, entry[1], entry[2])
+        end
+      end
+    end
+
+    if CaveBot and CaveBot.Config and CaveBot.Config.onConfigChange then
+      pcall(CaveBot.Config.onConfigChange, name, enabled == true, cavebotConfig)
+    end
+
+    if CaveBot and CaveBot.Extensions then
+      for extension, callbacks in pairs(CaveBot.Extensions) do
+        if callbacks.onConfigChange then
+          pcall(callbacks.onConfigChange, name, enabled == true, extensionConfig[extension])
+        end
+      end
+    end
+
+    if CaveBot and CaveBot.resetWalking then
+      pcall(CaveBot.resetWalking)
+    end
+
+    return true
+  end
+
+  local function elfCavebotValidProfileName(name)
+    if type(name) ~= "string" then return nil end
+    name = name:gsub("%s+", "_")
+    if name:len() == 0 or name:len() >= 30 or name:find("/") or name:find("\\") then
+      return nil
+    end
+    return name
+  end
+
   modules.game_bot.elfCavebotBridgeIsOn = function()
     if not CaveBot or not CaveBot.isOn then
       return false
@@ -246,6 +376,179 @@ if modules and modules.game_bot then
     if CaveBot and CaveBot.save then
       pcall(CaveBot.save)
     end
+  end
+
+  modules.game_bot.elfCavebotBridgeRecorderIsOn = function()
+    if CaveBot and CaveBot.Recorder and CaveBot.Recorder.isOn then
+      local ok, result = pcall(CaveBot.Recorder.isOn)
+      return ok and result == true
+    end
+    return false
+  end
+
+  modules.game_bot.elfCavebotBridgeToggleRecorder = function()
+    if not CaveBot or not CaveBot.Recorder then return false end
+    if CaveBot.Recorder.isOn and CaveBot.Recorder.isOn() then
+      if CaveBot.Recorder.disable then
+        return pcall(CaveBot.Recorder.disable)
+      end
+    elseif CaveBot.Recorder.enable then
+      return pcall(CaveBot.Recorder.enable)
+    end
+    return false
+  end
+
+  modules.game_bot.elfCavebotBridgeProfiles = function()
+    local profiles = {}
+    if Config and Config.list then
+      local ok, list = pcall(Config.list, "cavebot_configs")
+      if ok and type(list) == "table" then
+        profiles = list
+        table.sort(profiles)
+      end
+    end
+
+    local selected = nil
+    if storage._configs and storage._configs.cavebot_configs then
+      selected = storage._configs.cavebot_configs.selected
+    end
+
+    return {
+      profiles = profiles,
+      selected = selected
+    }
+  end
+
+  modules.game_bot.elfCavebotBridgeActions = function()
+    local result = {}
+    local list = elfCavebotActionList()
+    if not list then return result end
+
+    local focused = list:getFocusedChild()
+    for index, child in ipairs(list:getChildren()) do
+      table.insert(result, {
+        index = index,
+        action = child.action or "",
+        value = child.value or "",
+        text = child.getText and child:getText() or "",
+        focused = focused == child
+      })
+    end
+    return result
+  end
+
+  modules.game_bot.elfCavebotBridgeFocusAction = function(index)
+    local list = elfCavebotActionList()
+    if not list then return false end
+    local child = list:getChildByIndex(tonumber(index) or 0)
+    if not child then return false end
+    list:focusChild(child)
+    list:ensureChildVisible(child)
+    return true
+  end
+
+  modules.game_bot.elfCavebotBridgeAddRaw = function(action, value)
+    if not CaveBot or not CaveBot.addAction then return false end
+    local widget = CaveBot.addAction(action, value, true)
+    if widget and CaveBot.save then
+      CaveBot.save()
+    end
+    return widget ~= nil
+  end
+
+  modules.game_bot.elfCavebotBridgeAddAt = function(kind, position, extra)
+    if not position then return false end
+
+    if kind == "goto" then
+      return modules.game_bot.elfCavebotBridgeAddRaw("goto", elfCavebotPositionValue(position, false))
+    elseif kind == "gotoExact" then
+      return modules.game_bot.elfCavebotBridgeAddRaw("goto", elfCavebotPositionValue(position, true))
+    elseif kind == "use" then
+      return modules.game_bot.elfCavebotBridgeAddRaw("use", elfCavebotPositionValue(position, false))
+    elseif kind == "usewith" and extra then
+      return modules.game_bot.elfCavebotBridgeAddRaw("usewith", extra .. "," .. elfCavebotPositionValue(position, false))
+    end
+
+    return false
+  end
+
+  modules.game_bot.elfCavebotBridgeAddCurrent = function(kind)
+    return modules.game_bot.elfCavebotBridgeAddAt(kind, elfCavebotCurrentPosition())
+  end
+
+  modules.game_bot.elfCavebotBridgeEditFocused = function()
+    local list = elfCavebotActionList()
+    local action = list and list:getFocusedChild()
+    if action and action.onDoubleClick then
+      action:onDoubleClick()
+      return true
+    end
+    return false
+  end
+
+  modules.game_bot.elfCavebotBridgeRemoveFocused = function()
+    local list = elfCavebotActionList()
+    local action = list and list:getFocusedChild()
+    if not action then return false end
+    action:destroy()
+    if CaveBot and CaveBot.save then CaveBot.save() end
+    return true
+  end
+
+  modules.game_bot.elfCavebotBridgeMoveFocused = function(direction)
+    local list = elfCavebotActionList()
+    local action = list and list:getFocusedChild()
+    if not action then return false end
+    local index = list:getChildIndex(action)
+    local nextIndex = index + (tonumber(direction) or 0)
+    if nextIndex < 1 or nextIndex > list:getChildCount() then
+      return false
+    end
+    list:moveChildToIndex(action, nextIndex)
+    list:focusChild(action)
+    list:ensureChildVisible(action)
+    if CaveBot and CaveBot.save then CaveBot.save() end
+    return true
+  end
+
+  modules.game_bot.elfCavebotBridgeSaveProfile = function(name)
+    name = elfCavebotValidProfileName(name)
+    if not name or not Config or not Config.save then return false end
+    if type(storage._configs) ~= "table" then storage._configs = {} end
+    if type(storage._configs.cavebot_configs) ~= "table" then storage._configs.cavebot_configs = {} end
+    storage._configs.cavebot_configs.selected = name
+    Config.save("cavebot_configs", name, elfCavebotCollectData(), "cfg")
+    return true
+  end
+
+  modules.game_bot.elfCavebotBridgeLoadProfile = function(name)
+    name = elfCavebotValidProfileName(name)
+    if not name or not Config or not Config.load then return false end
+    local data = Config.load("cavebot_configs", name)
+    if type(data) ~= "table" then return false end
+    return elfCavebotApplyData(name, false, data)
+  end
+
+  modules.game_bot.elfCavebotBridgeDeleteProfile = function(name)
+    name = elfCavebotValidProfileName(name)
+    if not name or not Config or not Config.remove then return false end
+    local removed = Config.remove("cavebot_configs", name)
+    if not removed then return false end
+
+    if storage._configs and storage._configs.cavebot_configs and storage._configs.cavebot_configs.selected == name then
+      storage._configs.cavebot_configs.selected = nil
+      local profiles = Config.list("cavebot_configs")
+      table.sort(profiles)
+      if #profiles > 0 then
+        local data = Config.load("cavebot_configs", profiles[1])
+        elfCavebotApplyData(profiles[1], false, data)
+      else
+        local list = elfCavebotActionList()
+        if list then list:destroyChildren() end
+      end
+    end
+
+    return true
   end
 end
 
