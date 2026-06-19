@@ -13,7 +13,8 @@ context.addIcon = function(id, options, callback)
     hotkey: string
     switchable: true / false [default: true]
     movable: true / false [default: true]
-    phantom: true / false [defaule: false]
+    dragWithCtrl: true / false [default: true]
+    phantom: true / false [default: false]
 ]]--
   local panel = modules.game_interface.gameMapPanel
   if type(id) ~= "string" or id:len() < 1 then
@@ -111,9 +112,10 @@ context.addIcon = function(id, options, callback)
     widget.hotkey:hide()
   end
 
-  if options.movable ~= false then
+  if options.movable ~= false and options.moveable ~= false then
     widget.onDragEnter = function(widget, mousePos)
-      if not g_keyboard.isCtrlPressed() then
+      local dragRequiresCtrl = options.dragWithCtrl ~= false and options.moveWithCtrl ~= false
+      if dragRequiresCtrl and not g_keyboard.isCtrlPressed() then
         return false
       end
       widget:breakAnchors()
