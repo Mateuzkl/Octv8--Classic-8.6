@@ -1,27 +1,33 @@
 TargetBotCreatureEditorScrollBar < Panel
-  height: 28
-  margin-top: 3
+  height: 32
+  margin-top: 4
+  margin-left: 8
+  margin-right: 8
 
   Label
     id: text
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: parent.top
+    height: 13
     text-align: center
+    font: verdana-11px-rounded
 
   HorizontalScrollBar
     id: scroll
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.top: prev.bottom
+    anchors.top: text.bottom
     margin-top: 3
     minimum: 0
     maximum: 10
     step: 1
 
 TargetBotCreatureEditorTextEdit < Panel
-  height: 40
-  margin-top: 7
+  height: 42
+  margin-top: 6
+  margin-left: 8
+  margin-right: 8
 
   Label
     id: text
@@ -29,12 +35,13 @@ TargetBotCreatureEditorTextEdit < Panel
     anchors.right: parent.right
     anchors.top: parent.top
     text-align: center
+    font: verdana-11px-rounded
 
   TextEdit
     id: textEdit
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.top: prev.bottom
+    anchors.top: text.bottom
     margin-top: 5
     minimum: 0
     maximum: 10
@@ -50,6 +57,7 @@ TargetBotCreatureEditorItem < Panel
     id: text
     anchors.left: parent.left
     anchors.verticalCenter: next.verticalCenter
+    font: verdana-11px-rounded
 
   BotItem
     id: item
@@ -57,86 +65,148 @@ TargetBotCreatureEditorItem < Panel
     anchors.right: parent.right
 
 TargetBotCreatureEditorCheckBox < BotSwitch
-  height: 20
-  margin-top: 7
+  height: 22
+  margin-top: 5
+  margin-left: 8
+  margin-right: 8
+  font: verdana-11px-rounded
 
 TargetBotCreatureEditorWindow < MainWindow
   text: Monster Targeting
-  width: 540
-  height: 430
+  width: 610
+  height: 480
+  @onEscape: self:destroy()
 
   $mobile:
-    height: 300
+    height: 340
 
-  Label
-    anchors.left: parent.left
-    anchors.right: parent.right
+  FlatPanel
+    id: introPanel
     anchors.top: parent.top
-    text-align: center
-    !text: tr('You can use * (any characters) and ? (any character) in target name')
-
-  Label
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.top: prev.bottom
-    text-align: center
-    !text: tr('You can also enter multiple targets, separate them by ,')
+    height: 45
+    padding: 4
+
+    Label
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: parent.top
+      height: 16
+      text-align: center
+      font: verdana-11px-rounded
+      !text: tr('You can use * (any characters) and ? (any character) in target name')
+
+    Label
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: prev.bottom
+      height: 16
+      text-align: center
+      font: verdana-11px-rounded
+      !text: tr('You can also enter multiple targets, separate them by ,')
+
+  Label
+    id: nameLabel
+    anchors.top: introPanel.bottom
+    anchors.left: parent.left
+    margin-top: 8
+    width: 84
+    height: 18
+    text-align: right
+    text: Target name:
+    font: verdana-11px-rounded
 
   TextEdit
     id: name
-    anchors.top: prev.bottom
+    anchors.verticalCenter: nameLabel.verticalCenter
+    anchors.left: nameLabel.right
+    anchors.right: parent.right
+    margin-left: 6
+
+  HorizontalSeparator
+    id: topSeparator
+    anchors.top: name.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    margin-left: 90
-    margin-top: 5
+    margin-top: 8
 
-  Label
-    anchors.verticalCenter: prev.verticalCenter
+  HorizontalSeparator
+    id: footerSeparator
     anchors.left: parent.left
-    text: Target name:
+    anchors.right: parent.right
+    anchors.bottom: help.top
+    margin-bottom: 8
 
   VerticalScrollBar
     id: contentScroll
-    anchors.top: name.bottom
+    anchors.top: topSeparator.bottom
     anchors.right: parent.right
-    anchors.bottom: help.top
+    anchors.bottom: footerSeparator.top
     step: 28
     pixels-scroll: true
-    margin-right: -10
-    margin-top: 5
-    margin-bottom: 5
+    margin-top: 7
+    margin-bottom: 7
 
   ScrollablePanel
     id: content
-    anchors.top: name.bottom
+    anchors.top: topSeparator.bottom
     anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.bottom: help.top
+    anchors.right: contentScroll.left
+    anchors.bottom: footerSeparator.top
     vertical-scrollbar: contentScroll
-    margin-bottom: 10
+    margin-top: 7
+    margin-right: 4
+    margin-bottom: 7
 
-    Panel
-      id: left
+    Label
+      id: leftTitle
       anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.horizontalCenter
-      height: 430
-      margin-top: 5
-      margin-left: 10
-      margin-right: 10
+      margin-left: 8
+      margin-right: 6
+      height: 18
+      text-align: center
+      font: verdana-11px-rounded
+      text: Target selection
+
+    Label
+      id: rightTitle
+      anchors.top: parent.top
+      anchors.left: parent.horizontalCenter
+      anchors.right: parent.right
+      margin-left: 6
+      margin-right: 8
+      height: 18
+      text-align: center
+      font: verdana-11px-rounded
+      text: Target behaviour
+
+    FlatPanel
+      id: left
+      anchors.top: leftTitle.bottom
+      anchors.left: parent.left
+      anchors.right: parent.horizontalCenter
+      height: 446
+      margin-top: 4
+      margin-left: 8
+      margin-right: 6
+      padding-top: 3
       layout:
         type: verticalBox
         spacing: 0
 
-    Panel
+    FlatPanel
       id: right
-      anchors.top: parent.top
+      anchors.top: rightTitle.bottom
       anchors.left: parent.horizontalCenter
       anchors.right: parent.right
-      height: 430
-      margin-top: 5
-      margin-left: 10
-      margin-right: 10
+      height: 446
+      margin-top: 4
+      margin-left: 6
+      margin-right: 8
+      padding-top: 4
       layout:
         type: verticalBox
         spacing: 0
@@ -155,11 +225,11 @@ TargetBotCreatureEditorWindow < MainWindow
     anchors.bottom: parent.bottom
     anchors.right: next.left
     margin-right: 10
-    width: 60
+    width: 72
 
   Button
     id: cancel
     !text: tr('Cancel')
     anchors.bottom: parent.bottom
     anchors.right: parent.right
-    width: 60
+    width: 72

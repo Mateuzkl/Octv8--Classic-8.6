@@ -100,19 +100,27 @@ end
 
 function UIMinimap:setCrossPosition(pos)
   local cross = self.cross
+  if not pos then
+    if cross then
+      cross.pos = nil
+      cross:breakAnchors()
+    end
+    return
+  end
+
   if not self.cross then
     cross = g_ui.createWidget('MinimapCross', self)
     cross:setIcon('/images/game/minimap/cross')
     self.cross = cross
   end
 
-  pos.z = self:getCameraPosition().z
-  cross.pos = pos
-  if pos then
-    self:centerInPosition(cross, pos)
-  else
-    cross:breakAnchors()
+  local cameraPosition = self:getCameraPosition()
+  if cameraPosition then
+    pos.z = cameraPosition.z
   end
+
+  cross.pos = pos
+  self:centerInPosition(cross, pos)
 end
 
 function UIMinimap:addFlag(pos, icon, description, temporary)

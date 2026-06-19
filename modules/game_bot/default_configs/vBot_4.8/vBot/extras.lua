@@ -569,7 +569,7 @@ if true then
           guild = guild:sub(1,10) -- change to proper (last) values
           guild = guild.."..."
         end
-        local voc
+        local voc = ""
         local lowerText = text:lower()
         if lowerText:find("sorcerer") or lowerText:find("mage") then
             voc = "MS"

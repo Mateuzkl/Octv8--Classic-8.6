@@ -1338,7 +1338,9 @@ end)
 -- Recupera Holds visiveis no mapa (compatibilidade apos reload do script)
 macro(1000, function()
     if not config.enabled then return end
-    if next(WallsState.holdPoints) ~= nil then return end
+    for _ in pairs(WallsState.holdPoints) do
+        return
+    end
     if not g_map or not g_map.getTiles then return end
     local floorTiles = (type(posz) == "function" and g_map.getTiles(posz())) or {}
 

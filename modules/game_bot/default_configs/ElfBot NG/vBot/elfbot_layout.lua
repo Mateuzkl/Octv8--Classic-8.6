@@ -853,7 +853,13 @@ if rootWidget then
 
   elfWindow.creatureSpyButton.onClick = function()
     safeCall("Creature Spy", function()
-      showMessage("Creature Spy ativo pelo script spy_level.lua: use '-' e '=' para trocar o andar visivel.")
+      if ImperialElfBot_OpenCreatureSpy then
+        ImperialElfBot_OpenCreatureSpy()
+      elseif CreatureSpyController and CreatureSpyController.open then
+        CreatureSpyController.open()
+      else
+        showMessage("Creature Spy ainda nao carregou. Use '-' e '=' para trocar o andar visivel.")
+      end
     end)
   end
 
