@@ -1769,8 +1769,9 @@ end
 
 Analyzer.getLootedAmount = function(nameOrId)
   if type(nameOrId) == "number" then
-    return lootedItems[nameOrId].count or 0
-  else
+    local lootedItem = lootedItems[nameOrId]
+    return lootedItem and lootedItem.count or 0
+  elseif type(nameOrId) == "string" then
     local nameOrId = nameOrId:lower()
     for k,v in pairs(lootedItems) do
       if v.name == nameOrId then

@@ -86,6 +86,7 @@ CaveBot.Extensions.StandLure.setup = function()
             end
 
             local playerPos = player:getPosition()
+            local maxDist = storage.extras and storage.extras.gotoMaxDistance or 30
             local pathWithoutMonsters = findPath(playerPos, pos, 30, { ignoreFields = true, ignoreNonPathable = true, ignoreCreatures = true, precision = 0})
             local pathWithMonsters = findPath(playerPos, pos, maxDist, { ignoreFields = true, ignoreNonPathable = true, ignoreCreatures = false, precision = 0 })
 

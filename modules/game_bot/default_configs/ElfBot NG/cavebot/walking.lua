@@ -1,6 +1,6 @@
 -- walking
 local expectedDirs = {}
-local isWalking = {}
+local isWalking = false
 local walkPath = {}
 local walkPathIter = 0
 

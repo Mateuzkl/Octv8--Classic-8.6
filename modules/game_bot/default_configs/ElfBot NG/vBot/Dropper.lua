@@ -119,7 +119,11 @@ local function properTable(t)
     local r = {}
 
     for _, entry in pairs(t) do
-      table.insert(r, entry.id)
+      if type(entry) == "number" then
+        table.insert(r, entry)
+      elseif type(entry) == "table" and entry.id then
+        table.insert(r, entry.id)
+      end
     end
     return r
 end

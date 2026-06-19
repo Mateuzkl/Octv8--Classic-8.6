@@ -481,7 +481,7 @@ if rootWidget then
     currentSettings.MessageDelay = false
     currentSettings.Interval = true
     currentSettings.Conditions = true
-    currentSettings.name = "Profile #" .. HealBotConfig.currentBotProfile
+    currentSettings.name = "Profile #" .. HealBotConfig.currentHealBotProfile
   end
 
   -- profile buttons

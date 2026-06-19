@@ -265,12 +265,14 @@ end
 CaveBot.gotoFirstPreviousReachableWaypoint = function()
   local currentAction = ui.list:getFocusedChild()
   local currentIndex = ui.list:getChildIndex(currentAction)
-  local index = ui.list:getChildIndex(currentAction)
+  if not currentIndex then
+    return false
+  end
 
   -- check up to 100 childs
   for i=0,100 do
-    index = index - i
-    if index <= 0 or index > currentIndex or math.abs(index-currentIndex) > 100 then
+    local index = currentIndex - i
+    if index <= 0 then
       break
     end
 
