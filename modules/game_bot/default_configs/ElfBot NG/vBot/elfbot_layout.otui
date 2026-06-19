@@ -105,6 +105,14 @@ ImperialElfBotWindow < MainWindow
     size: 22 19
 
   ElfBotButton
+    id: languageButton
+    text: PT/EN
+    anchors.right: parent.right
+    anchors.top: healingButton.top
+    margin-right: 0
+    size: 62 19
+
+  ElfBotButton
     id: extrasButton
     text: Extras
     anchors.left: parent.left

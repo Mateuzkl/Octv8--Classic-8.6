@@ -48,6 +48,55 @@ local function buildBilingualTooltip(ptText, enText)
   return string.format("PT:\n%s\n\nEN:\n%s", pt, en)
 end
 
+local function normalizeElfLanguage(language)
+  language = tostring(language or ""):lower()
+  if language == "en" or language == "eng" or language == "english" then
+    return "en"
+  end
+  return "pt"
+end
+
+local function getElfLanguage()
+  if type(storage) ~= "table" then
+    return "pt"
+  end
+  storage.elfbotLanguage = normalizeElfLanguage(storage.elfbotLanguage)
+  return storage.elfbotLanguage
+end
+
+local function setElfLanguage(language)
+  if type(storage) == "table" then
+    storage.elfbotLanguage = normalizeElfLanguage(language)
+  end
+  return getElfLanguage()
+end
+
+local function picText(ptText, enText)
+  if getElfLanguage() == "en" then
+    return enText or ptText
+  end
+  return ptText
+end
+
+if type(ImperialElfBot_GetLanguage) ~= "function" then
+  function ImperialElfBot_GetLanguage()
+    return getElfLanguage()
+  end
+end
+
+if type(ImperialElfBot_SetLanguage) ~= "function" then
+  function ImperialElfBot_SetLanguage(language)
+    setElfLanguage(language)
+    if PainelDeIconesController and PainelDeIconesController.refreshLanguage then
+      pcall(PainelDeIconesController.refreshLanguage)
+    end
+    if ImperialElfBot and ImperialElfBot.refreshLanguage then
+      pcall(ImperialElfBot.refreshLanguage)
+    end
+    return getElfLanguage()
+  end
+end
+
 local function normalizeBoolFlag(value, defaultValue)
   if type(value) == "boolean" then
     return value
@@ -1783,13 +1832,35 @@ PainelDeIconesWindow < MainWindow
       anchors.top: parent.top
       anchors.right: parent.right
       margin-top: 1
-      margin-right: 102
+      margin-right: 168
       width: 110
       height: 14
       text: ""
       color: #9aa6b2
       font: verdana-11px-rounded
       text-align: right
+
+    Button
+      id: enButton
+      anchors.top: parent.top
+      anchors.right: parent.right
+      margin-top: 0
+      margin-right: 102
+      width: 30
+      height: 17
+      text: EN
+      font: verdana-11px-rounded
+
+    Button
+      id: ptButton
+      anchors.top: parent.top
+      anchors.right: enButton.left
+      margin-top: 0
+      margin-right: 3
+      width: 30
+      height: 17
+      text: PT
+      font: verdana-11px-rounded
 
     Label
       id: searchLabel
@@ -4497,6 +4568,93 @@ table.sort(categoryList, function(a, b)
   return a < b
 end)
 
+local categoryLabels = {
+  pt = {
+    Todos = "Todos",
+    Ataque = "Ataque",
+    Controle = "Controle",
+    Defesa = "Defesa",
+    Suporte = "Suporte",
+    Utilidade = "Utilidade",
+    Safety = "Safety",
+    Walls = "Walls",
+    PVP = "PVP"
+  },
+  en = {
+    Todos = "All",
+    Ataque = "Attack",
+    Controle = "Control",
+    Defesa = "Defense",
+    Suporte = "Support",
+    Utilidade = "Utility",
+    Safety = "Safety",
+    Walls = "Walls",
+    PVP = "PVP"
+  }
+}
+
+local titleLabelsEn = {
+  coletarSystem = "Collect",
+  revideSystem = "Retaliate",
+  antiPushCoin = "AntiPush",
+  exetaRes = "Exeta Res"
+}
+
+local function categoryDisplayName(categoryName)
+  local language = getElfLanguage()
+  local labels = categoryLabels[language] or categoryLabels.pt
+  return labels[categoryName] or categoryName
+end
+
+local function categoryFromDisplay(displayName)
+  local text = tostring(displayName or "")
+  for internalName, translatedName in pairs(categoryLabels.en) do
+    if text == translatedName then
+      return internalName
+    end
+  end
+  for internalName, translatedName in pairs(categoryLabels.pt) do
+    if text == translatedName then
+      return internalName
+    end
+  end
+  return text ~= "" and text or "Todos"
+end
+
+local function isKnownCategory(categoryName)
+  if categoryName == "Todos" then
+    return true
+  end
+  return categories[categoryName] == true
+end
+
+local function moduleDisplayTitle(definition)
+  if not definition then
+    return ""
+  end
+  if getElfLanguage() == "en" then
+    return titleLabelsEn[definition.key] or definition.enTitle or definition.title
+  end
+  return definition.ptTitle or definition.title
+end
+
+local function moduleDisplayDescription(definition)
+  if not definition then
+    return ""
+  end
+  if getElfLanguage() == "en" then
+    return definition.enDescription or ("Configure " .. moduleDisplayTitle(definition) .. ".")
+  end
+  return definition.description or moduleDisplayTitle(definition)
+end
+
+local function setupMetaText(definition, itemId)
+  if getElfLanguage() == "en" then
+    return string.format("Category: %s | Current icon ID: %d", categoryDisplayName(definition.category), itemId)
+  end
+  return string.format("Categoria: %s | Icon atual ID: %d", categoryDisplayName(definition.category), itemId)
+end
+
 local function defaultFromField(field)
   if field.default ~= nil then
     return deepcopy(field.default)
@@ -4850,9 +5008,9 @@ local function updateRowVisual(moduleKey)
   if row.iconItem and row.iconItem.setItemId then
     row.iconItem:setItemId(moduleState.iconItemId)
   end
-  local captionPreview = moduleState.iconText ~= "" and moduleState.iconText or "padrao automatico"
+  local captionPreview = moduleState.iconText ~= "" and moduleState.iconText or picText("padrao automatico", "automatic default")
   local ptTooltip = string.format("%s\nItem ID atual: %d\nTexto do icone: %s", definition.description, moduleState.iconItemId, captionPreview)
-  local enTooltip = string.format("Module: %s\nCurrent item ID: %d\nIcon text: %s", definition.title, moduleState.iconItemId, captionPreview)
+  local enTooltip = string.format("Module: %s\nCurrent item ID: %d\nIcon text: %s", moduleDisplayTitle(definition), moduleState.iconItemId, captionPreview)
   if definition.key == "guildPotHelper" then
     local p = moduleState.params or {}
     local trigger = tostring(p.requestTrigger or "pt")
@@ -4890,10 +5048,10 @@ local function updateRowVisual(moduleKey)
   row:setTooltip(buildBilingualTooltip(ptTooltip, enTooltip))
 
   if moduleState.showIcon then
-    row.statusLabel:setText("SHOW")
+    row.statusLabel:setText(picText("SHOW", "SHOW"))
     row.statusLabel:setColor("#22c55e")
   else
-    row.statusLabel:setText("HIDE")
+    row.statusLabel:setText(picText("HIDE", "HIDE"))
     row.statusLabel:setColor("#ef4444")
   end
 
@@ -5129,7 +5287,10 @@ local function moduleMatches(definition, query, category)
   local pool = {
     definition.title,
     definition.category,
+    moduleDisplayTitle(definition),
+    categoryDisplayName(definition.category),
     definition.description,
+    moduleDisplayDescription(definition),
     tostring(definition.iconId),
     tostring(moduleState.iconItemId),
     moduleState.iconText
@@ -5272,7 +5433,7 @@ updateToggleAllVisibilityButton = function()
     return
   end
   local allHidden = areAllIconsHidden()
-  button:setText(allHidden and "Mostrar todos" or "Ocultar todos")
+  button:setText(allHidden and picText("Mostrar todos", "Show all") or picText("Ocultar todos", "Hide all"))
 end
 
 local function setAllIconsVisibility(visible)
@@ -5512,7 +5673,7 @@ local function saveSetupValues()
         fieldRef.widget:setText(tostring(moduleState.iconItemId))
       end
       if setupWindow and setupWindow.header and setupWindow.header.metaLabel then
-        setupWindow.header.metaLabel:setText(string.format("Categoria: %s | Icon atual ID: %d", definition.category, moduleState.iconItemId))
+        setupWindow.header.metaLabel:setText(setupMetaText(definition, moduleState.iconItemId))
       end
       updateRowVisual(definition.key)
       updateIconVisual(definition.key)
@@ -6144,14 +6305,14 @@ local function openSetup(definition)
   local moduleState = ensureModuleState(definition)
   state.currentSetupKey = definition.key
 
-  setupWindow.header.titleLabel:setText(definition.title)
-  setupWindow.header.metaLabel:setText(string.format("Categoria: %s | Icon atual ID: %d", definition.category, moduleState.iconItemId))
-  setupWindow.header.descriptionLabel:setText(definition.description)
+  setupWindow.header.titleLabel:setText(moduleDisplayTitle(definition))
+  setupWindow.header.metaLabel:setText(setupMetaText(definition, moduleState.iconItemId))
+  setupWindow.header.descriptionLabel:setText(moduleDisplayDescription(definition))
 
   clearSetupRows()
 
   local showIconRow = g_ui.createWidget("PICSetupCheckRow", setupWindow.contentPanel.setupList)
-  showIconRow.check:setText("Mostrar icone na tela")
+  showIconRow.check:setText(picText("Mostrar icone na tela", "Show icon on screen"))
   showIconRow.check:setChecked(moduleState.showIcon == true)
   table.insert(state.setupFields, {
     field = {id = "__showIcon", type = "bool"},
@@ -6159,14 +6320,14 @@ local function openSetup(definition)
   })
 
   local iconIdentityRow = g_ui.createWidget("PICSetupIconIdentityRow", setupWindow.contentPanel.setupList)
-  iconIdentityRow.label:setText("Icone")
+  iconIdentityRow.label:setText(picText("Icone", "Icon"))
   iconIdentityRow.edit:setText(moduleState.iconText or "")
   iconIdentityRow.item:setItemId(moduleState.iconItemId)
   iconIdentityRow.item.onItemChange = function(widget)
     local newId = clamp(tonumber(widget:getItemId()) or definition.iconId, 100, 50000)
     moduleState.iconItemId = newId
     if setupWindow and setupWindow.header and setupWindow.header.metaLabel then
-      setupWindow.header.metaLabel:setText(string.format("Categoria: %s | Icon atual ID: %d", definition.category, newId))
+      setupWindow.header.metaLabel:setText(setupMetaText(definition, newId))
     end
     updateRowVisual(definition.key)
     updateIconVisual(definition.key)
@@ -6241,12 +6402,12 @@ local function createRow(definition)
   if row.iconItem.setEditable then
     row.iconItem:setEditable(false)
   end
-  row.nameLabel:setText(definition.title)
-  row.categoryLabel:setText(definition.category)
+  row.nameLabel:setText(moduleDisplayTitle(definition))
+  row.categoryLabel:setText(categoryDisplayName(definition.category))
   row.hintLabel:setText("")
-  local captionPreview = moduleState.iconText ~= "" and moduleState.iconText or "padrao automatico"
+  local captionPreview = moduleState.iconText ~= "" and moduleState.iconText or picText("padrao automatico", "automatic default")
   local ptTooltip = string.format("%s\nItem ID atual: %d\nTexto do icone: %s", definition.description, moduleState.iconItemId, captionPreview)
-  local enTooltip = string.format("Module: %s\nCurrent item ID: %d\nIcon text: %s", definition.title, moduleState.iconItemId, captionPreview)
+  local enTooltip = string.format("Module: %s\nCurrent item ID: %d\nIcon text: %s", moduleDisplayTitle(definition), moduleState.iconItemId, captionPreview)
   if definition.key == "guildPotHelper" then
     local p = moduleState.params or {}
     local trigger = tostring(p.requestTrigger or "pt")
@@ -6550,23 +6711,113 @@ state.runners.__externalSync = macro(500, function()
   end
 end)
 
+local function setLanguageButtonState(button, active)
+  if not button then
+    return
+  end
+  if button.setColor then
+    button:setColor(active and "#22c55e" or "#dbe8f5")
+  end
+end
+
+local function refreshLanguageButtons()
+  local header = mainWindow and mainWindow.header
+  if not header then
+    return
+  end
+  local language = getElfLanguage()
+  setLanguageButtonState(header.ptButton, language == "pt")
+  setLanguageButtonState(header.enButton, language == "en")
+  if header.ptButton and header.ptButton.setTooltip then
+    header.ptButton:setTooltip("PT: Mostrar interface em portugues.\nEN: Show interface in Portuguese.")
+  end
+  if header.enButton and header.enButton.setTooltip then
+    header.enButton:setTooltip("PT: Mostrar interface em ingles.\nEN: Show interface in English.")
+  end
+end
+
+local function rebuildCategoryCombo()
+  local combo = mainWindow and mainWindow.header and mainWindow.header.categoryCombo
+  if not combo then
+    return
+  end
+
+  combo:clearOptions()
+  for _, categoryName in ipairs(categoryList) do
+    combo:addOption(categoryDisplayName(categoryName), categoryName)
+  end
+
+  if not isKnownCategory(panelStorage.ui.category) then
+    panelStorage.ui.category = "Todos"
+  end
+  combo:setCurrentOption(categoryDisplayName(panelStorage.ui.category), true)
+end
+
+local function refreshPainelLanguage()
+  if mainWindow and mainWindow.setText then
+    mainWindow:setText(picText("Painel de Icones", "Icon Panel"))
+  end
+
+  local header = mainWindow and mainWindow.header
+  if header then
+    if header.searchLabel then header.searchLabel:setText(picText("Busca:", "Search:")) end
+    if header.categoryLabel then header.categoryLabel:setText(picText("Categoria:", "Category:")) end
+  end
+
+  local footer = mainWindow and mainWindow.footer
+  if footer then
+    if footer.clearFilterButton then footer.clearFilterButton:setText(picText("Limpar filtros", "Clear filters")) end
+    if footer.helpButton then footer.helpButton:setText(picText("Ajuda", "Help")) end
+    if footer.closeButton then footer.closeButton:setText(picText("Fechar", "Close")) end
+    if footer.hintLabel then footer.hintLabel:setText(picText("E: show | D: setup", "L: show | R: setup")) end
+  end
+
+  if setupWindow and setupWindow.setText then
+    setupWindow:setText(picText("Setup de Icone", "Icon Setup"))
+  end
+
+  for _, definition in ipairs(moduleDefinitions) do
+    local row = state.rows[definition.key]
+    if row then
+      row.nameLabel:setText(moduleDisplayTitle(definition))
+      row.categoryLabel:setText(categoryDisplayName(definition.category))
+      updateRowVisual(definition.key)
+    end
+  end
+
+  local currentDefinition = definitionsByKey[state.currentSetupKey]
+  if currentDefinition and setupWindow and setupWindow.header then
+    local moduleState = ensureModuleState(currentDefinition)
+    setupWindow.header.titleLabel:setText(moduleDisplayTitle(currentDefinition))
+    setupWindow.header.metaLabel:setText(setupMetaText(currentDefinition, moduleState.iconItemId))
+    setupWindow.header.descriptionLabel:setText(moduleDisplayDescription(currentDefinition))
+  end
+
+  rebuildCategoryCombo()
+  refreshLanguageButtons()
+  updateToggleAllVisibilityButton()
+  applyFilters()
+
+  if state.openButton and state.openButton.setText then
+    state.openButton:setText(picText("Painel de Icones", "Icon Panel"))
+  end
+
+  return getElfLanguage()
+end
+
 mainWindow.header.searchEdit:setText(panelStorage.ui.search or "")
 mainWindow.header.searchEdit.onTextChange = function(widget, text)
   panelStorage.ui.search = text or ""
   applyFilters()
 end
 
-mainWindow.header.categoryCombo:clearOptions()
-for _, categoryName in ipairs(categoryList) do
-  mainWindow.header.categoryCombo:addOption(categoryName, categoryName)
-end
-
-if not mainWindow.header.categoryCombo:isOption(panelStorage.ui.category) then
-  panelStorage.ui.category = "Todos"
-end
-mainWindow.header.categoryCombo:setCurrentOption(panelStorage.ui.category, true)
+rebuildCategoryCombo()
 mainWindow.header.categoryCombo.onOptionChange = function(widget, text)
-  panelStorage.ui.category = text or "Todos"
+  local option = widget.getCurrentOption and widget:getCurrentOption() or nil
+  panelStorage.ui.category = (option and option.data) or categoryFromDisplay(text)
+  if not isKnownCategory(panelStorage.ui.category) then
+    panelStorage.ui.category = "Todos"
+  end
   applyFilters()
 end
 
@@ -6574,8 +6825,20 @@ mainWindow.footer.clearFilterButton.onClick = function()
   panelStorage.ui.search = ""
   panelStorage.ui.category = "Todos"
   mainWindow.header.searchEdit:setText("")
-  mainWindow.header.categoryCombo:setCurrentOption("Todos", true)
+  mainWindow.header.categoryCombo:setCurrentOption(categoryDisplayName("Todos"), true)
   applyFilters()
+end
+
+if mainWindow.header.ptButton then
+  mainWindow.header.ptButton.onClick = function()
+    ImperialElfBot_SetLanguage("pt")
+  end
+end
+
+if mainWindow.header.enButton then
+  mainWindow.header.enButton.onClick = function()
+    ImperialElfBot_SetLanguage("en")
+  end
 end
 
 mainWindow.footer.toggleAllVisibilityButton.onClick = function()
@@ -6588,7 +6851,7 @@ if mainWindow.footer.helpButton then
     mainWindow.footer.helpButton:setTooltip("PT: Abre tutorial rapido do Painel de Icones.\nEN: Open quick Icon Panel tutorial.")
   end
   mainWindow.footer.helpButton.onClick = function()
-    openTutorialWindow("Tutorial - Painel de Icones", buildPainelTutorialText())
+    openTutorialWindow(picText("Tutorial - Painel de Icones", "Tutorial - Icon Panel"), buildPainelTutorialText())
   end
 end
 
@@ -6616,6 +6879,7 @@ local openButton = UI.Button("Painel de Icones", function()
   mainWindow:raise()
   mainWindow:focus()
 end)
+state.openButton = openButton
 if openButton then
   if openButton.setFont then
     openButton:setFont("verdana-11px-rounded")
@@ -6624,7 +6888,7 @@ end
 
 updateToggleAllVisibilityButton()
 
-applyFilters()
+refreshPainelLanguage()
 
 PainelDeIconesController = {
   state = state,
@@ -6644,6 +6908,13 @@ PainelDeIconesController = {
       mainWindow:raise()
       mainWindow:focus()
     end
+  end,
+  refreshLanguage = refreshPainelLanguage,
+  setLanguage = function(language)
+    return ImperialElfBot_SetLanguage(language)
+  end,
+  getLanguage = function()
+    return getElfLanguage()
   end,
   shutdown = function()
     closeTutorialWindow()

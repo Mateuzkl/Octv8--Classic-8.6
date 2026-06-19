@@ -48,6 +48,49 @@ local function showMessage(text)
   end
 end
 
+local function normalizeElfLanguage(language)
+  language = tostring(language or ""):lower()
+  if language == "en" or language == "eng" or language == "english" then
+    return "en"
+  end
+  return "pt"
+end
+
+local function getElfLanguage()
+  if type(storage) ~= "table" then
+    return "pt"
+  end
+  storage.elfbotLanguage = normalizeElfLanguage(storage.elfbotLanguage)
+  return storage.elfbotLanguage
+end
+
+local function elfText(ptText, enText)
+  if getElfLanguage() == "en" then
+    return enText or ptText
+  end
+  return ptText
+end
+
+function ImperialElfBot_GetLanguage()
+  return getElfLanguage()
+end
+
+function ImperialElfBot_SetLanguage(language)
+  if type(storage) == "table" then
+    storage.elfbotLanguage = normalizeElfLanguage(language)
+  end
+
+  if ImperialElfBot and ImperialElfBot.refreshLanguage then
+    pcall(ImperialElfBot.refreshLanguage)
+  end
+  if PainelDeIconesController and PainelDeIconesController.refreshLanguage then
+    pcall(PainelDeIconesController.refreshLanguage)
+  end
+
+  showMessage(elfText("ElfBot: idioma alterado para PT.", "ElfBot: language changed to EN."))
+  return getElfLanguage()
+end
+
 local function tryTab(tabName)
   if setDefaultTab then
     pcall(setDefaultTab, tabName)
@@ -708,6 +751,61 @@ if rootWidget then
       showMessage(ImperialElfBot.locked and "ElfBot NG: janela travada." or "ElfBot NG: janela destravada.")
     end
   end
+
+  local function refreshElfWindowLanguage()
+    if not elfWindow or (elfWindow.isDestroyed and elfWindow:isDestroyed()) then
+      return
+    end
+
+    local buttonTexts = {
+      healingButton = {"Healing", "Healing"},
+      aimbotButton = {"Aimbot", "Aimbot"},
+      listsButton = {"Listas", "Lists"},
+      hudButton = {"HUD", "HUD"},
+      extrasButton = {"Extras", "Extras"},
+      hotkeysButton = {"Hotkeys", "Hotkeys"},
+      shortkeysButton = {"Shortkeys", "Shortkeys"},
+      reconnectButton = {"Reconectar", "Reconnect"},
+      saveButton = {"Salvar", "Save"},
+      customButton = {"Custom", "Custom"},
+      cavebotButton = {"Cavebot", "Cavebot"},
+      navigationButton = {"Navegacao", "Navigation"},
+      linksButton = {"Links", "Links"},
+      creatureSpyButton = {"Creature Spy", "Creature Spy"},
+      loadButton = {"Carregar", "Load"},
+      helpButton = {"Ajuda", "Help"},
+      targetingButton = {"Targeting", "Targeting"},
+      proxyButton = {"Proxy", "Proxy"},
+      iconsButton = {"Icones", "Icons"},
+      pvpButton = {"PVP", "PVP"}
+    }
+
+    for id, labels in pairs(buttonTexts) do
+      local button = elfWindow[id]
+      if button and button.setText then
+        button:setText(elfText(labels[1], labels[2]))
+      end
+    end
+
+    if elfWindow.languageButton then
+      elfWindow.languageButton:setText(getElfLanguage() == "en" and "EN/PT" or "PT/EN")
+      if elfWindow.languageButton.setTooltip then
+        elfWindow.languageButton:setTooltip("PT: Trocar idioma do ElfBot para portugues/ingles.\nEN: Switch ElfBot language between Portuguese/English.")
+      end
+    end
+  end
+
+  ImperialElfBot.refreshLanguage = refreshElfWindowLanguage
+  ImperialElfBot.setLanguage = ImperialElfBot_SetLanguage
+  ImperialElfBot.getLanguage = getElfLanguage
+
+  if elfWindow.languageButton then
+    elfWindow.languageButton.onClick = function()
+      ImperialElfBot_SetLanguage(getElfLanguage() == "en" and "pt" or "en")
+    end
+  end
+
+  refreshElfWindowLanguage()
 
   elfWindow.healingButton.onClick = function()
     safeCall("Healing", function()
