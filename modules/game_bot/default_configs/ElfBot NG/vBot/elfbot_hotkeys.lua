@@ -452,7 +452,11 @@ local function stopEntry(entryId)
   local events = hotkeyEvents[entryId]
   if events then
     for _, event in pairs(events) do
-      removeEvent(event)
+      if type(event) == "table" and type(event.setOff) == "function" then
+        event.setOff()
+      else
+        removeEvent(event)
+      end
     end
   end
   hotkeyEvents[entryId] = nil
@@ -474,21 +478,24 @@ local function scheduleEntryCommand(entryId, interval, condition, action)
   local scheduleId = nextScheduleId
   hotkeyEvents[entryId] = hotkeyEvents[entryId] or {}
 
-  local function loop()
+  local runner
+  runner = macro(interval, function()
     if not isEntryRunning(entryId) then
-      return
+      runner.setOff()
+      return true
     end
-    pcall(function()
+    local ok, err = pcall(function()
       if g_game.isOnline() and evalCondition(condition) then
         executeCommand(action)
       end
     end)
-    if isEntryRunning(entryId) then
-      hotkeyEvents[entryId][scheduleId] = scheduleEvent(loop, interval)
+    if not ok then
+      elfHotkeysLog("warning", "[ElfBot Hotkeys] Script error: " .. tostring(err))
     end
-  end
+    return true
+  end)
 
-  hotkeyEvents[entryId][scheduleId] = scheduleEvent(loop, interval)
+  hotkeyEvents[entryId][scheduleId] = runner
 end
 
 local function startEntry(entry)
@@ -611,9 +618,8 @@ local function scriptPreview(script)
 end
 
 local function setCaptureHint(text)
-  if elfHotkeysWindow and elfHotkeysWindow.footer and elfHotkeysWindow.footer.status then
-    elfHotkeysWindow.footer.status:setText(text)
-    elfHotkeysWindow.footer.status:setColor("#f4cd50")
+  if elfHotkeysWindow and elfHotkeysWindow.header and elfHotkeysWindow.header.captureLabel then
+    elfHotkeysWindow.header.captureLabel:setText(text)
   end
 end
 
@@ -662,6 +668,7 @@ local function createRow(entry)
   row.enabled:setChecked(entry.enabled)
   row.keyButton:setText(entry.hotkey ~= "" and entry.hotkey or hotkeyText("Definir tecla", "Set key"))
   row.name:setText(entry.name)
+  row.script:setText(scriptPreview(entry.script))
   row.enabled.onClick = function()
     setEntryEnabled(entry.id, not entry.enabled)
     return true
@@ -676,7 +683,44 @@ local function createRow(entry)
   row.name.onFocusChange = function(_, focused)
     if focused then
       selectedEntryId = entry.id
+    else
+      saveConfig()
     end
+  end
+  row.script.onTextChange = function(_, text)
+    entry.script = tostring(text or "")
+  end
+  row.script.onFocusChange = function(_, focused)
+    if focused then
+      selectedEntryId = entry.id
+      return
+    end
+    if entry.enabled and hotkeysConfig.enabled then
+      startEntry(entry)
+    end
+    saveConfig()
+  end
+  row.editButton:setText(hotkeyText("Editar", "Edit"))
+  row.editButton.onClick = function()
+    selectedEntryId = entry.id
+    editScript(entry)
+    return true
+  end
+  row.removeButton.onClick = function()
+    unbindEntry(entry)
+    stopEntry(entry.id)
+    for index, candidate in ipairs(hotkeysConfig.entries) do
+      if candidate.id == entry.id then
+        table.remove(hotkeysConfig.entries, index)
+        break
+      end
+    end
+    if selectedEntryId == entry.id then
+      selectedEntryId = nil
+    end
+    saveConfig()
+    if refreshWindow then refreshWindow() end
+    return true
   end
   row.onMousePress = function()
     selectedEntryId = entry.id
@@ -687,13 +731,19 @@ end
 refreshWindow = function()
   if not elfHotkeysWindow then return end
   elfHotkeysWindow:setText(hotkeyText("Hotkeys Personalizadas", "Custom Hotkeys"))
-  elfHotkeysWindow.header.listLabel:setText(hotkeyText("Lista de Hotkeys", "Hotkey List"))
   elfHotkeysWindow.header.masterEnabled:setText(hotkeyText("Hotkeys ligadas", "Hotkeys enabled"))
   elfHotkeysWindow.header.persistent:setText(hotkeyText("Persistente", "Persistent"))
-  elfHotkeysWindow.header.editButton:setText(hotkeyText("Editar", "Edit"))
   elfHotkeysWindow.header.addButton:setText(hotkeyText("Criar Hotkey", "Create Hotkey"))
+  elfHotkeysWindow.columnHeader.stateHeader:setText(hotkeyText("Lig.", "On"))
+  elfHotkeysWindow.columnHeader.nameHeader:setText(hotkeyText("Nome", "Name"))
+  elfHotkeysWindow.columnHeader.scriptHeader:setText("Script")
+  elfHotkeysWindow.footer.saveButton:setText(hotkeyText("Salvar", "Save"))
+  elfHotkeysWindow.footer.closeButton:setText(hotkeyText("Fechar", "Close"))
   elfHotkeysWindow.header.masterEnabled:setChecked(hotkeysConfig.enabled)
   elfHotkeysWindow.header.persistent:setChecked(hotkeysConfig.persistent)
+  if not captureEntryId then
+    setCaptureHint(hotkeyText("Clique no campo da tecla e depois pressione uma tecla.", "Click a key field, then press a key."))
+  end
   elfHotkeysWindow.hotkeyList:destroyChildren()
   hotkeyRows = {}
   for _, entry in ipairs(hotkeysConfig.entries) do
@@ -736,17 +786,15 @@ function elfHotkeysInit()
   elfHotkeysWindow = g_ui.createWidget("ElfHotkeysWindow", rootWidget)
   elfHotkeysWindow:hide()
 
-  elfHotkeysWindow.closeButton.onClick = elfHotkeysClose
-  elfHotkeysWindow.header.editButton.onClick = function()
-    local entry = getEntry(selectedEntryId) or hotkeysConfig.entries[1]
-    if entry then
-      selectedEntryId = entry.id
-      editScript(entry)
-    else
-      addHotkey()
-    end
+  elfHotkeysWindow.titleCloseButton.onClick = function()
+    elfHotkeysClose()
     return true
   end
+  elfHotkeysWindow.footer.closeButton.onClick = function()
+    elfHotkeysClose()
+    return true
+  end
+  elfHotkeysWindow.footer.saveButton.onClick = elfHotkeysSave
   elfHotkeysWindow.header.addButton.onClick = function()
     addHotkey()
   end

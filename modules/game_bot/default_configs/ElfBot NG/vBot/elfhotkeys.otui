@@ -10,7 +10,7 @@ ElfHotkeysCloseButton < UIButton
     image-clip: 29 29 12 12
 
 ElfHotkeyRow < Panel
-  height: 30
+  height: 34
   margin-left: 2
   margin-right: 2
 
@@ -25,30 +25,56 @@ ElfHotkeyRow < Panel
     id: keyButton
     anchors.left: enabled.right
     anchors.verticalCenter: parent.verticalCenter
-    margin-left: 4
-    width: 46
-    height: 20
+    margin-left: 5
+    width: 76
+    height: 22
     text: Set key
 
   TextEdit
     id: name
     anchors.left: keyButton.right
+    anchors.verticalCenter: parent.verticalCenter
+    margin-left: 5
+    width: 156
+    height: 22
+    text-align: left
+
+  TextEdit
+    id: script
+    anchors.left: name.right
+    anchors.right: editButton.left
+    anchors.verticalCenter: parent.verticalCenter
+    margin-left: 5
+    margin-right: 5
+    height: 22
+    text-align: left
+
+  Button
+    id: editButton
+    anchors.right: removeButton.left
+    anchors.verticalCenter: parent.verticalCenter
+    margin-right: 5
+    width: 46
+    height: 22
+    text: Edit
+
+  Button
+    id: removeButton
     anchors.right: parent.right
     anchors.verticalCenter: parent.verticalCenter
-    margin-left: 4
-    margin-right: 3
-    height: 20
-    text-align: left
+    width: 24
+    height: 22
+    text: X
 
 ElfHotkeysWindow < MainWindow
   id: elfHotkeysWindow
   text: Custom Hotkeys
-  size: 520 430
+  size: 770 540
   visible: false
   @onEscape: self:hide()
 
   ElfHotkeysCloseButton
-    id: closeButton
+    id: titleCloseButton
     anchors.top: parent.top
     anchors.right: parent.right
     margin-top: -29
@@ -59,60 +85,43 @@ ElfHotkeysWindow < MainWindow
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 46
-
-    Label
-      id: listLabel
-      anchors.top: parent.top
-      anchors.left: parent.left
-      height: 16
-      text: Hotkey List
-      color: #d7dce1
-      font: verdana-11px-rounded
+    height: 50
 
     CheckBox
       id: masterEnabled
-      anchors.top: listLabel.bottom
+      anchors.top: parent.top
       anchors.left: parent.left
-      margin-top: 2
-      width: 132
+      width: 150
       height: 20
       text: Hotkeys enabled
 
     CheckBox
       id: persistent
-      anchors.top: listLabel.bottom
+      anchors.top: parent.top
       anchors.left: masterEnabled.right
       margin-left: 10
-      margin-top: 2
-      width: 76
+      width: 100
       height: 20
       text: Persistent
 
     Button
-      id: editButton
-      anchors.top: listLabel.bottom
-      anchors.left: persistent.right
-      margin-left: 10
-      margin-top: 2
-      width: 58
-      height: 22
-      text: Edit
-
-    Button
       id: addButton
-      anchors.top: listLabel.bottom
-      anchors.left: editButton.right
-      margin-left: 10
-      margin-top: 2
-      width: 106
-      height: 22
+      anchors.top: parent.top
+      anchors.right: parent.right
+      width: 132
+      height: 24
       text: Create Hotkey
 
     Label
       id: captureLabel
-      visible: false
+      anchors.top: masterEnabled.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 6
+      height: 16
       text: Click a key field, then press a key.
+      color: #d7dce1
+      font: verdana-11px-rounded
 
   HorizontalSeparator
     anchors.top: header.bottom
@@ -120,22 +129,57 @@ ElfHotkeysWindow < MainWindow
     anchors.right: parent.right
     margin-top: 4
 
+  Panel
+    id: columnHeader
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 20
+    margin-top: 4
+
+    Label
+      id: stateHeader
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+      width: 106
+      text: On
+      color: #d7dce1
+      font: verdana-11px-rounded
+
+    Label
+      id: nameHeader
+      anchors.left: prev.right
+      anchors.verticalCenter: parent.verticalCenter
+      width: 156
+      text: Name
+      color: #d7dce1
+      font: verdana-11px-rounded
+
+    Label
+      id: scriptHeader
+      anchors.left: prev.right
+      anchors.verticalCenter: parent.verticalCenter
+      text: Script
+      color: #d7dce1
+      font: verdana-11px-rounded
+
   VerticalScrollBar
     id: hotkeyScroll
-    anchors.top: prev.bottom
+    anchors.top: columnHeader.bottom
     anchors.right: parent.right
     anchors.bottom: footer.top
     margin-top: 4
     margin-bottom: 4
-    step: 30
+    step: 34
     pixels-scroll: true
 
   ScrollablePanel
     id: hotkeyList
-    anchors.top: prev.top
+    anchors.top: columnHeader.bottom
     anchors.left: parent.left
     anchors.right: hotkeyScroll.left
     anchors.bottom: footer.top
+    margin-top: 4
     margin-right: 4
     margin-bottom: 4
     background-color: #4e4e4e
@@ -148,20 +192,38 @@ ElfHotkeysWindow < MainWindow
     vertical-scrollbar: hotkeyScroll
     layout:
       type: verticalBox
-      spacing: 1
+      spacing: 2
 
   Panel
     id: footer
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    height: 24
+    height: 26
 
     Label
       id: status
       anchors.left: parent.left
-      anchors.right: parent.right
+      anchors.right: saveButton.left
       anchors.verticalCenter: parent.verticalCenter
+      margin-right: 8
       text: Disabled
       color: #ff5555
       font: verdana-11px-rounded
+
+    Button
+      id: saveButton
+      anchors.right: closeButton.left
+      anchors.verticalCenter: parent.verticalCenter
+      margin-right: 6
+      width: 78
+      height: 22
+      text: Save
+
+    Button
+      id: closeButton
+      anchors.right: parent.right
+      anchors.verticalCenter: parent.verticalCenter
+      width: 78
+      height: 22
+      text: Close
