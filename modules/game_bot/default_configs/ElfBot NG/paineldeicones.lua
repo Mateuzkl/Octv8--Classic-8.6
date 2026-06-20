@@ -1,5 +1,7 @@
 setDefaultTab("Main")
 
+ImperialElfBot = ImperialElfBot or {}
+
 if PainelDeIconesController and PainelDeIconesController.shutdown then
   PainelDeIconesController.shutdown()
 end
@@ -1026,18 +1028,9 @@ sanitizeStorageRootRecursive("swapSetProfiles")
 sanitizeStorageRootRecursive("ringAmuletSetup")
 sanitizeStorageRootRecursive("analyzer")
 
-local isAttackEnabledExternal
-local isHpToolsEnabledExternal
-local isFollowEnabledExternal
-local isNavigationEnabledExternal
-local isPvpEnabledExternal
-local isRingEnabledExternal
-local isAmuletEnabledExternal
-local isSwapSetEnabledExternal
-
 local function setAttackEnabledExternal(enabled)
   local turnOn = enabled == true
-  if isAttackEnabledExternal() == turnOn then
+  if ImperialElfBot.isAttackEnabledExternal() == turnOn then
     if type(storage.novoAtkUltraSafe) ~= "table" then
       storage.novoAtkUltraSafe = {}
     end
@@ -1064,7 +1057,7 @@ local function setAttackEnabledExternal(enabled)
   return true
 end
 
-isAttackEnabledExternal = function()
+ImperialElfBot.isAttackEnabledExternal = function()
   local cfg = storage.novoAtkUltraSafe
   if type(cfg) ~= "table" then
     return false
@@ -1077,7 +1070,7 @@ end
 
 local function setHpToolsEnabledExternal(enabled)
   local turnOn = enabled == true
-  if isHpToolsEnabledExternal() == turnOn and normalizeBoolFlag(storage.toolsEnabled, false) == turnOn then
+  if ImperialElfBot.isHpToolsEnabledExternal() == turnOn and normalizeBoolFlag(storage.toolsEnabled, false) == turnOn then
     storage.healingSystemEnabled = turnOn
     storage.toolsEnabled = turnOn
     return true
@@ -1094,13 +1087,13 @@ local function setHpToolsEnabledExternal(enabled)
   return true
 end
 
-isHpToolsEnabledExternal = function()
+ImperialElfBot.isHpToolsEnabledExternal = function()
   return normalizeBoolFlag(storage.healingSystemEnabled, false)
 end
 
 local function setFollowEnabledExternal(enabled)
   local turnOn = enabled == true
-  if isFollowEnabledExternal() == turnOn then
+  if ImperialElfBot.isFollowEnabledExternal() == turnOn then
     return true
   end
 
@@ -1133,7 +1126,7 @@ local function setFollowEnabledExternal(enabled)
   return true
 end
 
-isFollowEnabledExternal = function()
+ImperialElfBot.isFollowEnabledExternal = function()
   local controllerState = readExternalToggleState("NovoFollowController")
   if type(controllerState) == "boolean" then
     return controllerState
@@ -1157,7 +1150,7 @@ end
 
 local function setNavigationEnabledExternal(enabled)
   local turnOn = enabled == true
-  if isNavigationEnabledExternal() == turnOn then
+  if ImperialElfBot.isNavigationEnabledExternal() == turnOn then
     if type(storage.novoFollow) == "table" then
       if turnOn then
         storage.novoFollow.enabled = true
@@ -1204,7 +1197,7 @@ local function setNavigationEnabledExternal(enabled)
   return true
 end
 
-isNavigationEnabledExternal = function()
+ImperialElfBot.isNavigationEnabledExternal = function()
   local controllerState = readExternalToggleState("NovoNavController")
   if type(controllerState) == "boolean" then
     return controllerState
@@ -1223,7 +1216,7 @@ end
 
 local function setPvpEnabledExternal(enabled)
   local turnOn = enabled == true
-  if isPvpEnabledExternal() == turnOn then
+  if ImperialElfBot.isPvpEnabledExternal() == turnOn then
     return true
   end
 
@@ -1242,7 +1235,7 @@ local function setPvpEnabledExternal(enabled)
   return true
 end
 
-isPvpEnabledExternal = function()
+ImperialElfBot.isPvpEnabledExternal = function()
   local controllerState = readExternalToggleState("PvpSystemController")
   if type(controllerState) == "boolean" then
     return controllerState
@@ -1280,7 +1273,7 @@ end
 
 local function setRingEnabledExternal(enabled)
   local turnOn = enabled == true
-  if isRingEnabledExternal() == turnOn then
+  if ImperialElfBot.isRingEnabledExternal() == turnOn then
     local cfg = ensureRingAmuletSetup()
     cfg.ringsEnabled = turnOn
     cfg.enabled = cfg.ringsEnabled or cfg.amuletsEnabled
@@ -1296,7 +1289,7 @@ local function setRingEnabledExternal(enabled)
   return true
 end
 
-isRingEnabledExternal = function()
+ImperialElfBot.isRingEnabledExternal = function()
   local controllerState = readExternalToggleState("RingModuleController")
   if type(controllerState) == "boolean" then
     return controllerState
@@ -1307,7 +1300,7 @@ end
 
 local function setAmuletEnabledExternal(enabled)
   local turnOn = enabled == true
-  if isAmuletEnabledExternal() == turnOn then
+  if ImperialElfBot.isAmuletEnabledExternal() == turnOn then
     local cfg = ensureRingAmuletSetup()
     cfg.amuletsEnabled = turnOn
     cfg.enabled = cfg.ringsEnabled or cfg.amuletsEnabled
@@ -1323,7 +1316,7 @@ local function setAmuletEnabledExternal(enabled)
   return true
 end
 
-isAmuletEnabledExternal = function()
+ImperialElfBot.isAmuletEnabledExternal = function()
   local controllerState = readExternalToggleState("AmuletModuleController")
   if type(controllerState) == "boolean" then
     return controllerState
@@ -1347,7 +1340,7 @@ end
 local function setSwapSetEnabledExternal(enabled)
   local turnOn = enabled == true
   local cfg = getSwapSetConfigRef()
-  if isSwapSetEnabledExternal() == turnOn then
+  if ImperialElfBot.isSwapSetEnabledExternal() == turnOn then
     cfg.autoSwapEnabled = turnOn
     local controller = resolveGlobal("SwapSetController")
     if type(controller) == "table" and type(controller.refresh) == "function" then
@@ -1366,7 +1359,7 @@ local function setSwapSetEnabledExternal(enabled)
   return true
 end
 
-isSwapSetEnabledExternal = function()
+ImperialElfBot.isSwapSetEnabledExternal = function()
   local cfg = getSwapSetConfigRef()
   return normalizeBoolFlag(cfg.autoSwapEnabled, false)
 end
@@ -2493,7 +2486,7 @@ local moduleDefinitions = {
     tags = {"attack", "combat", "controle"},
     fields = {},
     tickWhenDisabled = true,
-    getExternalEnabled = isAttackEnabledExternal,
+    getExternalEnabled = ImperialElfBot.isAttackEnabledExternal,
     onToggle = function(enabled)
       setAttackEnabledExternal(enabled)
     end,
@@ -2511,7 +2504,7 @@ local moduleDefinitions = {
     tags = {"hp", "tools", "healing", "controle"},
     fields = {},
     tickWhenDisabled = true,
-    getExternalEnabled = isHpToolsEnabledExternal,
+    getExternalEnabled = ImperialElfBot.isHpToolsEnabledExternal,
     onToggle = function(enabled)
       setHpToolsEnabledExternal(enabled)
     end,
@@ -2649,7 +2642,7 @@ local moduleDefinitions = {
     tags = {"follow", "nav", "controle"},
     fields = {},
     tickWhenDisabled = true,
-    getExternalEnabled = isFollowEnabledExternal,
+    getExternalEnabled = ImperialElfBot.isFollowEnabledExternal,
     onToggle = function(enabled)
       setFollowEnabledExternal(enabled)
     end,
@@ -2667,7 +2660,7 @@ local moduleDefinitions = {
     tags = {"navigation", "nav", "controle"},
     fields = {},
     tickWhenDisabled = true,
-    getExternalEnabled = isNavigationEnabledExternal,
+    getExternalEnabled = ImperialElfBot.isNavigationEnabledExternal,
     onToggle = function(enabled)
       setNavigationEnabledExternal(enabled)
     end,
@@ -2685,7 +2678,7 @@ local moduleDefinitions = {
     tags = {"pvp", "controle"},
     fields = {},
     tickWhenDisabled = true,
-    getExternalEnabled = isPvpEnabledExternal,
+    getExternalEnabled = ImperialElfBot.isPvpEnabledExternal,
     onToggle = function(enabled)
       setPvpEnabledExternal(enabled)
     end,
@@ -2703,7 +2696,7 @@ local moduleDefinitions = {
     tags = {"ring", "ringamulet", "controle"},
     fields = {},
     tickWhenDisabled = true,
-    getExternalEnabled = isRingEnabledExternal,
+    getExternalEnabled = ImperialElfBot.isRingEnabledExternal,
     onToggle = function(enabled)
       setRingEnabledExternal(enabled)
     end,
@@ -2721,7 +2714,7 @@ local moduleDefinitions = {
     tags = {"amulet", "ringamulet", "controle"},
     fields = {},
     tickWhenDisabled = true,
-    getExternalEnabled = isAmuletEnabledExternal,
+    getExternalEnabled = ImperialElfBot.isAmuletEnabledExternal,
     onToggle = function(enabled)
       setAmuletEnabledExternal(enabled)
     end,
@@ -2739,7 +2732,7 @@ local moduleDefinitions = {
     tags = {"swapset", "set", "equip", "controle"},
     fields = {},
     tickWhenDisabled = true,
-    getExternalEnabled = isSwapSetEnabledExternal,
+    getExternalEnabled = ImperialElfBot.isSwapSetEnabledExternal,
     onToggle = function(enabled)
       setSwapSetEnabledExternal(enabled)
       local profiles = type(storage.swapSetProfiles) == "table" and storage.swapSetProfiles or nil
