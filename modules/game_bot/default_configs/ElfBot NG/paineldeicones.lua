@@ -45,7 +45,8 @@ local function buildBilingualTooltip(ptText, enText)
   if en == "" then
     en = pt
   end
-  return string.format("PT:\n%s\n\nEN:\n%s", pt, en)
+  local language = type(storage) == "table" and storage.elfbotLanguageExplicit == true and tostring(storage.elfbotLanguage):lower() or "en"
+  return (language == "en" or language == "eng" or language == "english") and en or pt
 end
 
 local function normalizeElfLanguage(language)
@@ -53,12 +54,16 @@ local function normalizeElfLanguage(language)
   if language == "en" or language == "eng" or language == "english" then
     return "en"
   end
-  return "pt"
+  return "en"
 end
 
 local function getElfLanguage()
   if type(storage) ~= "table" then
-    return "pt"
+    return "en"
+  end
+  if storage.elfbotLanguageExplicit ~= true then
+    storage.elfbotLanguage = "en"
+    return "en"
   end
   storage.elfbotLanguage = normalizeElfLanguage(storage.elfbotLanguage)
   return storage.elfbotLanguage
@@ -67,6 +72,7 @@ end
 local function setElfLanguage(language)
   if type(storage) == "table" then
     storage.elfbotLanguage = normalizeElfLanguage(language)
+    storage.elfbotLanguageExplicit = true
   end
   return getElfLanguage()
 end
@@ -4600,6 +4606,74 @@ local titleLabelsEn = {
   exetaRes = "Exeta Res"
 }
 
+ImperialElfBot = ImperialElfBot or {}
+ImperialElfBot.fieldLabelsEn = {
+  actionLockMs = "Action lock (ms)",
+  aolId = "AOL ID",
+  autoWhenZero = "Auto when bless is 0",
+  buyAtLogin = "Buy on login",
+  buyCommand = "AOL purchase command",
+  buyCooldownMs = "Purchase cooldown (ms)",
+  cancelSpell = "Cancel spell",
+  chatMode = "Request channel",
+  delayMs = "Delay after use (ms)",
+  disableCavebotNoAol = "Disable CaveBot without AOL",
+  disableTargetbotNoAol = "Disable TargetBot without AOL",
+  dropAmount = "Amount per drop",
+  enableCavebotWithAol = "Enable CaveBot with AOL",
+  enableTargetbotWithAol = "Enable TargetBot with AOL",
+  forceChase = "Force chase on retaliation",
+  forceSafeFight = "Disable safe fight on retaliation",
+  giveDelayMs = "Potion give delay (ms)",
+  guildChannel = "Guild channel (name/ID)",
+  hpAboveCancel = "HP above (%) to cancel",
+  hpBelow = "HP below (%)",
+  hpPercent = "Maximum HP (%)",
+  hpRequestBelow = "Request below HP (%)",
+  huntMode = "Disable Cave/Target on retaliation",
+  ignoredNicknames = "Ignored nicknames (comma-separated)",
+  ignorePartyAttackers = "Ignore party attackers",
+  ignoreSameGuildAttackers = "Ignore same-guild attackers",
+  itemId = "Item ID",
+  itemIds = "IDs (comma-separated)",
+  laddersIds = "Ladder IDs",
+  manaMin = "Minimum mana (%)",
+  manaRequestBelow = "Request below mana (%)",
+  maxDistance = "Target distance",
+  maxStack = "Maximum items on tile",
+  minCap = "Minimum capacity",
+  mode = "Mode",
+  nearTargetDistance = "Distance to lock chase",
+  needTarget = "Require target",
+  onlyPlayers = "Players only",
+  pathMaxDistance = "Maximum path distance",
+  potionId = "Potion ID",
+  prefix = "Prefix",
+  range = "Range (sqm)",
+  reacquireDelay = "Re-attack interval (ms)",
+  renewOnly = "Renew utamo only (do not cancel)",
+  requestCooldownMs = "New request delay (ms)",
+  requestTrigger = "Potion request trigger",
+  requireTarget = "Require target",
+  restoreHuntOnIdle = "Restore Cave/Target without target",
+  ropeHolesIds = "Rope hole IDs",
+  ropeId = "Rope ID",
+  runeId = "Rune ID",
+  safeRadius = "Safe radius",
+  searchRange = "Tile search radius",
+  sewerId = "Sewer ID",
+  sewersIds = "Sewer IDs",
+  showDebug = "Show logs",
+  showStopMsg = "Show stop message",
+  spell = "Spell",
+  spellDown = "Down spell",
+  spellList = "List (semicolon-separated)",
+  spellUp = "Up spell",
+  stepDelay = "Delay after cast (ms)",
+  targetLostSeconds = "Maximum target lost time (s)",
+  targetTimeoutMs = "Target timeout (ms)"
+}
+
 local function categoryDisplayName(categoryName)
   local language = getElfLanguage()
   local labels = categoryLabels[language] or categoryLabels.pt
@@ -4636,6 +4710,16 @@ local function moduleDisplayTitle(definition)
     return titleLabelsEn[definition.key] or definition.enTitle or definition.title
   end
   return definition.ptTitle or definition.title
+end
+
+function ImperialElfBot.fieldDisplayLabel(field)
+  if not field then
+    return ""
+  end
+  if getElfLanguage() == "en" then
+    return field.enLabel or ImperialElfBot.fieldLabelsEn[field.id] or field.label or field.id
+  end
+  return field.label or field.id
 end
 
 local function moduleDisplayDescription(definition)
@@ -5722,7 +5806,7 @@ local function addSetupField(definition, moduleState, field)
 
   if field.type == "bool" then
     local row = g_ui.createWidget("PICSetupCheckRow", setupWindow.contentPanel.setupList)
-    row.check:setText(field.label)
+    row.check:setText(ImperialElfBot.fieldDisplayLabel(field))
     row.check:setChecked(value == true)
     if field.tooltip and row.check and row.check.setTooltip then
       row.check:setTooltip(tostring(field.tooltip))
@@ -5733,7 +5817,7 @@ local function addSetupField(definition, moduleState, field)
 
   if field.type == "combo" then
     local row = g_ui.createWidget("PICSetupComboRow", setupWindow.contentPanel.setupList)
-    row.label:setText(field.label)
+    row.label:setText(ImperialElfBot.fieldDisplayLabel(field))
     local selectedText
 
     for _, option in ipairs(field.options or {}) do
@@ -5760,7 +5844,7 @@ local function addSetupField(definition, moduleState, field)
 
   if field.type == "number" then
     local row = g_ui.createWidget("PICSetupNumberRow", setupWindow.contentPanel.setupList)
-    row.label:setText(field.label)
+    row.label:setText(ImperialElfBot.fieldDisplayLabel(field))
     if row.spin and row.spin.setMinimum then
       row.spin:setMinimum(tonumber(field.min) or 0)
     end
@@ -5792,7 +5876,7 @@ Panel
     font: verdana-11px-rounded
     color: #e2e8f0
 ]], setupWindow.contentPanel.setupList)
-    holder.title:setText(field.label or "Itens")
+    holder.title:setText(ImperialElfBot.fieldDisplayLabel(field) ~= "" and ImperialElfBot.fieldDisplayLabel(field) or picText("Itens", "Items"))
 
     local listContainer
     listContainer = UI.Container(function(_, items)
@@ -5811,7 +5895,7 @@ Panel
     if field.tooltip and listContainer.setTooltip then
       listContainer:setTooltip(tostring(field.tooltip))
     elseif listContainer.setTooltip then
-      listContainer:setTooltip("PT:\nArraste/solte itens para cadastrar IDs.\nEN:\nDrag/drop items to register IDs.")
+      listContainer:setTooltip(picText("Arraste/solte itens para cadastrar IDs.", "Drag/drop items to register IDs."))
     end
 
     table.insert(state.setupFields, {field = field, widget = listContainer})
@@ -5855,7 +5939,8 @@ Panel
     text-align: left
 ]], setupWindow.contentPanel.setupList)
 
-    row.label:setText(field.label or "Nicks ignorados")
+    row.label:setText(ImperialElfBot.fieldDisplayLabel(field) ~= "" and ImperialElfBot.fieldDisplayLabel(field) or picText("Nicks ignorados", "Ignored nicknames"))
+    row.editButton:setText(picText("Editar", "Edit"))
     row.picValue = sanitizeNicknameCsv(value)
     row.editButton.onClick = function()
       openNickCsvEditor(definition, moduleState, field, row)
@@ -5869,7 +5954,7 @@ Panel
   end
 
   local row = g_ui.createWidget("PICSetupTextRow", setupWindow.contentPanel.setupList)
-  row.label:setText(field.label)
+  row.label:setText(ImperialElfBot.fieldDisplayLabel(field))
   row.edit:setText(tostring(value))
   if field.tooltip and row.edit and row.edit.setTooltip then
     row.edit:setTooltip(tostring(field.tooltip))
@@ -5917,7 +6002,7 @@ local function buildFieldGuideLine(field)
 end
 
 local function buildFieldGuideLineEn(field)
-  local label = tostring((field and field.label) or "Parameter")
+  local label = tostring(ImperialElfBot.fieldDisplayLabel(field) ~= "" and ImperialElfBot.fieldDisplayLabel(field) or "Parameter")
   local fieldType = field and field.type or "text"
 
   if fieldType == "number" then
@@ -6729,10 +6814,10 @@ local function refreshLanguageButtons()
   setLanguageButtonState(header.ptButton, language == "pt")
   setLanguageButtonState(header.enButton, language == "en")
   if header.ptButton and header.ptButton.setTooltip then
-    header.ptButton:setTooltip("PT: Mostrar interface em portugues.\nEN: Show interface in Portuguese.")
+    header.ptButton:setTooltip(picText("Mostrar interface em portugues.", "Show interface in Portuguese."))
   end
   if header.enButton and header.enButton.setTooltip then
-    header.enButton:setTooltip("PT: Mostrar interface em ingles.\nEN: Show interface in English.")
+    header.enButton:setTooltip(picText("Mostrar interface em ingles.", "Show interface in English."))
   end
 end
 
@@ -6775,6 +6860,11 @@ local function refreshPainelLanguage()
   if setupWindow and setupWindow.setText then
     setupWindow:setText(picText("Setup de Icone", "Icon Setup"))
   end
+  if setupWindow and setupWindow.footer then
+    if setupWindow.footer.resetButton then setupWindow.footer.resetButton:setText(picText("Resetar", "Reset")) end
+    if setupWindow.footer.saveButton then setupWindow.footer.saveButton:setText(picText("Salvar", "Save")) end
+    if setupWindow.footer.closeButton then setupWindow.footer.closeButton:setText(picText("Fechar", "Close")) end
+  end
 
   for _, definition in ipairs(moduleDefinitions) do
     local row = state.rows[definition.key]
@@ -6791,6 +6881,9 @@ local function refreshPainelLanguage()
     setupWindow.header.titleLabel:setText(moduleDisplayTitle(currentDefinition))
     setupWindow.header.metaLabel:setText(setupMetaText(currentDefinition, moduleState.iconItemId))
     setupWindow.header.descriptionLabel:setText(moduleDisplayDescription(currentDefinition))
+    if setupWindow.isVisible and setupWindow:isVisible() then
+      openSetup(currentDefinition)
+    end
   end
 
   rebuildCategoryCombo()
@@ -6848,7 +6941,7 @@ end
 
 if mainWindow.footer.helpButton then
   if mainWindow.footer.helpButton.setTooltip then
-    mainWindow.footer.helpButton:setTooltip("PT: Abre tutorial rapido do Painel de Icones.\nEN: Open quick Icon Panel tutorial.")
+    mainWindow.footer.helpButton:setTooltip(picText("Abre tutorial rapido do Painel de Icones.", "Open quick Icon Panel tutorial."))
   end
   mainWindow.footer.helpButton.onClick = function()
     openTutorialWindow(picText("Tutorial - Painel de Icones", "Tutorial - Icon Panel"), buildPainelTutorialText())

@@ -72,7 +72,7 @@ TargetBotCreatureEditorCheckBox < BotSwitch
   font: verdana-11px-rounded
 
 TargetBotCreatureEditorWindow < MainWindow
-  text: Monster Targeting
+  !text: tr('Monster Targeting')
   width: 610
   height: 480
   @onEscape: self:destroy()
@@ -114,7 +114,7 @@ TargetBotCreatureEditorWindow < MainWindow
     width: 84
     height: 18
     text-align: right
-    text: Target name:
+    !text: tr('Target name:')
     font: verdana-11px-rounded
 
   TextEdit
@@ -169,7 +169,7 @@ TargetBotCreatureEditorWindow < MainWindow
       height: 18
       text-align: center
       font: verdana-11px-rounded
-      text: Target selection
+      !text: tr('Target selection')
 
     Label
       id: rightTitle
@@ -181,7 +181,7 @@ TargetBotCreatureEditorWindow < MainWindow
       height: 18
       text-align: center
       font: verdana-11px-rounded
-      text: Target behaviour
+      !text: tr('Target behaviour')
 
     FlatPanel
       id: left

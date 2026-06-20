@@ -52,12 +52,26 @@ local function toggleBot(api)
   setBotState(api, not isBotOn(api))
 end
 
+local function getElfLanguage()
+  if type(ImperialElfBot_GetLanguage) == "function" then
+    local ok, language = pcall(ImperialElfBot_GetLanguage)
+    if ok and tostring(language):lower() == "en" then
+      return "en"
+    end
+  end
+  if type(storage) == "table" and tostring(storage.elfbotLanguage):lower() == "en" then
+    return "en"
+  end
+  return "en"
+end
+
 local function setTooltipPair(widget, ptText, enText)
   if not widget or not widget.setTooltip then
     return
   end
 
-  widget:setTooltip(string.format("PT:\n%s\n\nEN:\n%s", tostring(ptText or ""), tostring(enText or ptText or "")))
+  local text = getElfLanguage() == "en" and (enText or ptText) or ptText
+  widget:setTooltip(tostring(text or ""))
 end
 
 local function styleStatusIcon(icon)
@@ -117,6 +131,17 @@ local targetIcon = createStatusIcon(
   end
 )
 
+local function refreshStatusIconLanguage()
+  setTooltipPair(caveIcon, "Clique para ligar/desligar o CaveBot. Arraste para mover o icone.", "Click to toggle CaveBot. Drag to move the icon.")
+  setTooltipPair(caveIcon and caveIcon.text, "Clique para ligar/desligar o CaveBot. Arraste para mover o icone.", "Click to toggle CaveBot. Drag to move the icon.")
+  setTooltipPair(targetIcon, "Clique para ligar/desligar o TargetBot. Arraste para mover o icone.", "Click to toggle TargetBot. Drag to move the icon.")
+  setTooltipPair(targetIcon and targetIcon.text, "Clique para ligar/desligar o TargetBot. Arraste para mover o icone.", "Click to toggle TargetBot. Drag to move the icon.")
+end
+
+ImperialElfBot = ImperialElfBot or {}
+ImperialElfBot.languageRefreshers = ImperialElfBot.languageRefreshers or {}
+ImperialElfBot.languageRefreshers.statusIcons = refreshStatusIconLanguage
+
 local lastCaveState
 local lastTargetState
 
@@ -146,6 +171,7 @@ local function refreshStatusIcons(force)
 end
 
 refreshStatusIcons(true)
+refreshStatusIconLanguage()
 
 macro(250, function()
   refreshStatusIcons(false)

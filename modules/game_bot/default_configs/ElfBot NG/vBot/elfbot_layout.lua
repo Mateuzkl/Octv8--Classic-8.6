@@ -4,6 +4,7 @@
 setDefaultTab("Main")
 
 ImperialElfBot = ImperialElfBot or {}
+ImperialElfBot.languageRefreshers = ImperialElfBot.languageRefreshers or {}
 
 local function logError(text)
   if g_logger and g_logger.error then
@@ -53,12 +54,16 @@ local function normalizeElfLanguage(language)
   if language == "en" or language == "eng" or language == "english" then
     return "en"
   end
-  return "pt"
+  return "en"
 end
 
 local function getElfLanguage()
   if type(storage) ~= "table" then
-    return "pt"
+    return "en"
+  end
+  if storage.elfbotLanguageExplicit ~= true then
+    storage.elfbotLanguage = "en"
+    return "en"
   end
   storage.elfbotLanguage = normalizeElfLanguage(storage.elfbotLanguage)
   return storage.elfbotLanguage
@@ -71,6 +76,24 @@ local function elfText(ptText, enText)
   return ptText
 end
 
+function ImperialElfBot_Text(ptText, enText)
+  return elfText(ptText, enText)
+end
+
+function ImperialElfBot_RegisterLanguageRefresher(id, callback)
+  if type(id) ~= "string" or type(callback) ~= "function" then
+    return false
+  end
+  ImperialElfBot.languageRefreshers[id] = callback
+  return true
+end
+
+local function refreshLanguageConsumers()
+  for _, callback in pairs(ImperialElfBot.languageRefreshers) do
+    pcall(callback)
+  end
+end
+
 function ImperialElfBot_GetLanguage()
   return getElfLanguage()
 end
@@ -78,6 +101,7 @@ end
 function ImperialElfBot_SetLanguage(language)
   if type(storage) == "table" then
     storage.elfbotLanguage = normalizeElfLanguage(language)
+    storage.elfbotLanguageExplicit = true
   end
 
   if ImperialElfBot and ImperialElfBot.refreshLanguage then
@@ -86,6 +110,7 @@ function ImperialElfBot_SetLanguage(language)
   if PainelDeIconesController and PainelDeIconesController.refreshLanguage then
     pcall(PainelDeIconesController.refreshLanguage)
   end
+  refreshLanguageConsumers()
 
   showMessage(elfText("ElfBot: idioma alterado para PT.", "ElfBot: language changed to EN."))
   return getElfLanguage()
@@ -748,7 +773,9 @@ if rootWidget then
       elseif elfWindow.setPhantom then
         -- fallback only changes visual state; some OTC builds do not expose setDraggable to Lua
       end
-      showMessage(ImperialElfBot.locked and "ElfBot NG: janela travada." or "ElfBot NG: janela destravada.")
+      showMessage(ImperialElfBot.locked
+        and elfText("ElfBot NG: janela travada.", "ElfBot NG: window locked.")
+        or elfText("ElfBot NG: janela destravada.", "ElfBot NG: window unlocked."))
     end
   end
 
@@ -790,7 +817,7 @@ if rootWidget then
     if elfWindow.languageButton then
       elfWindow.languageButton:setText(getElfLanguage() == "en" and "EN/PT" or "PT/EN")
       if elfWindow.languageButton.setTooltip then
-        elfWindow.languageButton:setTooltip("PT: Trocar idioma do ElfBot para portugues/ingles.\nEN: Switch ElfBot language between Portuguese/English.")
+        elfWindow.languageButton:setTooltip(elfText("Trocar idioma do ElfBot para portugues/ingles.", "Switch ElfBot language between Portuguese/English."))
       end
     end
   end
