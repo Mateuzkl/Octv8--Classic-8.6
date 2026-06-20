@@ -88,6 +88,127 @@ TargetBot.Looting.updateItemsAndContainers = function()
   end
 end
 
+local function normalizeLootCount(value)
+  value = tonumber(value) or 1
+  if value < 1 then value = 1 end
+  if value > 100 then value = 100 end
+  return value
+end
+
+local function saveLootingConfig()
+  TargetBot.Looting.updateItemsAndContainers()
+  if vBot then
+    vBot.lootConainers = {}
+    vBot.lootItems = {}
+    for _, item in ipairs(containers) do
+      table.insert(vBot.lootConainers, item.id)
+    end
+    for _, item in ipairs(items) do
+      table.insert(vBot.lootItems, item.id)
+    end
+  end
+  if TargetBot and TargetBot.save then
+    TargetBot.save()
+  end
+end
+
+TargetBot.Looting.getConfig = function()
+  if not ui then
+    return {items = {}, containers = {}}
+  end
+  return {
+    items = ui.items:getItems(),
+    containers = ui.containers:getItems(),
+    everyItem = ui.everyItem:isOn()
+  }
+end
+
+TargetBot.Looting.addLootItem = function(itemId, count)
+  if not ui then return false end
+  itemId = tonumber(itemId)
+  if not itemId or itemId < 100 then return false end
+  count = normalizeLootCount(count)
+
+  local nextItems = ui.items:getItems()
+  local updated = false
+  for _, item in ipairs(nextItems) do
+    if tonumber(item.id) == itemId then
+      item.count = count
+      updated = true
+      break
+    end
+  end
+  if not updated then
+    table.insert(nextItems, {id = itemId, count = count})
+  end
+  ui.items:setItems(nextItems)
+  saveLootingConfig()
+  return true
+end
+
+TargetBot.Looting.addLootContainer = function(itemId, count)
+  if not ui then return false end
+  itemId = tonumber(itemId)
+  if not itemId or itemId < 100 then return false end
+  count = normalizeLootCount(count)
+
+  local nextContainers = ui.containers:getItems()
+  local updated = false
+  for _, item in ipairs(nextContainers) do
+    if tonumber(item.id) == itemId then
+      item.count = count
+      updated = true
+      break
+    end
+  end
+  if not updated then
+    table.insert(nextContainers, {id = itemId, count = count})
+  end
+  ui.containers:setItems(nextContainers)
+  saveLootingConfig()
+  return true
+end
+
+TargetBot.Looting.removeLootEntry = function(kind, index)
+  if not ui then return false end
+  index = tonumber(index)
+  if not index then return false end
+  local widget = kind == "container" and ui.containers or ui.items
+  local nextItems = widget:getItems()
+  if index < 1 or index > #nextItems then return false end
+  table.remove(nextItems, index)
+  widget:setItems(nextItems)
+  saveLootingConfig()
+  return true
+end
+
+TargetBot.Looting.removeLootId = function(itemId)
+  if not ui then return false end
+  itemId = tonumber(itemId)
+  if not itemId then return false end
+
+  local changed = false
+  local function removeFrom(widget)
+    local source = widget:getItems()
+    local nextItems = {}
+    for _, item in ipairs(source) do
+      if tonumber(item.id) ~= itemId then
+        table.insert(nextItems, item)
+      else
+        changed = true
+      end
+    end
+    widget:setItems(nextItems)
+  end
+
+  removeFrom(ui.items)
+  removeFrom(ui.containers)
+  if changed then
+    saveLootingConfig()
+  end
+  return changed
+end
+
 local waitTill = 0
 local waitingForContainer = nil
 local status = ""

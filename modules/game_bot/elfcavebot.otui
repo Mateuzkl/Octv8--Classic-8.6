@@ -2,6 +2,22 @@ ElfCavebotButton < Button
   height: 21
   text-align: center
 
+ElfCavebotSmallButton < Button
+  height: 21
+  text-align: center
+  font: verdana-11px-rounded
+
+ElfCavebotCloseButton < UIButton
+  size: 12 12
+  image-source: /images/ui/miniwindow_buttons
+  image-clip: 29 1 12 12
+
+  $hover:
+    image-clip: 29 15 12 12
+
+  $pressed:
+    image-clip: 29 29 12 12
+
 ElfCavebotListItem < Label
   height: 16
   text-offset: 4 0
@@ -11,318 +27,763 @@ ElfCavebotListItem < Label
   $focus:
     background-color: #00000066
 
+ElfCavebotSection < Panel
+  image-source: /images/ui/panel_flat
+  image-border: 1
+
+ElfCavebotTitle < Label
+  height: 16
+  color: #d7d7d7
+  text-align: center
+  text-auto-resize: false
+
+ElfCavebotField < TextEdit
+  height: 20
+
 MainWindow
   id: elfCavebotWindow
-  text: CaveBot
-  size: 720 600
+  text: Cavebot
+  size: 770 570
   @onEscape: modules.game_bot.elfCavebotClose()
 
-  Panel
-    id: mapPanel
+  ElfCavebotCloseButton
+    id: topCloseButton
+    anchors.top: parent.top
+    anchors.right: parent.right
+    margin-top: -29
+    margin-right: -9
+    @onClick: modules.game_bot.elfCavebotClose()
+
+  Label
+    id: cavebotStatus
+    text: Off
+    anchors.top: parent.top
+    anchors.right: parent.right
+    margin-top: 6
+    margin-right: 8
+    color: #ff6b6b
+    text-auto-resize: true
+
+  ElfCavebotSection
+    id: waypointsPanel
     anchors.top: parent.top
     anchors.left: parent.left
-    anchors.right: parent.right
-    margin: 6 6 0 6
-    height: 178
-    image-source: /images/ui/panel_flat
-    image-border: 1
+    margin-top: 24
+    margin-left: 8
+    size: 225 292
 
-    Label
-      id: mapTitle
-      text: Map Preview
+    ElfCavebotTitle
+      id: waypointsTitle
+      text: Waypoints
       anchors.top: parent.top
-      anchors.horizontalCenter: parent.horizontalCenter
-      margin-top: 4
-      color: #cfcfcf
-      text-auto-resize: true
-
-    Label
-      id: cavebotStatus
-      text: Off
-      anchors.top: parent.top
+      anchors.left: parent.left
       anchors.right: parent.right
       margin-top: 4
-      margin-right: 8
-      color: #ff6b6b
-      text-auto-resize: true
 
-    Minimap
-      id: cavebotMap
-      anchors.top: mapTitle.bottom
+    TextList
+      id: helperWaypointList
+      anchors.top: waypointsTitle.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: waypointButtons.top
+      margin: 4 16 4 4
+      vertical-scrollbar: waypointScroll
+      focusable: false
+
+    VerticalScrollBar
+      id: waypointScroll
+      anchors.top: helperWaypointList.top
+      anchors.bottom: helperWaypointList.bottom
+      anchors.right: parent.right
+      margin-right: 4
+      step: 14
+      pixels-scroll: true
+
+    Panel
+      id: waypointButtons
       anchors.left: parent.left
       anchors.right: parent.right
       anchors.bottom: parent.bottom
       margin: 4
-      autowalk: false
+      height: 24
 
-  Panel
-    id: bodyPanel
-    anchors.top: mapPanel.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.bottom: closeBtn.top
-    margin: 6
-
-    Panel
-      id: scriptsPanel
-      anchors.top: parent.top
-      anchors.right: parent.right
-      anchors.bottom: parent.bottom
-      width: 150
-      image-source: /images/ui/panel_flat
-      image-border: 1
-
-      Label
-        id: scriptsTitle
-        text: Scripts
+      ElfCavebotSmallButton
+        id: moveUpButton
+        text: <
+        anchors.left: parent.left
         anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        margin-top: 5
-        color: #cfcfcf
-        text-auto-resize: true
+        width: 24
+        @onClick: modules.game_bot.elfCavebotMoveSelected(-1)
 
-      TextList
-        id: profileList
-        anchors.top: scriptsTitle.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: profileName.top
-        margin: 4 16 4 4
-        vertical-scrollbar: profileScroll
-        focusable: false
-
-      VerticalScrollBar
-        id: profileScroll
-        anchors.top: profileList.top
-        anchors.bottom: profileList.bottom
-        anchors.right: parent.right
-        margin-right: 4
-        step: 14
-        pixels-scroll: true
-
-      TextEdit
-        id: profileName
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: saveProfileButton.top
-        margin: 0 4 4 4
-        height: 20
-
-      ElfCavebotButton
-        id: saveProfileButton
-        text: Save
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: loadProfileButton.top
-        margin: 0 4 3 4
-        @onClick: modules.game_bot.elfCavebotSaveProfile()
-
-      ElfCavebotButton
-        id: loadProfileButton
-        text: Load
-        anchors.left: parent.left
-        anchors.right: parent.horizontalCenter
-        anchors.bottom: recordButton.top
+      ElfCavebotSmallButton
+        id: moveDownButton
+        text: >
+        anchors.left: moveUpButton.right
+        anchors.top: parent.top
         margin-left: 4
-        margin-right: 2
-        margin-bottom: 3
-        @onClick: modules.game_bot.elfCavebotLoadProfile()
+        width: 24
+        @onClick: modules.game_bot.elfCavebotMoveSelected(1)
 
-      ElfCavebotButton
-        id: deleteProfileButton
-        text: Delete
-        anchors.left: parent.horizontalCenter
-        anchors.right: parent.right
-        anchors.bottom: recordButton.top
-        margin-left: 2
-        margin-right: 4
-        margin-bottom: 3
-        @onClick: modules.game_bot.elfCavebotDeleteProfile()
+      ElfCavebotSmallButton
+        id: clearButton
+        text: Clear
+        anchors.left: moveDownButton.right
+        anchors.top: parent.top
+        margin-left: 6
+        width: 48
+        @onClick: modules.game_bot.elfCavebotClearWaypoints()
 
-      ElfCavebotButton
-        id: recordButton
-        text: Record
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        margin: 0 4 4 4
-        @onClick: modules.game_bot.elfCavebotToggleRecord()
+      ElfCavebotSmallButton
+        id: addLabelButton
+        text: Label
+        anchors.left: clearButton.right
+        anchors.top: parent.top
+        margin-left: 4
+        width: 46
+        @onClick: modules.game_bot.elfCavebotAddLabel()
 
-    Panel
-      id: routePanel
+      ElfCavebotSmallButton
+        id: removeActionButton
+        text: Del
+        anchors.left: addLabelButton.right
+        anchors.top: parent.top
+        margin-left: 4
+        width: 36
+        @onClick: modules.game_bot.elfCavebotRemoveSelected()
+
+  ElfCavebotSection
+    id: placementPanel
+    anchors.top: waypointsPanel.top
+    anchors.left: waypointsPanel.right
+    margin-left: 8
+    size: 245 292
+
+    ElfCavebotTitle
+      id: placementTitle
+      text: Emplacement
       anchors.top: parent.top
       anchors.left: parent.left
-      anchors.right: scriptsPanel.left
-      anchors.bottom: parent.bottom
+      anchors.right: centerButton.left
+      margin-top: 4
+      margin-left: 4
       margin-right: 6
+
+    ElfCavebotButton
+      id: centerButton
+      text: Center
+      anchors.top: parent.top
+      anchors.right: parent.right
+      margin-top: 3
+      margin-right: 5
+      width: 82
+      @onClick: modules.game_bot.elfCavebotCenterPlayer()
+
+    Panel
+      id: placementButtons
+      anchors.top: placementTitle.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin: 8 8 0 8
+      height: 78
+      layout:
+        type: grid
+        cell-size: 53 22
+        cell-spacing: 4
+        num-columns: 4
+
+      ElfCavebotSmallButton
+        id: addExactButton
+        text: Stand
+        @onClick: modules.game_bot.elfCavebotAddCurrent('gotoExact')
+
+      ElfCavebotSmallButton
+        id: addGotoButton
+        text: Node
+        @onClick: modules.game_bot.elfCavebotAddCurrent('goto')
+
+      ElfCavebotSmallButton
+        id: addWalkButton
+        text: Walk
+        @onClick: modules.game_bot.elfCavebotAddCurrent('goto')
+
+      ElfCavebotSmallButton
+        id: addActionButton
+        text: Action
+        @onClick: modules.game_bot.elfCavebotAddAction()
+
+      ElfCavebotSmallButton
+        id: addRopeButton
+        text: Rope
+        @onClick: modules.game_bot.elfCavebotAddUseWithItem(3003)
+
+      ElfCavebotSmallButton
+        id: addLadderButton
+        text: Ladder
+        @onClick: modules.game_bot.elfCavebotAddCurrent('use')
+
+      ElfCavebotSmallButton
+        id: addShovelButton
+        text: Shovel
+        @onClick: modules.game_bot.elfCavebotAddUseWithItem(3457)
+
+      ElfCavebotSmallButton
+        id: addLureButton
+        text: Lure
+        @onClick: modules.game_bot.elfCavebotAddLure()
+
+    Label
+      id: infoText
+      text: A new bot for Tibia called NeoBot has been developed by the maker of ElfBot. Visit www.tibianeobot.com for more information!
+      anchors.top: placementButtons.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin: 8
+      height: 90
+      text-wrap: true
+      color: #d7d7d7
+
+    CheckBox
+      id: showLabelsBox
+      text: Show labels
+      anchors.left: parent.left
+      anchors.bottom: parent.bottom
+      margin-left: 8
+      margin-bottom: 8
+
+    CheckBox
+      id: followWaypointsBox
+      text: Follow waypoints
+      anchors.left: showLabelsBox.right
+      anchors.bottom: showLabelsBox.bottom
+      margin-left: 12
+
+  ElfCavebotSection
+    id: rightPanel
+    anchors.top: waypointsPanel.top
+    anchors.left: placementPanel.right
+    anchors.right: parent.right
+    anchors.bottom: closeBtn.top
+    margin-left: 8
+    margin-right: 8
+    margin-bottom: 8
+
+    ElfCavebotTitle
+      id: hotkeysTitle
+      text: Cavebot Hotkeys
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 4
+
+    ElfCavebotButton
+      id: configButton
+      text: Edit
+      anchors.top: hotkeysTitle.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin: 4 8 0 8
+      @onClick: modules.game_bot.elfCavebotToggleConfig()
+
+    Panel
+      id: runButtons
+      anchors.top: configButton.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin: 5 8 0 8
+      height: 46
+      layout:
+        type: grid
+        cell-size: 64 21
+        cell-spacing: 4
+        num-columns: 3
+
+      ElfCavebotSmallButton
+        id: startButton
+        text: Start
+        @onClick: modules.game_bot.elfCavebotStart()
+
+      ElfCavebotSmallButton
+        id: stopButton
+        text: Stop
+        @onClick: modules.game_bot.elfCavebotStop()
+
+      ElfCavebotSmallButton
+        id: saveButton
+        text: Save
+        @onClick: modules.game_bot.elfCavebotSave()
+
+      ElfCavebotSmallButton
+        id: refreshButton
+        text: Refresh
+        @onClick: modules.game_bot.elfCavebotRefresh()
+
+      ElfCavebotSmallButton
+        id: recordButton
+        text: Record
+        @onClick: modules.game_bot.elfCavebotToggleRecord()
+
+    ElfCavebotTitle
+      id: lootingTitle
+      text: Looting
+      anchors.top: runButtons.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 6
+
+    Panel
+      id: lootingListPanel
+      anchors.top: lootingTitle.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin: 4 8 0 8
+      height: 122
       image-source: /images/ui/panel_flat
       image-border: 1
 
-      Panel
-        id: toolbarPanel
+      TextList
+        id: lootingList
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        margin: 4
-        height: 24
-
-        ElfCavebotButton
-          id: startButton
-          text: Start
-          anchors.top: parent.top
-          anchors.left: parent.left
-          width: 66
-          @onClick: modules.game_bot.elfCavebotStart()
-
-        ElfCavebotButton
-          id: stopButton
-          text: Stop
-          anchors.top: parent.top
-          anchors.left: startButton.right
-          margin-left: 4
-          width: 66
-          @onClick: modules.game_bot.elfCavebotStop()
-
-        ElfCavebotButton
-          id: editorButton
-          text: Editor
-          anchors.top: parent.top
-          anchors.left: stopButton.right
-          margin-left: 4
-          width: 72
-          @onClick: modules.game_bot.elfCavebotToggleEditor()
-
-        ElfCavebotButton
-          id: configButton
-          text: Config
-          anchors.top: parent.top
-          anchors.left: editorButton.right
-          margin-left: 4
-          width: 72
-          @onClick: modules.game_bot.elfCavebotToggleConfig()
-
-        ElfCavebotButton
-          id: saveButton
-          text: Save Route
-          anchors.top: parent.top
-          anchors.left: configButton.right
-          margin-left: 4
-          width: 86
-          @onClick: modules.game_bot.elfCavebotSave()
-
-        ElfCavebotButton
-          id: refreshButton
-          text: Refresh
-          anchors.top: parent.top
-          anchors.right: parent.right
-          width: 72
-          @onClick: modules.game_bot.elfCavebotRefresh()
-
-      Panel
-        id: listHeader
-        anchors.top: toolbarPanel.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        margin: 2 4 0 4
-        height: 16
-
-        Label
-          id: waypointsTitle
-          text: Waypoints
-          anchors.left: parent.left
-          anchors.verticalCenter: parent.verticalCenter
-          color: #cfcfcf
-          text-auto-resize: true
-
-        Label
-          id: positionLabel
-          text: Position: -
-          anchors.right: parent.right
-          anchors.verticalCenter: parent.verticalCenter
-          color: #aaaaaa
-          text-auto-resize: true
-
-      TextList
-        id: helperWaypointList
-        anchors.top: listHeader.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: actionPanel.top
-        margin: 4 18 4 4
-        vertical-scrollbar: waypointScroll
+        anchors.bottom: parent.bottom
+        margin: 3 14 3 3
+        vertical-scrollbar: lootingScroll
         focusable: false
 
       VerticalScrollBar
-        id: waypointScroll
-        anchors.top: helperWaypointList.top
-        anchors.bottom: helperWaypointList.bottom
+        id: lootingScroll
+        anchors.top: lootingList.top
+        anchors.bottom: lootingList.bottom
         anchors.right: parent.right
-        margin-right: 4
+        margin-right: 3
         step: 14
         pixels-scroll: true
 
-      Panel
-        id: actionPanel
+    ElfCavebotField
+      id: lootIdField
+      anchors.top: lootingListPanel.bottom
+      anchors.left: parent.left
+      margin-top: 6
+      margin-left: 8
+      width: 48
+
+    ElfCavebotField
+      id: lootCountField
+      text: 1
+      anchors.top: lootIdField.top
+      anchors.left: lootIdField.right
+      margin-left: 6
+      width: 30
+
+    ElfCavebotSmallButton
+      id: lootAddItemButton
+      text: Add
+      anchors.top: lootIdField.top
+      anchors.left: lootCountField.right
+      margin-left: 6
+      width: 38
+      @onClick: modules.game_bot.elfCavebotAddLoot('item')
+
+    ElfCavebotSmallButton
+      id: lootAddContainerButton
+      text: Bag
+      anchors.top: lootIdField.top
+      anchors.left: lootAddItemButton.right
+      margin-left: 4
+      width: 38
+      @onClick: modules.game_bot.elfCavebotAddLoot('container')
+
+    ElfCavebotSmallButton
+      id: lootDelButton
+      text: Del
+      anchors.top: lootIdField.top
+      anchors.right: parent.right
+      margin-right: 8
+      width: 38
+      @onClick: modules.game_bot.elfCavebotRemoveLoot()
+
+    ElfCavebotTitle
+      id: optionsTitle
+      text: Options
+      anchors.top: lootIdField.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 10
+
+    Label
+      id: useRopeLabel
+      text: Use Rope
+      anchors.top: optionsTitle.bottom
+      anchors.left: parent.left
+      margin-top: 6
+      margin-left: 12
+      width: 124
+      color: #d7d7d7
+
+    ComboBox
+      id: useRopeCombo
+      anchors.top: useRopeLabel.top
+      anchors.right: parent.right
+      margin-right: 8
+      width: 116
+      height: 20
+      &menuScroll: true
+      &menuHeight: 120
+
+    Label
+      id: useShovelLabel
+      text: Use Shovel
+      anchors.top: useRopeLabel.bottom
+      anchors.left: useRopeLabel.left
+      margin-top: 4
+      width: 124
+      color: #d7d7d7
+
+    ComboBox
+      id: useShovelCombo
+      anchors.top: useShovelLabel.top
+      anchors.right: useRopeCombo.right
+      width: 116
+      height: 20
+      &menuScroll: true
+      &menuHeight: 120
+
+    Label
+      id: skipNodesLabel
+      text: Skip nearby nodes
+      anchors.top: useShovelLabel.bottom
+      anchors.left: useRopeLabel.left
+      margin-top: 4
+      width: 124
+      color: #d7d7d7
+
+    ComboBox
+      id: skipNodesCombo
+      anchors.top: skipNodesLabel.top
+      anchors.right: useRopeCombo.right
+      width: 116
+      height: 20
+      &menuScroll: true
+      &menuHeight: 160
+
+    CheckBox
+      id: openNextBpBox
+      text: Open next bp
+      anchors.top: skipNodesLabel.bottom
+      anchors.left: useRopeLabel.left
+      margin-top: 14
+
+    CheckBox
+      id: lootNearbyBox
+      text: Loot nearby targets
+      anchors.top: openNextBpBox.bottom
+      anchors.left: useRopeLabel.left
+      margin-top: 4
+
+    CheckBox
+      id: lootDistantBox
+      text: Loot distant targets
+      anchors.top: lootNearbyBox.bottom
+      anchors.left: useRopeLabel.left
+      margin-top: 4
+
+  ElfCavebotSection
+    id: profilePanel
+    anchors.top: waypointsPanel.bottom
+    anchors.left: waypointsPanel.left
+    anchors.right: placementPanel.left
+    anchors.bottom: closeBtn.top
+    margin-top: 8
+    margin-right: 8
+    margin-bottom: 8
+
+    ElfCavebotTitle
+      id: profileTitle
+      text: Saving & Loading settings
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 4
+
+    TextList
+      id: profileList
+      anchors.top: profileTitle.bottom
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: profileName.top
+      margin: 4 16 4 4
+      vertical-scrollbar: profileScroll
+      focusable: false
+
+    VerticalScrollBar
+      id: profileScroll
+      anchors.top: profileList.top
+      anchors.bottom: profileList.bottom
+      anchors.right: parent.right
+      margin-right: 4
+      step: 14
+      pixels-scroll: true
+
+    Label
+      id: profileNameLabel
+      text: Name
+      anchors.left: parent.left
+      anchors.bottom: profileButtons.top
+      margin-left: 6
+      margin-bottom: 8
+      width: 38
+      color: #d7d7d7
+
+    ElfCavebotField
+      id: profileName
+      anchors.left: profileNameLabel.right
+      anchors.right: parent.right
+      anchors.bottom: profileButtons.top
+      margin-left: 6
+      margin-right: 6
+      margin-bottom: 6
+
+    Panel
+      id: profileButtons
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.bottom: parent.bottom
+      margin: 4
+      height: 24
+
+      ElfCavebotSmallButton
+        id: editorButton
+        text: Edit
         anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        margin: 4
-        height: 76
-        layout:
-          type: grid
-          cell-size: 86 22
-          cell-spacing: 4
-          num-columns: 5
+        anchors.top: parent.top
+        width: 54
+        @onClick: modules.game_bot.elfCavebotToggleEditor()
 
-        ElfCavebotButton
-          id: addGotoButton
-          text: GoTo
-          @onClick: modules.game_bot.elfCavebotAddCurrent('goto')
+      ElfCavebotSmallButton
+        id: saveProfileButton
+        text: Save
+        anchors.left: editorButton.right
+        anchors.top: parent.top
+        margin-left: 6
+        width: 54
+        @onClick: modules.game_bot.elfCavebotSaveProfile()
 
-        ElfCavebotButton
-          id: addExactButton
-          text: GoTo exact
-          @onClick: modules.game_bot.elfCavebotAddCurrent('gotoExact')
+      ElfCavebotSmallButton
+        id: loadProfileButton
+        text: Load
+        anchors.left: saveProfileButton.right
+        anchors.top: parent.top
+        margin-left: 6
+        width: 54
+        @onClick: modules.game_bot.elfCavebotLoadProfile()
 
-        ElfCavebotButton
-          id: addUseButton
-          text: Use
-          @onClick: modules.game_bot.elfCavebotAddCurrent('use')
+      ElfCavebotSmallButton
+        id: deleteProfileButton
+        text: Del
+        anchors.left: loadProfileButton.right
+        anchors.top: parent.top
+        margin-left: 6
+        width: 36
+        @onClick: modules.game_bot.elfCavebotDeleteProfile()
 
-        ElfCavebotButton
-          id: addUseWithButton
-          text: UseWith
-          @onClick: modules.game_bot.elfCavebotAddUseWith()
+  ElfCavebotSection
+    id: alertsPanel
+    anchors.top: placementPanel.bottom
+    anchors.left: placementPanel.left
+    anchors.right: rightPanel.left
+    anchors.bottom: closeBtn.top
+    margin-top: 8
+    margin-right: 8
+    margin-bottom: 8
 
-        ElfCavebotButton
-          id: addLabelButton
-          text: Label
-          @onClick: modules.game_bot.elfCavebotAddLabel()
+    ElfCavebotTitle
+      id: alertsTitle
+      text: Alerts
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      margin-top: 4
 
-        ElfCavebotButton
-          id: editActionButton
-          text: Edit
-          @onClick: modules.game_bot.elfCavebotEditSelected()
+    Label
+      id: alertSLabel
+      text: S
+      anchors.top: alertsTitle.bottom
+      anchors.left: parent.left
+      margin-top: 6
+      margin-left: 154
+      width: 16
+      color: #d7d7d7
+      text-align: center
 
-        ElfCavebotButton
-          id: removeActionButton
-          text: Remove
-          @onClick: modules.game_bot.elfCavebotRemoveSelected()
+    Label
+      id: alertPLabel
+      text: P
+      anchors.top: alertsTitle.bottom
+      anchors.left: alertSLabel.right
+      margin-top: 6
+      margin-left: 20
+      width: 16
+      color: #d7d7d7
+      text-align: center
 
-        ElfCavebotButton
-          id: moveUpButton
-          text: Move Up
-          @onClick: modules.game_bot.elfCavebotMoveSelected(-1)
+    Label
+      id: alertXLabel
+      text: X
+      anchors.top: alertsTitle.bottom
+      anchors.left: alertPLabel.right
+      margin-top: 6
+      margin-left: 20
+      width: 16
+      color: #d7d7d7
+      text-align: center
 
-        ElfCavebotButton
-          id: moveDownButton
-          text: Move Down
-          @onClick: modules.game_bot.elfCavebotMoveSelected(1)
+    Label
+      id: alertPlayerLabel
+      text: Player on screen
+      anchors.top: alertSLabel.bottom
+      anchors.left: parent.left
+      margin-top: 6
+      margin-left: 10
+      color: #d7d7d7
+      text-auto-resize: true
 
-        ElfCavebotButton
-          id: centerButton
-          text: Center
-          @onClick: modules.game_bot.elfCavebotCenterPlayer()
+    CheckBox
+      id: alertPlayerS
+      anchors.top: alertPlayerLabel.top
+      anchors.right: parent.right
+      margin-right: 64
+
+    CheckBox
+      id: alertPlayerP
+      anchors.top: alertPlayerLabel.top
+      anchors.right: parent.right
+      margin-right: 36
+
+    CheckBox
+      id: alertPlayerX
+      anchors.top: alertPlayerLabel.top
+      anchors.right: parent.right
+      margin-right: 8
+
+    Label
+      id: alertGmLabel
+      text: GM/CM detected
+      anchors.top: alertPlayerLabel.bottom
+      anchors.left: alertPlayerLabel.left
+      margin-top: 6
+      color: #d7d7d7
+      text-auto-resize: true
+
+    CheckBox
+      id: alertGmS
+      anchors.top: alertGmLabel.top
+      anchors.right: alertPlayerS.right
+
+    CheckBox
+      id: alertGmP
+      anchors.top: alertGmLabel.top
+      anchors.right: alertPlayerP.right
+
+    CheckBox
+      id: alertGmX
+      anchors.top: alertGmLabel.top
+      anchors.right: alertPlayerX.right
+
+    Label
+      id: alertAttackLabel
+      text: Player attacking
+      anchors.top: alertGmLabel.bottom
+      anchors.left: alertPlayerLabel.left
+      margin-top: 6
+      color: #d7d7d7
+      text-auto-resize: true
+
+    CheckBox
+      id: alertAttackS
+      anchors.top: alertAttackLabel.top
+      anchors.right: alertPlayerS.right
+
+    CheckBox
+      id: alertAttackP
+      anchors.top: alertAttackLabel.top
+      anchors.right: alertPlayerP.right
+
+    CheckBox
+      id: alertAttackX
+      anchors.top: alertAttackLabel.top
+      anchors.right: alertPlayerX.right
+
+    Label
+      id: alertDefaultLabel
+      text: Default chat msg
+      anchors.top: alertAttackLabel.bottom
+      anchors.left: alertPlayerLabel.left
+      margin-top: 6
+      color: #d7d7d7
+      text-auto-resize: true
+
+    CheckBox
+      id: alertDefaultS
+      anchors.top: alertDefaultLabel.top
+      anchors.right: alertPlayerS.right
+
+    CheckBox
+      id: alertDefaultP
+      anchors.top: alertDefaultLabel.top
+      anchors.right: alertPlayerP.right
+
+    CheckBox
+      id: alertDefaultX
+      anchors.top: alertDefaultLabel.top
+      anchors.right: alertPlayerX.right
+
+    Label
+      id: alertPrivateLabel
+      text: Private chat msg
+      anchors.top: alertDefaultLabel.bottom
+      anchors.left: alertPlayerLabel.left
+      margin-top: 6
+      color: #d7d7d7
+      text-auto-resize: true
+
+    CheckBox
+      id: alertPrivateS
+      anchors.top: alertPrivateLabel.top
+      anchors.right: alertPlayerS.right
+
+    CheckBox
+      id: alertPrivateP
+      anchors.top: alertPrivateLabel.top
+      anchors.right: alertPlayerP.right
+
+    CheckBox
+      id: alertPrivateX
+      anchors.top: alertPrivateLabel.top
+      anchors.right: alertPlayerX.right
+
+    Label
+      id: alertDisconnectedLabel
+      text: Disconnected
+      anchors.top: alertPrivateLabel.bottom
+      anchors.left: alertPlayerLabel.left
+      margin-top: 6
+      color: #d7d7d7
+      text-auto-resize: true
+
+    CheckBox
+      id: alertDisconnectedS
+      anchors.top: alertDisconnectedLabel.top
+      anchors.right: alertPlayerS.right
+
+    CheckBox
+      id: alertDisconnectedP
+      anchors.top: alertDisconnectedLabel.top
+      anchors.right: alertPlayerP.right
+
+    CheckBox
+      id: alertDisconnectedX
+      anchors.top: alertDisconnectedLabel.top
+      anchors.right: alertPlayerX.right
 
   ElfCavebotButton
     id: closeBtn

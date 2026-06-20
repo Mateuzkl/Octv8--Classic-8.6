@@ -23,6 +23,55 @@ end
 -- main loop, controlled by config
 local actionRetries = 0
 local prevActionResult = true
+
+local function ensureCavebotConfigStorage()
+  if type(storage._configs) ~= "table" then
+    storage._configs = {}
+  end
+  if type(storage._configs.cavebot_configs) ~= "table" then
+    storage._configs.cavebot_configs = {
+      enabled = false,
+      selected = ""
+    }
+  end
+end
+
+local function getSelectedCavebotProfile()
+  ensureCavebotConfigStorage()
+  return storage._configs.cavebot_configs.selected
+end
+
+local function hasValidCavebotProfile()
+  local name = getSelectedCavebotProfile()
+  return type(name) == "string" and name:len() > 0 and name ~= "-"
+end
+
+local function hasRuntimeActions()
+  return ui.list and ui.list:getChildCount() > 0
+end
+
+local function setCavebotRuntimeEnabled(enabled)
+  ensureCavebotConfigStorage()
+  storage._configs.cavebot_configs.enabled = enabled == true
+  if configWidget and configWidget.switch then
+    configWidget.switch:setOn(enabled == true)
+  end
+
+  actionRetries = 0
+  CaveBot.resetWalking()
+  prevActionResult = true
+
+  if enabled then
+    if CaveBot.Recorder and CaveBot.Recorder.isOn and CaveBot.Recorder.isOn() and CaveBot.Recorder.disable then
+      CaveBot.Recorder.disable()
+    end
+    cavebotMacro.setOn(true)
+    cavebotMacro.delay = nil
+  else
+    cavebotMacro.setOff()
+  end
+end
+
 cavebotMacro = macro(20, function()
   if TargetBot and TargetBot.isActive() and not TargetBot.isCaveBotActionAllowed() then
     CaveBot.resetWalking()
@@ -91,8 +140,12 @@ config = Config.setup("cavebot_configs", configWidget, "cfg", function(name, ena
   end
 
   local currentActionIndex = ui.list:getChildIndex(ui.list:getFocusedChild())
+  if not data then
+    setCavebotRuntimeEnabled(enabled and hasRuntimeActions())
+    return
+  end
+
   ui.list:destroyChildren()
-  if not data then return cavebotMacro.setOff() end
 
   local cavebotConfig = nil
   for k,v in ipairs(data) do
@@ -175,12 +228,18 @@ CaveBot.setOn = function(val)
   if val == false then
     return CaveBot.setOff(true)
   end
+  if hasRuntimeActions() then
+    return setCavebotRuntimeEnabled(true)
+  end
   config.setOn()
 end
 
 CaveBot.setOff = function(val)
   if val == false then
     return CaveBot.setOn(true)
+  end
+  if hasRuntimeActions() then
+    return setCavebotRuntimeEnabled(false)
   end
   config.setOff()
 end
@@ -421,6 +480,10 @@ CaveBot.gotoLabel = function(label)
 end
 
 CaveBot.save = function()
+  if not hasValidCavebotProfile() then
+    return false
+  end
+
   local data = {}
   for index, child in ipairs(ui.list:getChildren()) do
     table.insert(data, {child.action, child.value})
@@ -441,6 +504,7 @@ CaveBot.save = function()
   end
   table.insert(data, {"extensions", json.encode(extension_data, 2)})
   config.save(data)
+  return true
 end
 
 CaveBotList = function()

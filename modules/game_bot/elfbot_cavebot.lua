@@ -3,6 +3,9 @@ elfCavebotWindow = nil
 local cavebotStatusEvent = nil
 local selectedProfile = nil
 local selectedWaypointIndex = nil
+local selectedLootEntry = nil
+local updatingProfileName = false
+local elfCavebotOptions = {}
 
 local function getBotWindow()
   if botWindow then return botWindow end
@@ -66,10 +69,25 @@ local function clearMapFlags(map)
   end
 end
 
-local function setProfileName(name)
+local function normalizeProfileName(name)
+  if type(name) ~= "string" then return nil end
+  name = name:gsub("^%s+", ""):gsub("%s+$", "")
+  if name == "" or name == "-" then return nil end
+  return name:gsub("%s+", "_")
+end
+
+local function setProfileName(name, force)
   local profileName = getElfCavebotChild("profileName")
   if profileName and name then
+    if not force and profileName.isFocused and profileName:isFocused() then
+      return
+    end
+    if not force and profileName.getText and profileName:getText() == name then
+      return
+    end
+    updatingProfileName = true
     profileName:setText(name)
+    updatingProfileName = false
   end
 end
 
@@ -117,7 +135,9 @@ local function refreshProfiles()
   list:destroyChildren()
 
   local data = callCavebotBridge("elfCavebotBridgeProfiles") or {}
-  selectedProfile = data.selected or selectedProfile
+  if data.selected and data.selected ~= "" and data.selected ~= "-" then
+    selectedProfile = data.selected
+  end
   if selectedProfile then
     setProfileName(selectedProfile)
   end
@@ -131,6 +151,37 @@ local function refreshProfiles()
       selectedProfile = name
       modules.game_bot.elfCavebotLoadProfile()
     end)
+  end
+end
+
+local function refreshLooting()
+  local list = getElfCavebotChild("lootingList")
+  if not list then return end
+
+  list:destroyChildren()
+  local data = callCavebotBridge("elfCavebotBridgeLooting") or {}
+  local count = 0
+
+  for index, item in ipairs(data.items or {}) do
+    count = count + 1
+    local text = string.format("Item %d x%d", tonumber(item.id) or 0, tonumber(item.count) or 1)
+    addListItem(list, text, "#d7d7d7", function(widget)
+      selectedLootEntry = { kind = "item", index = index }
+      list:focusChild(widget)
+    end)
+  end
+
+  for index, item in ipairs(data.containers or {}) do
+    count = count + 1
+    local text = string.format("Bag %d x%d", tonumber(item.id) or 0, tonumber(item.count) or 1)
+    addListItem(list, text, "#65d16e", function(widget)
+      selectedLootEntry = { kind = "container", index = index }
+      list:focusChild(widget)
+    end)
+  end
+
+  if count == 0 then
+    addListItem(list, "<New Entry>", "#d7d7d7")
   end
 end
 
@@ -223,10 +274,14 @@ local function updateCavebotStatus()
 
   refreshProfiles()
   local count = refreshWaypoints()
+  refreshLooting()
 
   local enabled = callCavebotBridge("elfCavebotBridgeIsOn") == true
   local recording = callCavebotBridge("elfCavebotBridgeRecorderIsOn") == true
-  local profile = callCavebotBridge("elfCavebotBridgeProfile") or selectedProfile or "-"
+  local profile = callCavebotBridge("elfCavebotBridgeProfile")
+  if not profile or profile == "-" or profile == "" then
+    profile = selectedProfile or "-"
+  end
   setStatusText(enabled, recording, profile, count)
 
   local startButton = getElfCavebotChild("startButton")
@@ -277,11 +332,69 @@ local function setupMap()
   end
 end
 
+local function setupOptions()
+  local function optionKey(id)
+    return "elf_cavebot_" .. id
+  end
+
+  local function loadOption(id, defaultValue)
+    local value = elfCavebotOptions[id]
+    if not value and g_settings and g_settings.get then
+      value = g_settings.get(optionKey(id))
+    end
+    return value or defaultValue
+  end
+
+  local function saveOption(id, value)
+    elfCavebotOptions[id] = value
+    if g_settings and g_settings.set then
+      g_settings.set(optionKey(id), value)
+      if g_settings.save then pcall(g_settings.save) end
+    end
+  end
+
+  local function setupCombo(id, options, defaultValue)
+    local combo = getElfCavebotChild(id)
+    if not combo then return end
+
+    if combo.clear then combo:clear() end
+    for _, option in ipairs(options) do
+      combo:addOption(option)
+    end
+
+    local value = loadOption(id, defaultValue)
+    if combo.isOption and not combo:isOption(value) then
+      value = defaultValue
+    end
+    saveOption(id, value)
+    if combo.setCurrentOption then
+      local ok = pcall(function() combo:setCurrentOption(value, true) end)
+      if not ok and combo.setCurrentIndex then
+        combo:setCurrentIndex(1, true)
+      end
+    elseif combo.setCurrentIndex then
+      combo:setCurrentIndex(1, true)
+    end
+
+    combo.onOptionChange = function(widget)
+      local current = widget:getCurrentOption()
+      if current then
+        saveOption(id, current.text or tostring(current))
+      end
+    end
+  end
+
+  setupCombo("useRopeCombo", {"Rope", "Elvenhair rope"}, "Rope")
+  setupCombo("useShovelCombo", {"Shovel", "Light shovel"}, "Shovel")
+  setupCombo("skipNodesCombo", {"Don't", "1 sq away", "2 sq away", "3 sq away", "4 sq away", "5 sq away", "6 sq away", "7 sq away", "8 sq away", "9 sq away", "10 sq away"}, "Don't")
+end
+
 function elfCavebotInit()
   elfCavebotWindow = g_ui.displayUI('elfcavebot')
   elfCavebotWindow:disable()
   elfCavebotWindow:hide()
   setupMap()
+  setupOptions()
 end
 
 function elfCavebotTerminate()
@@ -333,12 +446,28 @@ function elfCavebotRefresh()
 end
 
 function elfCavebotStart()
+  local beforeActions = callCavebotBridge("elfCavebotBridgeActions") or {}
+  local profileName = getElfCavebotChild("profileName")
+  local name = normalizeProfileName(profileName and profileName:getText() or selectedProfile)
+  if name then
+    selectedProfile = name
+    callCavebotBridge("elfCavebotBridgeSelectProfile", selectedProfile)
+  end
   callCavebotBridge("elfCavebotBridgeSetOn")
+  local afterActions = callCavebotBridge("elfCavebotBridgeActions") or {}
+  if #afterActions == 0 and #beforeActions > 0 then
+    callCavebotBridge("elfCavebotBridgeApplyActionsSnapshot", beforeActions)
+  end
   updateCavebotStatus()
 end
 
 function elfCavebotStop()
+  local beforeActions = callCavebotBridge("elfCavebotBridgeActions") or {}
   callCavebotBridge("elfCavebotBridgeSetOff")
+  local afterActions = callCavebotBridge("elfCavebotBridgeActions") or {}
+  if #afterActions == 0 and #beforeActions > 0 then
+    callCavebotBridge("elfCavebotBridgeApplyActionsSnapshot", beforeActions)
+  end
   updateCavebotStatus()
 end
 
@@ -359,31 +488,65 @@ end
 
 function elfCavebotSaveProfile()
   local profileName = getElfCavebotChild("profileName")
-  local name = profileName and profileName:getText() or selectedProfile
-  if not name or name:len() < 1 then
+  local name = normalizeProfileName(profileName and profileName:getText() or selectedProfile)
+  if not name then
     return
   end
-  selectedProfile = name:gsub("%s+", "_")
+  selectedProfile = name
   callCavebotBridge("elfCavebotBridgeSaveProfile", selectedProfile)
   updateCavebotStatus()
 end
 
+function elfCavebotAddLoot(kind)
+  local idField = getElfCavebotChild("lootIdField")
+  local countField = getElfCavebotChild("lootCountField")
+  local itemId = idField and tonumber(idField:getText()) or nil
+  local itemCount = countField and tonumber(countField:getText()) or 1
+  if not itemId or itemId < 100 then
+    return
+  end
+
+  if kind == "container" then
+    callCavebotBridge("elfCavebotBridgeAddLootContainer", itemId, itemCount or 1)
+  else
+    callCavebotBridge("elfCavebotBridgeAddLootItem", itemId, itemCount or 1)
+  end
+  selectedLootEntry = nil
+  refreshLooting()
+end
+
+function elfCavebotRemoveLoot()
+  if selectedLootEntry then
+    callCavebotBridge("elfCavebotBridgeRemoveLootEntry", selectedLootEntry.kind, selectedLootEntry.index)
+    selectedLootEntry = nil
+    refreshLooting()
+    return
+  end
+
+  local idField = getElfCavebotChild("lootIdField")
+  local itemId = idField and tonumber(idField:getText()) or nil
+  if itemId and itemId >= 100 then
+    callCavebotBridge("elfCavebotBridgeRemoveLootId", itemId)
+  end
+  refreshLooting()
+end
+
 function elfCavebotLoadProfile()
   local profileName = getElfCavebotChild("profileName")
-  local name = selectedProfile or (profileName and profileName:getText())
-  if not name or name:len() < 1 then
+  local name = normalizeProfileName(profileName and profileName:getText() or selectedProfile)
+  if not name then
     return
   end
   selectedProfile = name
   resetMapCamera()
-  callCavebotBridge("elfCavebotBridgeLoadProfile", name)
+  callCavebotBridge("elfCavebotBridgeLoadProfile", selectedProfile)
   updateCavebotStatus()
 end
 
 function elfCavebotDeleteProfile()
   local profileName = getElfCavebotChild("profileName")
-  local name = selectedProfile or (profileName and profileName:getText())
-  if not name or name:len() < 1 then
+  local name = normalizeProfileName(profileName and profileName:getText() or selectedProfile)
+  if not name then
     return
   end
   callCavebotBridge("elfCavebotBridgeDeleteProfile", name)
@@ -416,9 +579,36 @@ function elfCavebotAddUseWith()
   end)
 end
 
+function elfCavebotAddUseWithItem(itemId)
+  local pos = getPlayerPosition()
+  if not pos then return end
+  callCavebotBridge("elfCavebotBridgeAddRaw", "usewith", tostring(itemId) .. "," .. pos.x .. "," .. pos.y .. "," .. pos.z)
+  updateCavebotStatus()
+end
+
+function elfCavebotAddAction()
+  promptText("say:hi", "Action", function(value)
+    if not value or value:len() < 1 then return end
+    local action, actionValue = value:match("^%s*([^:]+)%s*:%s*(.+)$")
+    if action and actionValue then
+      callCavebotBridge("elfCavebotBridgeAddRaw", action, actionValue)
+    else
+      callCavebotBridge("elfCavebotBridgeAddRaw", "say", value)
+    end
+    updateCavebotStatus()
+  end)
+end
+
 function elfCavebotAddLabel()
   promptText("start", "Label", function(value)
     callCavebotBridge("elfCavebotBridgeAddRaw", "label", value)
+    updateCavebotStatus()
+  end)
+end
+
+function elfCavebotAddLure()
+  promptText("toggle", "Lure", function(value)
+    callCavebotBridge("elfCavebotBridgeAddRaw", "lure", value)
     updateCavebotStatus()
   end)
 end
@@ -430,6 +620,16 @@ end
 
 function elfCavebotRemoveSelected()
   callCavebotBridge("elfCavebotBridgeRemoveFocused")
+  updateCavebotStatus()
+end
+
+function elfCavebotClearWaypoints()
+  local actions = callCavebotBridge("elfCavebotBridgeActions") or {}
+  for i = #actions, 1, -1 do
+    callCavebotBridge("elfCavebotBridgeFocusAction", actions[i].index)
+    callCavebotBridge("elfCavebotBridgeRemoveFocused")
+  end
+  selectedWaypointIndex = nil
   updateCavebotStatus()
 end
 
@@ -477,15 +677,21 @@ modules.game_bot.elfCavebotToggleEditor = elfCavebotToggleEditor
 modules.game_bot.elfCavebotToggleConfig = elfCavebotToggleConfig
 modules.game_bot.elfCavebotSave = elfCavebotSave
 modules.game_bot.elfCavebotSaveProfile = elfCavebotSaveProfile
+modules.game_bot.elfCavebotAddLoot = elfCavebotAddLoot
+modules.game_bot.elfCavebotRemoveLoot = elfCavebotRemoveLoot
 modules.game_bot.elfCavebotLoadProfile = elfCavebotLoadProfile
 modules.game_bot.elfCavebotDeleteProfile = elfCavebotDeleteProfile
 modules.game_bot.elfCavebotToggleRecord = elfCavebotToggleRecord
 modules.game_bot.elfCavebotAddAt = elfCavebotAddAt
 modules.game_bot.elfCavebotAddCurrent = elfCavebotAddCurrent
 modules.game_bot.elfCavebotAddUseWith = elfCavebotAddUseWith
+modules.game_bot.elfCavebotAddUseWithItem = elfCavebotAddUseWithItem
+modules.game_bot.elfCavebotAddAction = elfCavebotAddAction
 modules.game_bot.elfCavebotAddLabel = elfCavebotAddLabel
+modules.game_bot.elfCavebotAddLure = elfCavebotAddLure
 modules.game_bot.elfCavebotEditSelected = elfCavebotEditSelected
 modules.game_bot.elfCavebotRemoveSelected = elfCavebotRemoveSelected
+modules.game_bot.elfCavebotClearWaypoints = elfCavebotClearWaypoints
 modules.game_bot.elfCavebotMoveSelected = elfCavebotMoveSelected
 modules.game_bot.elfCavebotCenterPlayer = elfCavebotCenterPlayer
 modules.game_bot.elfCavebotFocusMapPosition = elfCavebotFocusMapPosition

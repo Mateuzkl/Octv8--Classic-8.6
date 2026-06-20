@@ -409,6 +409,15 @@ local function getVBotProfileDirName()
   return "vBot_configs/profile_" .. profile
 end
 
+local function hasConfigSelection(dir)
+  return type(storage) == "table"
+    and type(storage._configs) == "table"
+    and type(storage._configs[dir]) == "table"
+    and type(storage._configs[dir].selected) == "string"
+    and storage._configs[dir].selected:len() > 0
+    and storage._configs[dir].selected ~= "-"
+end
+
 local function saveRuntimeConfigs()
   safeCall("save icon positions", function()
     if ImperialElfBot_SaveIconPositions then ImperialElfBot_SaveIconPositions() end
@@ -416,8 +425,12 @@ local function saveRuntimeConfigs()
   safeCall("save heal", function() if vBotConfigSave then vBotConfigSave("heal") end end)
   safeCall("save attack", function() if vBotConfigSave then vBotConfigSave("atk") end end)
   safeCall("save supply", function() if vBotConfigSave then vBotConfigSave("supply") end end)
-  safeCall("save cavebot", function() if CaveBot and CaveBot.save then CaveBot.save() end end)
-  safeCall("save targetbot", function() if TargetBot and TargetBot.save then TargetBot.save() end end)
+  safeCall("save cavebot", function()
+    if CaveBot and CaveBot.save and hasConfigSelection("cavebot_configs") then CaveBot.save() end
+  end)
+  safeCall("save targetbot", function()
+    if TargetBot and TargetBot.save and hasConfigSelection("targetbot_configs") then TargetBot.save() end
+  end)
   safeCall("save custom hotkeys", function()
     if elfHotkeysSave then
       elfHotkeysSave(true)
@@ -793,7 +806,7 @@ if modules and modules.game_bot then
   local function elfCavebotValidProfileName(name)
     if type(name) ~= "string" then return nil end
     name = name:gsub("%s+", "_")
-    if name:len() == 0 or name:len() >= 30 or name:find("/") or name:find("\\") then
+    if name == "-" or name:len() == 0 or name:len() >= 30 or name:find("/") or name:find("\\") then
       return nil
     end
     return name
@@ -821,6 +834,17 @@ if modules and modules.game_bot then
     if CaveBot and CaveBot.setOn then
       pcall(CaveBot.setOn)
     end
+  end
+
+  modules.game_bot.elfCavebotBridgeSelectProfile = function(name)
+    name = elfCavebotValidProfileName(name)
+    if not name or not Config or not Config.load then return false end
+    local data = Config.load("cavebot_configs", name)
+    if type(data) ~= "table" then return false end
+    if type(storage._configs) ~= "table" then storage._configs = {} end
+    if type(storage._configs.cavebot_configs) ~= "table" then storage._configs.cavebot_configs = {} end
+    storage._configs.cavebot_configs.selected = name
+    return true
   end
 
   modules.game_bot.elfCavebotBridgeSetOff = function()
@@ -852,9 +876,16 @@ if modules and modules.game_bot then
   end
 
   modules.game_bot.elfCavebotBridgeSave = function()
+    local name = nil
+    if storage._configs and storage._configs.cavebot_configs then
+      name = elfCavebotValidProfileName(storage._configs.cavebot_configs.selected)
+    end
+    if not name then return false end
     if CaveBot and CaveBot.save then
       pcall(CaveBot.save)
+      return true
     end
+    return false
   end
 
   modules.game_bot.elfCavebotBridgeRecorderIsOn = function()
@@ -916,6 +947,36 @@ if modules and modules.game_bot then
     return result
   end
 
+  modules.game_bot.elfCavebotBridgeApplyActionsSnapshot = function(actions)
+    local list = elfCavebotActionList()
+    if not list or type(actions) ~= "table" or not CaveBot or not CaveBot.addAction then
+      return false
+    end
+
+    list:destroyChildren()
+    local focusWidget = nil
+    for _, entry in ipairs(actions) do
+      if type(entry) == "table" and entry.action and entry.value and entry.action ~= "" then
+        local ok, widget = pcall(CaveBot.addAction, entry.action, entry.value, false)
+        if ok and widget then
+          focusWidget = focusWidget or widget
+          if entry.focused then
+            focusWidget = widget
+          end
+        end
+      end
+    end
+
+    if focusWidget then
+      list:focusChild(focusWidget)
+      list:ensureChildVisible(focusWidget)
+    end
+    if CaveBot.resetWalking then
+      pcall(CaveBot.resetWalking)
+    end
+    return true
+  end
+
   modules.game_bot.elfCavebotBridgeFocusAction = function(index)
     local list = elfCavebotActionList()
     if not list then return false end
@@ -929,9 +990,6 @@ if modules and modules.game_bot then
   modules.game_bot.elfCavebotBridgeAddRaw = function(action, value)
     if not CaveBot or not CaveBot.addAction then return false end
     local widget = CaveBot.addAction(action, value, true)
-    if widget and CaveBot.save then
-      CaveBot.save()
-    end
     return widget ~= nil
   end
 
@@ -970,7 +1028,6 @@ if modules and modules.game_bot then
     local action = list and list:getFocusedChild()
     if not action then return false end
     action:destroy()
-    if CaveBot and CaveBot.save then CaveBot.save() end
     return true
   end
 
@@ -986,7 +1043,6 @@ if modules and modules.game_bot then
     list:moveChildToIndex(action, nextIndex)
     list:focusChild(action)
     list:ensureChildVisible(action)
-    if CaveBot and CaveBot.save then CaveBot.save() end
     return true
   end
 
@@ -996,8 +1052,51 @@ if modules and modules.game_bot then
     if type(storage._configs) ~= "table" then storage._configs = {} end
     if type(storage._configs.cavebot_configs) ~= "table" then storage._configs.cavebot_configs = {} end
     storage._configs.cavebot_configs.selected = name
+    storage._configs.cavebot_configs.enabled = false
     Config.save("cavebot_configs", name, elfCavebotCollectData(), "cfg")
     return true
+  end
+
+  modules.game_bot.elfCavebotBridgeLooting = function()
+    if TargetBot and TargetBot.Looting and TargetBot.Looting.getConfig then
+      local ok, data = pcall(TargetBot.Looting.getConfig)
+      if ok and type(data) == "table" then
+        return data
+      end
+    end
+    return { items = {}, containers = {} }
+  end
+
+  modules.game_bot.elfCavebotBridgeAddLootItem = function(itemId, count)
+    if TargetBot and TargetBot.Looting and TargetBot.Looting.addLootItem then
+      local ok, result = pcall(TargetBot.Looting.addLootItem, itemId, count)
+      return ok and result == true
+    end
+    return false
+  end
+
+  modules.game_bot.elfCavebotBridgeAddLootContainer = function(itemId, count)
+    if TargetBot and TargetBot.Looting and TargetBot.Looting.addLootContainer then
+      local ok, result = pcall(TargetBot.Looting.addLootContainer, itemId, count)
+      return ok and result == true
+    end
+    return false
+  end
+
+  modules.game_bot.elfCavebotBridgeRemoveLootEntry = function(kind, index)
+    if TargetBot and TargetBot.Looting and TargetBot.Looting.removeLootEntry then
+      local ok, result = pcall(TargetBot.Looting.removeLootEntry, kind, index)
+      return ok and result == true
+    end
+    return false
+  end
+
+  modules.game_bot.elfCavebotBridgeRemoveLootId = function(itemId)
+    if TargetBot and TargetBot.Looting and TargetBot.Looting.removeLootId then
+      local ok, result = pcall(TargetBot.Looting.removeLootId, itemId)
+      return ok and result == true
+    end
+    return false
   end
 
   modules.game_bot.elfCavebotBridgeLoadProfile = function(name)
@@ -1390,7 +1489,9 @@ if rootWidget then
         TargetBot.Creature.edit(nil, function(newConfig)
           if newConfig then
             TargetBot.Creature.addConfig(newConfig, true)
-            TargetBot.save()
+            if hasConfigSelection("targetbot_configs") then
+              TargetBot.save()
+            end
           end
         end)
       else
