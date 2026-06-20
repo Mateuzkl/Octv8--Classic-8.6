@@ -56,6 +56,9 @@ local function normalizeElfLanguage(language)
   if language == "en" or language == "eng" or language == "english" then
     return "en"
   end
+  if language == "pt" or language == "br" or language == "portuguese" or language == "portugues" then
+    return "pt"
+  end
   return "en"
 end
 
@@ -75,6 +78,9 @@ local function setElfLanguage(language)
   if type(storage) == "table" then
     storage.elfbotLanguage = normalizeElfLanguage(language)
     storage.elfbotLanguageExplicit = true
+  end
+  if type(saveConfig) == "function" then
+    pcall(saveConfig)
   end
   return getElfLanguage()
 end
@@ -1491,6 +1497,12 @@ local function syncAddIconState(iconId, enabled)
     storage._icons[iconId] = {}
   end
   storage._icons[iconId].enabled = enabled == true
+end
+
+local function savePainelProfileStorage()
+  if type(saveConfig) == "function" then
+    pcall(saveConfig)
+  end
 end
 
 local function ensureIconStorageConfig(iconId)
@@ -4862,6 +4874,14 @@ end
 
 local ICON_TEXT_MAX_CHARS = 10
 
+local function painelProfileLoaded()
+  if type(ImperialElfBot_IsProfileLoaded) == "function" then
+    local ok, loaded = pcall(ImperialElfBot_IsProfileLoaded)
+    return ok and loaded == true
+  end
+  return modules and modules.game_bot and modules.game_bot.elfbotProfileLoadedThisSession == true
+end
+
 local function sanitizeIconText(value)
   if value == nil then
     return ""
@@ -5469,6 +5489,7 @@ local function applyToggle(definition, enabled, silent)
   end
 
   updateRowVisual(definition.key)
+  savePainelProfileStorage()
 
   if not silent then
     showMessage(string.format("[Painel] %s: %s", definition.title, moduleState.enabled and "ON" or "OFF"))
@@ -5488,6 +5509,7 @@ local function setIconVisibility(definition, visible, silent)
   updateIconVisual(definition.key)
   updateRowVisual(definition.key)
   updateToggleAllVisibilityButton()
+  savePainelProfileStorage()
 
   if not silent then
     showMessage(string.format("[Painel] %s: %s", definition.title, moduleState.showIcon and "SHOW" or "HIDE"))
@@ -6567,6 +6589,9 @@ for _, definition in ipairs(moduleDefinitions) do
 end
 
 local function createScreenIcon(definition)
+  if not painelProfileLoaded() then
+    return
+  end
   if type(addIcon) ~= "function" then
     return
   end
@@ -6604,6 +6629,7 @@ local function createScreenIcon(definition)
     local posX, posY = syncIconPositionPercentFromWidget(targetWidget or iconWidget, iconId)
     moduleState.iconPosX = posX
     moduleState.iconPosY = posY
+    savePainelProfileStorage()
   end
 
   iconWidget.onDragEnter = function(widget, mousePos)
@@ -6654,6 +6680,28 @@ for _, definition in ipairs(moduleDefinitions) do
   createScreenIcon(definition)
 end
 
+function ImperialElfBot_SaveIconPositions()
+  if not painelProfileLoaded() then
+    return false
+  end
+  local changed = false
+  for _, definition in ipairs(moduleDefinitions) do
+    local iconWidget = state.icons[definition.key]
+    if iconWidget then
+      local moduleState = ensureModuleState(definition)
+      local iconId = "PIC_" .. definition.key
+      local posX, posY = syncIconPositionPercentFromWidget(iconWidget, iconId)
+      moduleState.iconPosX = posX
+      moduleState.iconPosY = posY
+      changed = true
+    end
+  end
+  if changed then
+    savePainelProfileStorage()
+  end
+  return changed
+end
+
 local function createRunner(definition)
   local moduleState = ensureModuleState(definition)
   local isAlwaysSyncedControl = alwaysSyncedControlModules[definition.key] == true
@@ -6701,12 +6749,12 @@ local function createRunner(definition)
       updateIconVisual(definition.key)
     end
   end)
-  if moduleState.enabled or definition.tickWhenDisabled == true then
+  if painelProfileLoaded() and (moduleState.enabled or definition.tickWhenDisabled == true) then
     runner.setOn()
   else
     runner.setOff()
   end
-  if moduleState.enabled and not isAlwaysSyncedControl then
+  if painelProfileLoaded() and moduleState.enabled and not isAlwaysSyncedControl then
     local runtimeRef = state.moduleRuntime and state.moduleRuntime[definition.key]
     if type(runtimeRef) ~= "table" then
       runtimeRef = {}
@@ -6741,8 +6789,9 @@ for _, definition in ipairs(moduleDefinitions) do
 end
 
 -- Apply saved desired state before external synchronization to avoid boot-time reactivation.
-for _, definition in ipairs(moduleDefinitions) do
-  if alwaysSyncedControlModules[definition.key] == true and type(definition.getExternalEnabled) == "function" then
+if painelProfileLoaded() then
+  for _, definition in ipairs(moduleDefinitions) do
+    if alwaysSyncedControlModules[definition.key] == true and type(definition.getExternalEnabled) == "function" then
     local moduleState = ensureModuleState(definition)
     local runtimeRef = state.moduleRuntime and state.moduleRuntime[definition.key]
     if type(runtimeRef) ~= "table" then
@@ -6770,6 +6819,7 @@ for _, definition in ipairs(moduleDefinitions) do
       state.moduleRuntime[definition.key] = runtimeRef
     end
   end
+  end
 end
 
 local externalSyncDefinitions = {}
@@ -6779,11 +6829,16 @@ for _, definition in ipairs(moduleDefinitions) do
   end
 end
 
-for _, definition in ipairs(externalSyncDefinitions) do
-  syncStateFromExternal(definition)
+if painelProfileLoaded() then
+  for _, definition in ipairs(externalSyncDefinitions) do
+    syncStateFromExternal(definition)
+  end
 end
 
 state.runners.__externalSync = macro(500, function()
+  if not painelProfileLoaded() then
+    return
+  end
   for _, definition in ipairs(externalSyncDefinitions) do
     syncStateFromExternal(definition)
   end
@@ -7584,11 +7639,15 @@ function ensureSwapProfiles()
   end
 
   if not swapProfileDebugState.bootLogged then
-    print("BOOT Active profile loaded: " .. activeId)
+    if painelProfileLoaded() then
+      print("BOOT Active profile loaded: " .. activeId)
+    end
     swapProfileDebugState.bootLogged = true
   end
   if swapProfileDebugState.lastSanitizedProfile ~= activeId then
-    print("SANITIZE Active profile after sanitize: " .. activeId)
+    if painelProfileLoaded() then
+      print("SANITIZE Active profile after sanitize: " .. activeId)
+    end
     swapProfileDebugState.lastSanitizedProfile = activeId
   end
 
@@ -7639,7 +7698,9 @@ function applySwapProfileState(profileId)
   if id == "" then
     return
   end
-  print("APPLY Applying profile: " .. id)
+  if painelProfileLoaded() then
+    print("APPLY Applying profile: " .. id)
+  end
   local cfg = profiles.configs[id]
   local data = type(cfg) == "table" and cfg.data or nil
   if type(data) ~= "table" then
@@ -9022,19 +9083,19 @@ end
 
 local swapContent = swapSetupWindow.contentPanel.content
 
-local function getSwapScenarioData(setKey)
+function getSwapScenarioData(setKey)
   swapSettings.scenarios = type(swapSettings.scenarios) == "table" and swapSettings.scenarios or {}
   swapSettings.scenarios[setKey] = type(swapSettings.scenarios[setKey]) == "table" and swapSettings.scenarios[setKey] or {}
   return swapSettings.scenarios[setKey]
 end
 
-local function getSwapScenarioNameList(setKey, listKey)
+function getSwapScenarioNameList(setKey, listKey)
   local scenarioData = getSwapScenarioData(setKey)
   scenarioData[listKey] = normalizeSwapNameList(scenarioData[listKey] or {})
   return scenarioData[listKey]
 end
 
-local function addNamesToSwapScenario(setKey, listKey, textValue)
+function addNamesToSwapScenario(setKey, listKey, textValue)
   local list = getSwapScenarioNameList(setKey, listKey)
   local existing = buildSwapNameLookup(list)
   local added = 0
@@ -9071,7 +9132,7 @@ local function addNamesToSwapScenario(setKey, listKey, textValue)
   return added
 end
 
-local function removeNameFromSwapScenario(setKey, listKey, index)
+function removeNameFromSwapScenario(setKey, listKey, index)
   local list = getSwapScenarioNameList(setKey, listKey)
   if index < 1 or index > #list then
     return false
@@ -9081,7 +9142,7 @@ local function removeNameFromSwapScenario(setKey, listKey, index)
   return true
 end
 
-local function clearSwapScenarioNames(setKey, listKey)
+function clearSwapScenarioNames(setKey, listKey)
   local list = getSwapScenarioNameList(setKey, listKey)
   if #list <= 0 then
     return false
@@ -9094,11 +9155,11 @@ local function clearSwapScenarioNames(setKey, listKey)
 end
 
 local refreshSwapNamesWindow
-local function getSwapNamesWindowWidget(childId)
+function getSwapNamesWindowWidget(childId)
   return findSwapWidgetByIdRecursive(swapNamesWindow, childId)
 end
 
-local function isSwapNamesWindowReady()
+function isSwapNamesWindowReady()
   if not swapNamesWindow then
     return false
   end
@@ -9113,7 +9174,7 @@ local function isSwapNamesWindowReady()
     and getSwapNamesWindowWidget("countLabel")
 end
 
-local function bindSwapNamesWindowHandlers()
+function bindSwapNamesWindowHandlers()
   if not swapNamesWindow or swapNamesWindow.__picNamesHandlersBound == true then
     return
   end
@@ -9170,7 +9231,7 @@ local function bindSwapNamesWindowHandlers()
   swapNamesWindow.__picNamesHandlersBound = true
 end
 
-local function ensureSwapNamesWindow()
+function ensureSwapNamesWindow()
   if swapNamesWindow and (not swapNamesWindow.isDestroyed or not swapNamesWindow:isDestroyed()) then
     if isSwapNamesWindowReady() then
       bindSwapNamesWindowHandlers()
@@ -9424,7 +9485,7 @@ Panel
   end
 end
 
-local function openSwapNamesWindow(setKey, listKey, titleText, hintText)
+function openSwapNamesWindow(setKey, listKey, titleText, hintText)
   if not ensureSwapNamesWindow() then
     swapMessage("[SwapSet] Janela de nomes nao disponivel.", "#ff8080")
     return
@@ -9456,7 +9517,7 @@ local function openSwapNamesWindow(setKey, listKey, titleText, hintText)
 end
 
 local swapNamesEditorStyleLoaded = false
-local function ensureSwapNamesEditorStyle()
+function ensureSwapNamesEditorStyle()
   if swapNamesEditorStyleLoaded then
     return true
   end
@@ -9531,7 +9592,7 @@ SwapSetNamesEditorWindow < MainWindow
   return swapNamesEditorStyleLoaded
 end
 
-local function buildSwapNamesListFromText(textValue)
+function buildSwapNamesListFromText(textValue)
   local list = {}
   local seen = {}
   for rawName in string.gmatch(tostring(textValue or ""), "[^\r\n,;]+") do
@@ -9548,7 +9609,7 @@ local function buildSwapNamesListFromText(textValue)
   return list
 end
 
-local function closeSwapNamesEditorWindow()
+function closeSwapNamesEditorWindow()
   if not swapNamesEditorWindow then
     return
   end
@@ -9565,7 +9626,7 @@ local function closeSwapNamesEditorWindow()
   swapNamesEditorWindow = nil
 end
 
-local function openSwapNamesEditorWindow(setKey, listKey, titleText, hintText)
+function openSwapNamesEditorWindow(setKey, listKey, titleText, hintText)
   local parent = rootWidget or (g_ui and g_ui.getRootWidget and g_ui.getRootWidget())
   if not parent then
     warn("[SwapSet] Falha ao abrir editor de nomes: rootWidget indisponivel.")
@@ -10050,7 +10111,7 @@ end
 buildEqRowsForSet("SET1")
 buildEqRowsForSet("SET2")
 
-local function renderSwapProfileList()
+function renderSwapProfileList()
   local profiles = ensureSwapProfiles()
   local combo = swapProfileRow.profilesCombo
   combo:clearOptions()
@@ -10204,16 +10265,20 @@ if swapMainUi and swapMainUi.setTooltip then
 end
 
 normalizeSwapSetConfig()
-initialProfileId = getSelectedSwapProfileId()
-initialProfiles = ensureSwapProfiles()
-if initialProfileId ~= "" and type(initialProfiles.configs[initialProfileId]) == "table" and type(initialProfiles.configs[initialProfileId].data) == "table" then
-  applySwapProfileState(initialProfileId)
-else
-  saveSwapProfileState(initialProfileId)
+if painelProfileLoaded() then
+  initialProfileId = getSelectedSwapProfileId()
+  initialProfiles = ensureSwapProfiles()
+  if initialProfileId ~= "" and type(initialProfiles.configs[initialProfileId]) == "table" and type(initialProfiles.configs[initialProfileId].data) == "table" then
+    applySwapProfileState(initialProfileId)
+  else
+    saveSwapProfileState(initialProfileId)
+  end
 end
 renderSwapProfileList()
 refreshSwapUi()
-swapMessage("Auto SwapSet carregado.", "#9dd1ff")
+if painelProfileLoaded() then
+  swapMessage("ElfBot: Auto SwapSet loaded.", "#9dd1ff")
+end
 
 function consumePainelSwapSetBridge()
   local bridge = storage and storage.painelDeIconesBridge
@@ -10236,8 +10301,13 @@ function consumePainelSwapSetBridge()
   refreshSwapUi()
 end
 
-consumePainelSwapSetBridge()
+if painelProfileLoaded() then
+  consumePainelSwapSetBridge()
+end
 swapBridgeSyncMacro = macro(250, function()
+  if not painelProfileLoaded() then
+    return
+  end
   consumePainelSwapSetBridge()
 end)
 
@@ -10247,6 +10317,9 @@ swapAutoRuntime = {
 }
 
 swapAutoMacro = macro(500, function()
+  if not painelProfileLoaded() then
+    return
+  end
   if swapSettings.autoSwapEnabled ~= true then
     return
   end

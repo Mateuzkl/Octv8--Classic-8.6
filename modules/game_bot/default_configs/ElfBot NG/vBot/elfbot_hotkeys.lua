@@ -21,6 +21,8 @@ elfHotkeysRunning = false
 elfHotkeysText = ""
 elfHotkeysLastSpell = 0
 elfHotkeysLastUse = 0
+elfHotkeysLastCount = elfHotkeysLastCount or 0
+elfHotkeysLastFired = false
 
 local elfHotkeysNextEventId = 0
 
@@ -85,6 +87,8 @@ auto 1000 if [$itemcount.268 <= 10] playsound lowpots.wav]]
 }
 
 local foodIds = {3725, 3723, 3724, 3726, 3727, 3728, 3729, 3730, 3731, 3732, 3582, 3577, 3578, 3579, 3580, 3581, 3592, 3593, 3594, 3595, 3600, 3606, 3607}
+local botStartedAtMs = tonumber(time) or os.time() * 1000
+local saveProfileStorage = saveConfig
 
 local function msg(text)
   if modules.game_textmessage then
@@ -169,8 +173,227 @@ end
 
 local function hasState(state)
   local player = getPlayer()
-  if not player or not PlayerStates or not state then return false end
+  if not player or not state then return false end
   return bit.band(player:getStates(), state) > 0
+end
+
+local function nowMs()
+  return tonumber(time) or os.time() * 1000
+end
+
+local function boolNumber(value)
+  return value and 1 or 0
+end
+
+local skillIndexByName = {
+  fist = 0,
+  club = 1,
+  sword = 2,
+  axe = 3,
+  distance = 4,
+  shielding = 5,
+  fishing = 6
+}
+
+local function getSkillValue(player, kind, skillName)
+  if skillName == "mlevel" or skillName == "magic" or skillName == "magiclevel" then
+    if kind == "skillpc" and player.getMagicLevelPercent then return player:getMagicLevelPercent() or 0 end
+    if kind == "skilltime" then return 0 end
+    return player:getMagicLevel() or 0
+  end
+  local skillId = skillIndexByName[tostring(skillName or ""):lower()]
+  if skillId == nil then return 0 end
+  if kind == "skillpc" and player.getSkillLevelPercent then return player:getSkillLevelPercent(skillId) or 0 end
+  if kind == "skilltime" then return 0 end
+  if player.getSkillLevel then return player:getSkillLevel(skillId) or 0 end
+  return 0
+end
+
+local function screenValue(part)
+  local root = g_ui and g_ui.getRootWidget and g_ui.getRootWidget()
+  local rect = root and root.getRect and root:getRect()
+  if not rect then return 0 end
+  part = tostring(part or ""):lower()
+  if part == "screenleft" then return rect.x or 0 end
+  if part == "screenright" then return (rect.x or 0) + (rect.width or 0) end
+  if part == "screentop" then return rect.y or 0 end
+  if part == "screenbottom" then return (rect.y or 0) + (rect.height or 0) end
+  return 0
+end
+
+local function modifierPressed(name)
+  if not g_keyboard then return false end
+  name = tostring(name or ""):lower()
+  if name == "ctrl" and g_keyboard.isCtrlPressed then return g_keyboard.isCtrlPressed() end
+  if name == "shift" and g_keyboard.isShiftPressed then return g_keyboard.isShiftPressed() end
+  if name == "alt" and g_keyboard.isAltPressed then return g_keyboard.isAltPressed() end
+  return false
+end
+
+local function keyPressed(keyId)
+  keyId = tonumber(keyId)
+  if not keyId or not g_keyboard or not g_keyboard.isKeyPressed then return false end
+  return g_keyboard.isKeyPressed(keyId)
+end
+
+local function sameName(left, right)
+  return tostring(left or ""):lower():trim() == tostring(right or ""):lower():trim()
+end
+
+local function listHasName(list, name)
+  if type(list) ~= "table" then return false end
+  for _, entry in pairs(list) do
+    if sameName(entry, name) then return true end
+  end
+  return false
+end
+
+local function relationByName(relation, name)
+  relation = tostring(relation or ""):lower()
+  if relation == "isfriend" and type(isFriend) == "function" then
+    local ok, result = pcall(isFriend, name)
+    if ok and result ~= nil then return result == true end
+  elseif relation == "isenemy" and type(isEnemy) == "function" then
+    local ok, result = pcall(isEnemy, name)
+    if ok and result ~= nil then return result == true end
+  end
+
+  local playerList = type(storage) == "table" and type(storage.playerList) == "table" and storage.playerList or {}
+  if relation == "isfriend" then return listHasName(playerList.friendList, name) end
+  if relation == "isenemy" then return listHasName(playerList.enemyList, name) end
+  if relation == "issubfriend" then return listHasName(playerList.subFriendList or playerList.subfriendList, name) end
+  if relation == "issubenemy" then return listHasName(playerList.subEnemyList or playerList.subenemyList, name) end
+  if relation == "isleader" then return listHasName(storage and storage.partyLeaders, name) end
+  return false
+end
+
+local slotByElfName = {
+  ringslot = InventorySlotFinger,
+  beltslot = InventorySlotAmmo,
+  ammoslot = InventorySlotAmmo,
+  backslot = InventorySlotBack,
+  rhandslot = InventorySlotRight,
+  lhandslot = InventorySlotLeft,
+  amuletslot = InventorySlotNeck,
+  bootsslot = InventorySlotFeet,
+  legsslot = InventorySlotLeg,
+  chestslot = InventorySlotBody,
+  headslot = InventorySlotHead
+}
+
+local function slotValue(slotName, property)
+  local player = getPlayer()
+  local slot = slotByElfName[tostring(slotName or ""):lower()]
+  if not player or not slot then return 0 end
+  local item = player:getInventoryItem(slot)
+  if not item then return 0 end
+  property = tostring(property or ""):lower()
+  if property == "id" then return item:getId() or 0 end
+  if property == "count" then return math.max(1, item:getCount() or 1) end
+  return 0
+end
+
+local function creatureValue(creature, property)
+  if not creature then return 0 end
+  property = tostring(property or ""):lower()
+  if property == "name" and creature.getName then return creature:getName() or "" end
+  if property == "id" and creature.getId then return creature:getId() or 0 end
+  if property == "hp" and creature.getHealth then return creature:getHealth() or 0 end
+  if property == "maxhp" and creature.getMaxHealth then return creature:getMaxHealth() or 0 end
+  if property == "mp" and creature.getMana then return creature:getMana() or 0 end
+  if property == "maxmp" and creature.getMaxMana then return creature:getMaxMana() or 0 end
+  if property == "hppc" then return creature:getHealthPercent() or 0 end
+  if property == "speed" and creature.getSpeed then return creature:getSpeed() or 0 end
+  if property == "dir" and creature.getDirection then return creature:getDirection() or 0 end
+  if property == "outfit" and creature.getOutfit then
+    local outfit = creature:getOutfit()
+    return type(outfit) == "table" and (outfit.type or outfit.lookType or 0) or 0
+  end
+  if property == "skull" and creature.getSkull then return creature:getSkull() or 0 end
+  if property == "party" and creature.getShield then return creature:getShield() or 0 end
+  if property == "warbanner" and creature.getEmblem then return creature:getEmblem() or 0 end
+  if property == "posx" then
+    local pos = creature:getPosition()
+    return pos and pos.x or 0
+  end
+  if property == "posy" then
+    local pos = creature:getPosition()
+    return pos and pos.y or 0
+  end
+  if property == "posz" then
+    local pos = creature:getPosition()
+    return pos and pos.z or 0
+  end
+  if property == "distance" then
+    local player = getPlayer()
+    return player and dist(player:getPosition(), creature:getPosition()) or 999
+  end
+  if property == "distx" then
+    local player = getPlayer()
+    local playerPos = player and player:getPosition()
+    local creaturePos = creature:getPosition()
+    return playerPos and creaturePos and math.abs(playerPos.x - creaturePos.x) or 999
+  end
+  if property == "disty" then
+    local player = getPlayer()
+    local playerPos = player and player:getPosition()
+    local creaturePos = creature:getPosition()
+    return playerPos and creaturePos and math.abs(playerPos.y - creaturePos.y) or 999
+  end
+  if property == "isplayer" then return boolNumber(creature.isPlayer and creature:isPlayer()) end
+  if property == "ismonster" then return boolNumber(creature.isMonster and creature:isMonster()) end
+  if property == "isnpc" then return boolNumber(creature.isNpc and creature:isNpc()) end
+  if property == "isonscreen" then
+    local player = getPlayer()
+    return boolNumber(player and creature:getPosition().z == player:getPosition().z)
+  end
+  if property == "isshootable" then return boolNumber(creature.canShoot and creature:canShoot()) end
+  if property == "isparalyzed" then return boolNumber(creature.getStates and bit.band(creature:getStates(), Paralyze or 0) > 0) end
+  if property == "isenemy" then return boolNumber(type(isEnemy) == "function" and isEnemy(creature)) end
+  if property == "isfriend" then return boolNumber(type(isFriend) == "function" and isFriend(creature)) end
+  if property == "haslookinfo" then return 0 end
+  if property == "issubenemy" or property == "issubfriend" or property == "isleader" then return 0 end
+  return 0
+end
+
+local function itemDisplayName(item)
+  if not item then return "" end
+  if item.getName then
+    local ok, name = pcall(function() return item:getName() end)
+    if ok and name and name ~= "" then return tostring(name):lower() end
+  end
+  if Item and Item.create and item.getId then
+    local ok, market = pcall(function()
+      local created = Item.create(item:getId())
+      return created and created.getMarketData and created:getMarketData()
+    end)
+    if ok and market and market.name then return tostring(market.name):lower() end
+  end
+  return ""
+end
+
+local function itemCountByName(itemName)
+  itemName = tostring(itemName or ""):lower():trim()
+  if itemName == "" then return 0 end
+  local total = 0
+  local function addItem(item)
+    if item and itemDisplayName(item) == itemName then
+      total = total + math.max(1, item:getCount() or 1)
+    end
+  end
+  for _, container in pairs(g_game.getContainers() or {}) do
+    for _, item in ipairs(container:getItems() or {}) do
+      addItem(item)
+    end
+  end
+  local player = getPlayer()
+  if player then
+    for _, slot in pairs(slotByElfName) do
+      addItem(player:getInventoryItem(slot))
+    end
+  end
+  elfHotkeysLastCount = total
+  return total
 end
 
 local function itemCount(itemId)
@@ -189,7 +412,69 @@ local function itemCount(itemId)
   if item then
     total = total + math.max(1, item:getCount())
   end
+  elfHotkeysLastCount = total
   return total
+end
+
+local function topItemId(x, y, z)
+  local tile = g_map.getTile({x = tonumber(x) or 0, y = tonumber(y) or 0, z = tonumber(z) or 0})
+  local thing = tile and tile.getTopUseThing and tile:getTopUseThing()
+  return thing and thing.getId and thing:getId() or 0
+end
+
+local function isTileItem(x, y, z, itemId)
+  local tile = g_map.getTile({x = tonumber(x) or 0, y = tonumber(y) or 0, z = tonumber(z) or 0})
+  itemId = tonumber(itemId) or 0
+  if not tile or itemId <= 0 then return 0 end
+  for _, item in ipairs(tile:getItems() or {}) do
+    if item and item.getId and item:getId() == itemId then return 1 end
+  end
+  return 0
+end
+
+local function screenCountByName(creatureName)
+  creatureName = tostring(creatureName or ""):lower():trim()
+  if creatureName == "" then return 0 end
+  local count = 0
+  local player = getPlayer()
+  for _, creature in ipairs(getSpectators()) do
+    if creature and creature ~= player and creature.getName and sameName(creature:getName(), creatureName) then
+      count = count + 1
+    end
+  end
+  return count
+end
+
+local creatureAliases = {
+  target = true,
+  attacked = true,
+  attacker = true,
+  pk = true,
+  lastdmger = true,
+  pattacker = true,
+  mattacker = true,
+  enemy = true,
+  friend = true,
+  subenemy = true,
+  subfriend = true,
+  anyenemy = true,
+  anyfriend = true,
+  coretarget = true,
+  triggertarget = true,
+  autoaimtarget = true,
+  followed = true,
+  self = true
+}
+
+local function resolveCreatureAlias(alias)
+  alias = tostring(alias or ""):lower()
+  if alias == "self" then
+    return getPlayer()
+  end
+  if alias == "followed" and g_game.getFollowingCreature then
+    return g_game.getFollowingCreature()
+  end
+  return g_game.getAttackingCreature and g_game.getAttackingCreature() or nil
 end
 
 local function varValue(var)
@@ -204,14 +489,60 @@ local function varValue(var)
     return math.floor((player:getMana() or 0) * 100 / maxMana)
   end
   if var == "hp" then return player:getHealth() or 0 end
+  if var == "maxhp" then return player:getMaxHealth() or 0 end
   if var == "mp" or var == "mana" then return player:getMana() or 0 end
+  if var == "maxmp" then return player:getMaxMana() or 0 end
   if var == "cap" then return player:getFreeCapacity() or player:getCapacity() or 0 end
-  if var == "pzone" then return hasState(PlayerStates.Pz) and 1 or 0 end
-  if var == "paralyzed" then return hasState(PlayerStates.Paralyze) and true or false end
-  if var == "hasted" then return hasState(PlayerStates.Haste) and 1 or 0 end
-  if var == "manashielded" then return hasState(PlayerStates.ManaShield) and 1 or 0 end
+  if var == "exp" then return player:getExperience() or 0 end
+  if var == "level" then return player:getLevel() or 0 end
+  if var == "mlevel" then return player:getMagicLevel() or 0 end
+  if var == "name" then return player:getName() or "" end
+  if var == "pkname" or var == "lastdmgername" then
+    local target = g_game.getAttackingCreature()
+    return target and target.getName and target:getName() or ""
+  end
+  if var == "count" then return elfHotkeysLastCount or 0 end
+  if var == "dmgs" or var == "lastdmg" or var == "lastdmgtype" or var == "poisondmg" then return 0 end
+  if var == "screenleft" or var == "screenright" or var == "screentop" or var == "screenbottom" then return screenValue(var) end
+  if var == "exptnl" or var == "exph" or var == "expgained" or var:match("^exptolevel%.%d+$") or var:match("^timetolevel%.%d+$") or var == "timetnl" then return 0 end
+  if var == "systime" then return os.date("%H:%M:%S") end
+  if var == "sysdate" then return os.date("%A, %B %d %Y") end
+  if var == "soul" then return player:getSoul() or 0 end
+  if var == "stamina" then return player:getStamina() or 0 end
+  if var == "posx" then return player:getPosition().x or 0 end
+  if var == "posy" then return player:getPosition().y or 0 end
+  if var == "posz" then return player:getPosition().z or 0 end
+  if var == "connected" then return boolNumber(g_game.isOnline()) end
+  if var == "ping" then return g_game.getPing and (tonumber(g_game.getPing()) or 0) or 0 end
+  if var == "time" then return math.floor(nowMs() / 1000) end
+  if var == "times" then return nowMs() end
+  if var == "deltatime" then return math.floor((nowMs() - botStartedAtMs) / 1000) end
+  if var == "deltatimems" then return nowMs() - botStartedAtMs end
+  if var == "pzone" then return hasState(Pz) and 1 or 0 end
+  if var == "inpz" then return boolNumber(hasState(Pz)) end
+  if var == "battlesign" or var == "redbattlesign" then return boolNumber(hasState(Swords)) end
+  if var == "paralyzed" then return hasState(Paralyze) and true or false end
+  if var == "hasted" then return hasState(Haste) and 1 or 0 end
+  if var == "manashielded" or var == "shielded" then return hasState(ManaShield) and 1 or 0 end
+  if var == "poisoned" then return boolNumber(hasState(Poison)) end
+  if var == "drunk" then return boolNumber(hasState(Drunk)) end
+  if var == "invisible" then return boolNumber(hasState(Invisible)) end
   if var == "gmaround" then return gmAround() end
   if var == "strengthtime" then return 0 end
+  if var == "mshieldtime" or var == "hastetime" or var == "invistime" then return 0 end
+  if var == "waypointson" or var == "caveboton" then return boolNumber(CaveBot and CaveBot.isOn and CaveBot.isOn()) end
+  if var == "targetingon" then return boolNumber(TargetBot and TargetBot.isOn and TargetBot.isOn()) end
+  if var == "autocomboon" or var == "navion" or var == "synctime" or var == "exectime" or var == "sbtime" or var == "sstime" then return 0 end
+  if var == "fired" then return boolNumber(elfHotkeysLastFired) end
+  if var == "ctrl" or var == "shift" or var == "alt" then return boolNumber(modifierPressed(var)) end
+  if var == "target" or var == "attacked" then return boolNumber(resolveCreatureAlias("target")) end
+
+  local skillKind, skillName = var:match("^(skillpc)%.([%w_]+)$")
+  if skillKind then return getSkillValue(player, skillKind, skillName) end
+  skillKind, skillName = var:match("^(skilltime)%.([%w_]+)$")
+  if skillKind then return getSkillValue(player, skillKind, skillName) end
+  skillKind, skillName = var:match("^(skill)%.([%w_]+)$")
+  if skillKind then return getSkillValue(player, skillKind, skillName) end
 
   local r = var:match("^monstersaround%.(%d+)$")
   if r then return countMonsters(tonumber(r)) end
@@ -222,10 +553,48 @@ local function varValue(var)
   r = var:match("^itemcount%.(%d+)$")
   if r then return itemCount(tonumber(r)) end
 
-  if var == "target.hppc" then
-    local target = g_game.getAttackingCreature()
-    if target then return target:getHealthPercent() or 0 end
-    return 0
+  local quoted = var:match("^itemcount%.'(.+)'$")
+  if quoted then return itemCountByName(quoted) end
+
+  r = var:match("^winitemcount%.(%d+)$")
+  if r then return itemCount(tonumber(r)) end
+
+  quoted = var:match("^winitemcount%.'(.+)'$")
+  if quoted then return itemCountByName(quoted) end
+
+  quoted = var:match("^screencount%.'(.+)'$")
+  if quoted then return screenCountByName(quoted) end
+
+  local relation, relationName = var:match("^(isfriend|isenemy|issubfriend|issubenemy|isleader)%.'(.+)'$")
+  if relation and relationName then return boolNumber(relationByName(relation, relationName)) end
+
+  r = var:match("^key%.(%d+)$")
+  if r then return boolNumber(keyPressed(r)) end
+
+  local x, y, z = var:match("^topitem%.(%d+)%.(%d+)%.(%d+)$")
+  if x and y and z then return topItemId(x, y, z) end
+
+  local itemId
+  x, y, z, itemId = var:match("^istileitem%.(%d+)%.(%d+)%.(%d+)%.(%d+)$")
+  if x and y and z and itemId then return isTileItem(x, y, z, itemId) end
+
+  local rx, ry = var:match("^rand%.(%d+)%.(%d+)$")
+  if rx and ry then
+    rx = tonumber(rx) or 0
+    ry = tonumber(ry) or rx
+    if ry < rx then rx, ry = ry, rx end
+    return math.random(rx, ry)
+  end
+
+  r = var:match("^rand%.(%d+)$")
+  if r then return math.random(0, tonumber(r) or 0) end
+
+  local slotName, slotProperty = var:match("^(%w+slot)%.(%w+)$")
+  if slotName then return slotValue(slotName, slotProperty) end
+
+  local creatureAlias, creatureProperty = var:match("^(%w+)%.(%w+)$")
+  if creatureAlias and creatureProperty and creatureAliases[creatureAlias] then
+    return creatureValue(resolveCreatureAlias(creatureAlias), creatureProperty)
   end
 
   return 0
@@ -234,11 +603,14 @@ end
 local function evalCondition(cond)
   cond = trim(cond)
   if cond == "" then return true end
-  cond = cond:gsub("%$([%w_%.]+)", function(v)
+  local function replaceVariable(v)
     local val = varValue(v)
     if type(val) == "boolean" then return val and "true" or "false" end
+    if type(val) == "string" then return string.format("%q", val) end
     return tostring(tonumber(val) or 0)
-  end)
+  end
+  cond = cond:gsub("%$([%w_%.]+%.'[^']+')", replaceVariable)
+  cond = cond:gsub("%$([%w_%.]+)", replaceVariable)
   cond = cond:gsub("&&", " and "):gsub("%|%|", " or ")
   cond = cond:gsub("!%s*", " not ")
   local fn, err = loadstring("return (" .. cond .. ")")
@@ -248,6 +620,16 @@ local function evalCondition(cond)
   end
   local ok, result = pcall(fn)
   return ok and result and true or false
+end
+
+local function expandElfVariables(text)
+  local function replaceVariable(v)
+    local val = varValue(v)
+    if type(val) == "boolean" then return val and "1" or "0" end
+    return tostring(val)
+  end
+  text = tostring(text or ""):gsub("%$([%w_%.]+%.'[^']+')", replaceVariable)
+  return text:gsub("%$([%w_%.]+)", replaceVariable)
 end
 
 local function moveItemToSlot(itemId, slot)
@@ -293,8 +675,25 @@ local function useOnCreature(itemId, targetName)
   end
   if target then
     g_game.useInventoryItemWith(itemId, target, -1)
+    elfHotkeysLastFired = true
   end
 end
+
+local potionAliasItems = {
+  mana = 268,
+  smana = 237,
+  gmana = 238,
+  gsmana = 7642,
+  health = 266,
+  hp = 266,
+  shp = 236,
+  ghp = 239,
+  uhp = 7643,
+  spirit = 7642,
+  greatspirit = 7642,
+  uh = 3160,
+  sd = 3155
+}
 
 local function playSound(file)
   if not g_sounds then return end
@@ -310,7 +709,7 @@ local function playSound(file)
 end
 
 local function executeOneCommand(cmd)
-  cmd = trim(cmd)
+  cmd = expandElfVariables(trim(cmd))
   if cmd == "" then return end
   local lcmd = cmd:lower()
 
@@ -322,6 +721,21 @@ local function executeOneCommand(cmd)
 
   local itemId, targetName = lcmd:match("^useoncreature%s+(%d+)%s+([%w_]+)$")
   if itemId then return useOnCreature(itemId, targetName) end
+
+  local countVisibleId = lcmd:match("^countitemsvisible%s+(%d+)$")
+  if countVisibleId then
+    elfHotkeysLastCount = itemCount(tonumber(countVisibleId))
+    return
+  end
+
+  if lcmd:match("^wait%s+%d+$") then
+    return
+  end
+
+  local aliasName, aliasTarget = lcmd:match("^([%w_]+)%s+([%w_]+)$")
+  if aliasName and potionAliasItems[aliasName] and (aliasTarget == "self" or aliasTarget == "target") then
+    return useOnCreature(potionAliasItems[aliasName], aliasTarget)
+  end
 
   if lcmd == "sd target" then return useOnCreature(3155, "target") end
   if lcmd == "eatfood" then return eatFood() end
@@ -357,6 +771,7 @@ local function executeOneCommand(cmd)
 end
 
 local function executeCommand(cmd)
+  elfHotkeysLastFired = false
   for part in tostring(cmd or ""):gmatch("[^|]+") do
     executeOneCommand(part)
   end
@@ -369,6 +784,8 @@ local hotkeyBindings = {}
 local hotkeyRows = {}
 local captureEntryId = nil
 local selectedEntryId = nil
+local skipToggleKey = nil
+local hotkeyToggleRegistered = false
 local nextScheduleId = 0
 
 local function getHotkeysLanguage()
@@ -388,6 +805,14 @@ local function hotkeyText(ptText, enText)
   return getHotkeysLanguage() == "pt" and ptText or enText
 end
 
+local function elfProfileLoaded()
+  if type(ImperialElfBot_IsProfileLoaded) == "function" then
+    local ok, loaded = pcall(ImperialElfBot_IsProfileLoaded)
+    return ok and loaded == true
+  end
+  return modules and modules.game_bot and modules.game_bot.elfbotProfileLoadedThisSession == true
+end
+
 local function getEntry(entryId)
   for _, entry in ipairs(hotkeysConfig.entries or {}) do
     if entry.id == entryId then
@@ -398,12 +823,26 @@ local function getEntry(entryId)
 end
 
 local function saveConfig()
+  if type(storage) == "table" then
+    storage[SETTINGS_KEY] = hotkeysConfig
+  end
   g_settings.setNode(SETTINGS_KEY, hotkeysConfig)
   g_settings.save()
+  if type(saveProfileStorage) == "function" then
+    pcall(saveProfileStorage)
+  end
 end
 
 local function normalizeConfig()
-  local saved = g_settings.getNode(SETTINGS_KEY)
+  if not elfProfileLoaded() then
+    hotkeysConfig = {enabled = false, persistent = false, nextId = 1, entries = {}}
+    return
+  end
+
+  local saved = type(storage) == "table" and storage[SETTINGS_KEY] or nil
+  if type(saved) ~= "table" then
+    saved = g_settings.getNode(SETTINGS_KEY)
+  end
   hotkeysConfig = type(saved) == "table" and saved or {}
   hotkeysConfig.enabled = hotkeysConfig.enabled == true
   hotkeysConfig.persistent = hotkeysConfig.persistent == true
@@ -445,6 +884,9 @@ local function normalizeConfig()
     for _, entry in ipairs(entries) do
       entry.enabled = false
     end
+  end
+  if type(storage) == "table" then
+    storage[SETTINGS_KEY] = hotkeysConfig
   end
 end
 
@@ -527,32 +969,19 @@ local function getGameRoot()
 end
 
 local function unbindEntry(entry)
-  local binding = entry and hotkeyBindings[entry.id]
-  if not binding then
-    return
-  end
-  g_keyboard.unbindKeyPress(binding.hotkey, binding.callback, getGameRoot())
-  hotkeyBindings[entry.id] = nil
+  if entry then hotkeyBindings[entry.id] = nil end
 end
 
 local refreshWindow
 local setEntryEnabled
+local scriptPreview
 
 local function bindEntry(entry)
   unbindEntry(entry)
   if not entry or not hotkeysConfig.enabled or entry.hotkey == "" then
     return
   end
-
-  local callback = function()
-    local currentEntry = getEntry(entry.id)
-    if currentEntry then
-      setEntryEnabled(currentEntry.id, not currentEntry.enabled)
-    end
-    return true
-  end
-  hotkeyBindings[entry.id] = {hotkey = entry.hotkey, callback = callback}
-  g_keyboard.bindKeyPress(entry.hotkey, callback, getGameRoot())
+  hotkeyBindings[entry.id] = entry.hotkey
 end
 
 local function bindAllEntries()
@@ -607,9 +1036,32 @@ setEntryEnabled = function(entryId, enabled)
   end
   saveConfig()
   if refreshWindow then refreshWindow() end
+  msg(string.format("%s: %s (%s)", entry.name ~= "" and entry.name or hotkeyText("Hotkey sem nome", "Unnamed hotkey"), entry.enabled and "ON" or "OFF", scriptPreview(entry.script)))
 end
 
-local function scriptPreview(script)
+local function registerHotkeyToggle()
+  if hotkeyToggleRegistered or type(onKeyDown) ~= "function" then
+    return
+  end
+  hotkeyToggleRegistered = true
+  onKeyDown(function(keyDesc)
+    if skipToggleKey == keyDesc then
+      skipToggleKey = nil
+      return
+    end
+    if captureEntryId or not hotkeysConfig or not hotkeysConfig.enabled then
+      return
+    end
+    for _, entry in ipairs(hotkeysConfig.entries) do
+      if entry.hotkey ~= "" and entry.hotkey == keyDesc then
+        setEntryEnabled(entry.id, not entry.enabled)
+        return
+      end
+    end
+  end)
+end
+
+scriptPreview = function(script)
   local preview = tostring(script or ""):gsub("[\r\n]+", " ")
   if #preview > 70 then
     return preview:sub(1, 67) .. "..."
@@ -777,6 +1229,7 @@ function elfHotkeysInit()
     legacyHotkeysStop = nil
   end
   normalizeConfig()
+  registerHotkeyToggle()
 
   local rootWidget = g_ui.getRootWidget()
   if rootWidget and rootWidget.recursiveGetChildById then
@@ -816,6 +1269,10 @@ function elfHotkeysInit()
     elfHotkeysWindow:ungrabKeyboard()
     if hotkey ~= "Escape" then
       assignHotkey(capturedEntryId, hotkey)
+      skipToggleKey = hotkey
+      scheduleEvent(function()
+        skipToggleKey = nil
+      end, 50)
     else
       refreshWindow()
     end
@@ -860,7 +1317,7 @@ function elfHotkeysClose()
   end
 end
 
-function elfHotkeysSave()
+function elfHotkeysSave(silent)
   saveConfig()
   if hotkeysConfig.enabled then
     stopAllEntries()
@@ -869,7 +1326,9 @@ function elfHotkeysSave()
     end
   end
   refreshWindow()
-  msg(hotkeyText("Hotkeys personalizadas salvas.", "Custom hotkeys saved."))
+  if not silent then
+    msg(hotkeyText("Hotkeys personalizadas salvas.", "Custom hotkeys saved."))
+  end
 end
 
 function elfHotkeysLoadPreset(name)

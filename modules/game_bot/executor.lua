@@ -139,6 +139,11 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
   context.HTTP = HTTP
   context.OutputMessage = OutputMessage
   context.modules = modules
+  context.ImperialElfBot_IsProfileLoaded = function()
+    return modules
+      and modules.game_bot
+      and modules.game_bot.elfbotProfileLoadedThisSession == true
+  end
   context.Directions = Directions
   context.scheduleEvent = scheduleEvent
   context.removeEvent = removeEvent

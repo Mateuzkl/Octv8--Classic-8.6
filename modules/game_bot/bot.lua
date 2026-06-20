@@ -20,6 +20,16 @@ local statusLabel = nil
 local configManagerUrl = "http://otclient.ovh/configs.php"
 local defaultElfBotConfig = "ElfBot NG"
 
+local function isElfBotNgConfig(configName)
+  return configName == "ElfBot NG" or configName == "IMPERIALBOT"
+end
+
+local function isElfBotManualProfileLoad()
+  return modules
+    and modules.game_bot
+    and (modules.game_bot.elfbotPendingManualProfileLoad == true or modules.game_bot.elfbotProfileLoadedThisSession == true)
+end
+
 local function getBotSettingsIndex()
   if not g_game or not g_game.getCharacterName or not g_game.getClientVersion then
     return nil
@@ -59,6 +69,14 @@ local function forceBotOffForLogin()
   g_settings.save()
 end
 
+local elfBotUserDataDirs = {
+  storage = true,
+  vBot_configs = true,
+  cavebot_configs = true,
+  targetbot_configs = true,
+  elfbot_profiles = true
+}
+
 function init()
   dofile("executor")
   local hkOk, hkErr = pcall(function() dofile("elfbot_hotkeys") end)
@@ -93,6 +111,8 @@ function init()
   botWindow:setup()
   if modules and modules.game_bot then
     modules.game_bot.botWindow = botWindow
+    modules.game_bot.reload = refresh
+    modules.game_bot.showElfBotNgWindow = showElfBotNgWindow
   end
 
   contentsPanel = botWindow.contentsPanel
@@ -262,7 +282,7 @@ function refresh()
   local configName = settings[index].config
 
   -- Perfil ElfBot NG: esconder a janela grande antes de carregar os scripts.
-  if configName == "ElfBot NG" and botWindow then
+  if isElfBotNgConfig(configName) and botWindow then
     botWindow:hide()
     if botButton then botButton:setOn(true) end
   end
@@ -286,6 +306,17 @@ function refresh()
     botStorage = result
   end
 
+  if isElfBotNgConfig(configName) then
+    if isElfBotManualProfileLoad() then
+      modules.game_bot.elfbotRuntimeOnlySession = false
+    else
+      modules.game_bot.elfbotRuntimeOnlySession = true
+      botStorage = {}
+    end
+  elseif modules and modules.game_bot then
+    modules.game_bot.elfbotRuntimeOnlySession = false
+  end
+
   -- run script
   local status, result = pcall(function()
     return executeBot(configName, botStorage, botTabs, message, save, refresh, botWebSockets) end
@@ -299,11 +330,13 @@ function refresh()
 
   -- Se estiver usando o perfil ElfBot NG, nao mostra a lista grande lateral.
   -- O loader do perfil cria/abre a janela compacta.
-  if configName == "ElfBot NG" or configName == "IMPERIALBOT" then
+  if isElfBotNgConfig(configName) then
     scheduleEvent(function()
       if botWindow then botWindow:hide() end
       if ImperialElfBot and ImperialElfBot.show then
         ImperialElfBot.show()
+      else
+        showElfBotNgWindow()
       end
       if botButton then botButton:setOn(true) end
     end, 200)
@@ -314,6 +347,13 @@ end
 
 function save()
   if not botExecutor then
+    return
+  end
+
+  if modules
+    and modules.game_bot
+    and modules.game_bot.elfbotRuntimeOnlySession == true
+    and not isElfBotManualProfileLoad() then
     return
   end
 
@@ -409,7 +449,7 @@ function toggle()
   -- Perfil ElfBot NG selecionado, mas a janela ainda nao foi criada.
   -- Aqui o botao Bot/game_bot tambem liga o perfil, porque sem o perfil ligado
   -- o loader nao cria a janela compacta.
-  if cfg == "ElfBot NG" or cfg == "IMPERIALBOT" then
+  if isElfBotNgConfig(cfg) then
     if botWindow then botWindow:hide() end
     if botButton then botButton:setOn(true) end
 
@@ -440,6 +480,12 @@ function toggle()
 end
 
 function online()
+  if modules and modules.game_bot then
+    modules.game_bot.elfbotPendingManualProfileLoad = nil
+    modules.game_bot.elfbotProfileLoadedThisSession = false
+    modules.game_bot.elfbotRuntimeOnlySession = false
+    modules.game_bot.elfbotSelectedProfileName = nil
+  end
   botButton:show()
   botButton:setOn(false)
   if botWindow then botWindow:hide() end
@@ -448,6 +494,11 @@ function online()
     statusLabel:setOn(true)
     statusLabel:setText("Status: disabled\nClick Bot to enable")
   end
+end
+
+if modules and modules.game_bot then
+  modules.game_bot.reload = refresh
+  modules.game_bot.showElfBotNgWindow = showElfBotNgWindow
 end
 
 function offline()
@@ -501,7 +552,13 @@ local function copyDefaultConfigDir(src, dst, forceOverwrite)
     local target = dst .. "/" .. baseName
 
     if g_resources.directoryExists(file) then
-      copyDefaultConfigDir(file, target, forceOverwrite)
+      local preserveUserData = forceOverwrite
+        and (src == "default_configs/ElfBot NG" or src == "default_configs/IMPERIALBOT")
+        and elfBotUserDataDirs[baseName] == true
+        and g_resources.directoryExists(target)
+      if not preserveUserData then
+        copyDefaultConfigDir(file, target, forceOverwrite and not elfBotUserDataDirs[baseName])
+      end
     else
       local contents = g_resources.fileExists(file) and g_resources.readFileContents(file) or ""
       if contents:len() > 0 and (forceOverwrite or not g_resources.fileExists(target)) then
@@ -514,8 +571,7 @@ end
 function createDefaultConfigs()
   local defaultConfigFiles = g_resources.listDirectoryFiles("default_configs", false, false)
   for i, config_name in ipairs(defaultConfigFiles) do
-    -- Para estes dois perfis, sempre sincroniza os arquivos do ZIP novo.
-    -- Isso evita ficar usando /bot/ElfBot NG antigo depois de substituir modules/game_bot.
+    -- Sincroniza os scripts do ZIP novo sem sobrescrever perfis/configs salvos pelo jogador.
     local forceOverwrite = (config_name == "ElfBot NG" or config_name == "IMPERIALBOT")
     copyDefaultConfigDir("default_configs/" .. config_name, "/bot/" .. config_name, forceOverwrite)
   end

@@ -587,7 +587,9 @@ local function logAttackProfileBoot(profileId)
     if attackProfileDebugState.bootLogged then
         return
     end
-    print("BOOT Active profile loaded: " .. trimAttackText(profileId))
+    if type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded() then
+        print("BOOT Active profile loaded: " .. trimAttackText(profileId))
+    end
     attackProfileDebugState.bootLogged = true
 end
 
@@ -596,7 +598,9 @@ local function logAttackProfileSanitize(profileId)
     if attackProfileDebugState.lastSanitizedProfile == normalized then
         return
     end
-    print("SANITIZE Active profile after sanitize: " .. normalized)
+    if type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded() then
+        print("SANITIZE Active profile after sanitize: " .. normalized)
+    end
     attackProfileDebugState.lastSanitizedProfile = normalized
 end
 
@@ -750,7 +754,9 @@ end
 
 local function applyAttackProfileState(cfg, id)
     if not id or id == '' then return end
-    print("APPLY Applying profile: " .. trimAttackText(id))
+    if type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded() then
+        print("APPLY Applying profile: " .. trimAttackText(id))
+    end
     local profiles = ensureProfileData(cfg)
     local data = profiles[id]
     if not data then
@@ -3557,7 +3563,9 @@ Panel
     end
 
     refreshConfigLabel()
-    applyAttackProfileState(cfg, getSelectedConfigId(cfg))
+    if type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded() then
+        applyAttackProfileState(cfg, getSelectedConfigId(cfg))
+    end
     renderConfigList(renderSpellRows)
 
     combatRenderRows = renderSpellRows
@@ -4696,7 +4704,9 @@ mainWindow.closeButton.onClick = function()
     mainWindow:hide()
 end
 
-modules.game_textmessage.displayStatusMessage("Attack System carregado - OK!", "#FFFFFF")
+if type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded() then
+    modules.game_textmessage.displayStatusMessage("ElfBot: Attack System loaded - OK!", "#FFFFFF")
+end
 
 -- ============================================
 

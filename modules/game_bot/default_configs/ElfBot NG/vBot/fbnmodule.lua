@@ -94,7 +94,7 @@ local addScrollBar = function(id, title, min, max, defaultValue, dest, tooltip)
     widget.scroll.onValueChange(widget.scroll, widget.scroll:getValue())
 end
 
-UI.Button("ImperialScripts: Module v1", function()
+UI.Button("ElfBot Scripts: Module v1", function()
     fbnWindows:show()
     fbnWindows:raise()
     fbnWindows:focus()

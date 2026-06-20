@@ -176,6 +176,14 @@ Config.setup = function(dir, widget, configExtension, callback)
   else
     widget.switch:setOn(context.storage._configs[dir].enabled)
   end
+
+  local waitElfBotManualLoad = tostring(context.configDir or ""):find("ElfBot NG", 1, true)
+    and (type(ImperialElfBot_IsProfileLoaded) ~= "function" or not ImperialElfBot_IsProfileLoaded())
+  if waitElfBotManualLoad then
+    context.storage._configs[dir].enabled = false
+    context.storage._configs[dir].selected = ""
+    widget.switch:setOn(false)
+  end
   
   local isRefreshing = false
   local refresh = function()
@@ -190,16 +198,16 @@ Config.setup = function(dir, widget, configExtension, callback)
       end
     end
     local data = nil
-    if #configs > 0 then
+    if #configs > 0 and not waitElfBotManualLoad then
       widget.list:setCurrentIndex(configIndex)
       context.storage._configs[dir].selected = widget.list:getCurrentOption().text
       data = Config.load(dir, configs[configIndex])
     else
       context.storage._configs[dir].selected = nil
     end
-    context.storage._configs[dir].enabled = widget.switch:isOn()
+    context.storage._configs[dir].enabled = (not waitElfBotManualLoad) and widget.switch:isOn()
     isRefreshing = false    
-    callback(context.storage._configs[dir].selected, widget.switch:isOn(), data)
+    callback(context.storage._configs[dir].selected, context.storage._configs[dir].enabled, data)
   end
   
   widget.list.onOptionChange = function(widget)

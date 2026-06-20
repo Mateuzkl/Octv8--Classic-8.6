@@ -26,9 +26,10 @@ local attackBotFile = "/bot/" .. configName .. "/vBot_configs/profile_".. profil
 SuppliesConfig = {}
 local suppliesFile = "/bot/" .. configName .. "/vBot_configs/profile_".. profile .. "/Supplies.json"
 
+local elfProfileLoaded = type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded()
 
 --healbot
-if g_resources.fileExists(healBotFile) then
+if elfProfileLoaded and g_resources.fileExists(healBotFile) then
     local status, result = pcall(function()
       return json.decode(g_resources.readFileContents(healBotFile))
     end)
@@ -39,7 +40,7 @@ if g_resources.fileExists(healBotFile) then
 end
 
 --attackbot
-if g_resources.fileExists(attackBotFile) then
+if elfProfileLoaded and g_resources.fileExists(attackBotFile) then
     local status, result = pcall(function()
       return json.decode(g_resources.readFileContents(attackBotFile))
     end)
@@ -50,7 +51,7 @@ if g_resources.fileExists(attackBotFile) then
 end
 
 --supplies
-if g_resources.fileExists(suppliesFile) then
+if elfProfileLoaded and g_resources.fileExists(suppliesFile) then
     local status, result = pcall(function()
       return json.decode(g_resources.readFileContents(suppliesFile))
     end)

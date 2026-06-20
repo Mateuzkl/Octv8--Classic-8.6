@@ -57,10 +57,14 @@ local function getElfLanguage()
     local ok, language = pcall(ImperialElfBot_GetLanguage)
     if ok and tostring(language):lower() == "en" then
       return "en"
+    elseif ok and tostring(language):lower() == "pt" then
+      return "pt"
     end
   end
   if type(storage) == "table" and tostring(storage.elfbotLanguage):lower() == "en" then
     return "en"
+  elseif type(storage) == "table" and tostring(storage.elfbotLanguage):lower() == "pt" then
+    return "pt"
   end
   return "en"
 end
@@ -72,6 +76,14 @@ local function setTooltipPair(widget, ptText, enText)
 
   local text = getElfLanguage() == "en" and (enText or ptText) or ptText
   widget:setTooltip(tostring(text or ""))
+end
+
+local function elfProfileLoaded()
+  if type(ImperialElfBot_IsProfileLoaded) == "function" then
+    local ok, loaded = pcall(ImperialElfBot_IsProfileLoaded)
+    return ok and loaded == true
+  end
+  return modules and modules.game_bot and modules.game_bot.elfbotProfileLoadedThisSession == true
 end
 
 local function styleStatusIcon(icon)
@@ -95,6 +107,10 @@ local function styleStatusIcon(icon)
 end
 
 local function createStatusIcon(id, label, ptTooltip, enTooltip, callback)
+  if not elfProfileLoaded() then
+    return nil
+  end
+
   local icon = addIcon(id, {
     text = label,
     switchable = false,

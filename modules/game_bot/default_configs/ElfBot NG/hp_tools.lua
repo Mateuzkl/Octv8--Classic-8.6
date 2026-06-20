@@ -3587,11 +3587,15 @@ local function ensureHpProfiles()
   end
 
   if not hpProfileDebugState.bootLogged then
-    print("BOOT Active profile loaded: " .. activeId)
+    if type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded() then
+      print("BOOT Active profile loaded: " .. activeId)
+    end
     hpProfileDebugState.bootLogged = true
   end
   if hpProfileDebugState.lastSanitizedProfile ~= activeId then
-    print("SANITIZE Active profile after sanitize: " .. activeId)
+    if type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded() then
+      print("SANITIZE Active profile after sanitize: " .. activeId)
+    end
     hpProfileDebugState.lastSanitizedProfile = activeId
   end
 
@@ -3646,7 +3650,9 @@ local function applyHpProfileState(profileId)
   if id == "" then
     return
   end
-  print("APPLY Applying profile: " .. id)
+  if type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded() then
+    print("APPLY Applying profile: " .. id)
+  end
   local cfg = profiles.configs[id]
   local data = type(cfg) == "table" and cfg.data or nil
   if type(data) ~= "table" then
@@ -7570,6 +7576,8 @@ mainUI.openBtn.onClick = function()
     healingMainWindow:focus()
 end
 
-modules.game_textmessage.displayStatusMessage("HP/Tools carregado - OK!", "#00FF00")
+if type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded() then
+  modules.game_textmessage.displayStatusMessage("ElfBot: HP/Tools loaded - OK!", "#00FF00")
+end
 
 -- ====================================

@@ -243,3 +243,86 @@ ImperialElfBotWindow < MainWindow
     anchors.top: targetingButton.top
     margin-left: 2
     size: 72 19
+
+ElfBotProfileWindow < MainWindow
+  size: 360 154
+  padding: 8
+  text: ElfBot Profiles
+  @onEscape: self:hide()
+
+  Label
+    id: selectedLabel
+    anchors.top: parent.top
+    anchors.left: parent.left
+    margin-top: 18
+    text: Selected profile:
+    width: 130
+    height: 18
+
+  ComboBox
+    id: profileList
+    anchors.top: selectedLabel.bottom
+    anchors.left: parent.left
+    margin-top: 4
+    width: 160
+    height: 20
+    &menuScroll: true
+    &menuHeight: 180
+
+  Label
+    id: nameLabel
+    anchors.top: selectedLabel.top
+    anchors.left: profileList.right
+    margin-left: 12
+    text: Name:
+    width: 70
+    height: 18
+
+  TextEdit
+    id: profileName
+    anchors.top: profileList.top
+    anchors.left: profileList.right
+    margin-left: 12
+    width: 150
+    height: 20
+
+  Label
+    id: hintLabel
+    anchors.top: profileList.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 8
+    height: 34
+    text-wrap: true
+    text: Choose a profile here, then use Save/Load on the main ElfBot window.
+
+  ElfBotButton
+    id: selectButton
+    anchors.left: parent.left
+    anchors.bottom: parent.bottom
+    margin-bottom: 2
+    text: Select
+    size: 70 20
+
+  ElfBotButton
+    id: newButton
+    anchors.left: selectButton.right
+    anchors.bottom: selectButton.bottom
+    margin-left: 6
+    text: New
+    size: 70 20
+
+  ElfBotButton
+    id: deleteButton
+    anchors.left: newButton.right
+    anchors.bottom: selectButton.bottom
+    margin-left: 6
+    text: Delete
+    size: 70 20
+
+  ElfBotButton
+    id: closeButton
+    anchors.right: parent.right
+    anchors.bottom: selectButton.bottom
+    text: Close
+    size: 70 20

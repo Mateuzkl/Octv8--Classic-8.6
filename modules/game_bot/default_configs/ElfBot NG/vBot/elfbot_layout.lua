@@ -1,4 +1,4 @@
--- ElfBot style layout for IMPERIALBOT
+-- ElfBot style layout
 -- This file only changes the interface/shortcuts. Existing bot systems are preserved.
 
 setDefaultTab("Main")
@@ -25,7 +25,7 @@ end
 local function safeCall(name, callback)
   local ok, err = pcall(callback)
   if not ok then
-    logError("[ImperialElfBot] " .. name .. ": " .. tostring(err))
+    logError("[ElfBot] " .. name .. ": " .. tostring(err))
   end
 end
 
@@ -45,14 +45,28 @@ local function showMessage(text)
   if modules and modules.game_textmessage and modules.game_textmessage.displayGameMessage then
     modules.game_textmessage.displayGameMessage(text)
   else
-    logInfo("[ImperialElfBot] " .. text)
+    logInfo("[ElfBot] " .. text)
   end
+end
+
+local function settingsKey(suffix)
+  local name = "elfbot_" .. tostring(suffix or "")
+  if g_game and g_game.getCharacterName and g_game.getClientVersion then
+    local characterName = tostring(g_game.getCharacterName() or "")
+    if characterName ~= "" then
+      return name .. "_" .. characterName .. "_" .. tostring(g_game.getClientVersion() or "")
+    end
+  end
+  return name
 end
 
 local function normalizeElfLanguage(language)
   language = tostring(language or ""):lower()
   if language == "en" or language == "eng" or language == "english" then
     return "en"
+  end
+  if language == "pt" or language == "br" or language == "portuguese" or language == "portugues" then
+    return "pt"
   end
   return "en"
 end
@@ -111,6 +125,9 @@ function ImperialElfBot_SetLanguage(language)
     pcall(PainelDeIconesController.refreshLanguage)
   end
   refreshLanguageConsumers()
+  if type(saveConfig) == "function" then
+    pcall(saveConfig)
+  end
 
   showMessage(elfText("ElfBot: idioma alterado para PT.", "ElfBot: language changed to EN."))
   return getElfLanguage()
@@ -248,13 +265,381 @@ local function clickWidgetByText(text, tabName)
   return false
 end
 
-local function saveAll()
+local ELF_PROFILE_DIR = "elfbot_profiles"
+
+local function getElfConfigDir()
+  return configDir or "/bot/ElfBot NG"
+end
+
+local function getElfProfileDir()
+  return getElfConfigDir() .. "/" .. ELF_PROFILE_DIR .. "/"
+end
+
+local function ensureElfProfileDir()
+  local dir = getElfProfileDir()
+  if not g_resources.directoryExists(dir) then
+    g_resources.makeDir(dir)
+  end
+  return g_resources.directoryExists(dir)
+end
+
+local function validElfProfileName(name)
+  name = tostring(name or ""):gsub("^%s+", ""):gsub("%s+$", "")
+  name = name:gsub("[%c/\\:%*%?\"<>|]+", "_"):gsub("%s+", "_")
+  if name == "" then
+    name = "default"
+  end
+  return name
+end
+
+local function getSelectedElfProfile()
+  local saved = nil
+  if modules and modules.game_bot and modules.game_bot.elfbotSelectedProfileName then
+    saved = modules.game_bot.elfbotSelectedProfileName
+  end
+  if g_settings and g_settings.get then
+    saved = saved or g_settings.get(settingsKey("selected_profile"))
+  end
+  local name = saved or (type(storage) == "table" and storage.elfbotSelectedProfile) or "default"
+  name = validElfProfileName(name)
+  if type(storage) == "table" then
+    storage.elfbotSelectedProfile = name
+  end
+  if modules and modules.game_bot then
+    modules.game_bot.elfbotSelectedProfileName = name
+  end
+  return name
+end
+
+local function setSelectedElfProfile(name, skipSave)
+  name = validElfProfileName(name)
+  if modules and modules.game_bot then
+    modules.game_bot.elfbotSelectedProfileName = name
+  end
+  if type(storage) == "table" then
+    storage.elfbotSelectedProfile = name
+  end
+  if g_settings and g_settings.set then
+    g_settings.set(settingsKey("selected_profile"), name)
+    if g_settings.save then pcall(g_settings.save) end
+  end
+  if not skipSave and type(saveConfig) == "function" then
+    pcall(saveConfig)
+  end
+  return name
+end
+
+local function getElfProfileFile(name)
+  return getElfProfileDir() .. validElfProfileName(name) .. ".json"
+end
+
+local function getLegacyStorageProfileFile()
+  local profile = g_settings and g_settings.getNumber and g_settings.getNumber("profile") or 1
+  profile = tonumber(profile) or 1
+  return getElfConfigDir() .. "/storage/profile_" .. profile .. ".json"
+end
+
+local function listElfProfiles()
+  ensureElfProfileDir()
+  local profiles = {}
+  local ok, files = pcall(function()
+    return g_resources.listDirectoryFiles(getElfProfileDir(), false, false)
+  end)
+  if ok and type(files) == "table" then
+    for _, file in ipairs(files) do
+      file = tostring(file or ""):match("[^/\\]+$") or tostring(file or "")
+      local name = tostring(file or ""):match("(.+)%.json$")
+      if name and name ~= "" then
+        table.insert(profiles, name)
+      end
+    end
+  end
+  table.sort(profiles)
+  return profiles
+end
+
+local function readFilesSnapshot(relativeDir)
+  local baseDir = getElfConfigDir() .. "/" .. relativeDir .. "/"
+  local snapshot = {}
+  if not g_resources.directoryExists(baseDir) then
+    return snapshot
+  end
+  local ok, files = pcall(function()
+    return g_resources.listDirectoryFiles(baseDir, false, false)
+  end)
+  if ok and type(files) == "table" then
+    for _, file in ipairs(files) do
+      file = tostring(file or ""):match("[^/\\]+$") or tostring(file or "")
+      if file:match("%.json$") or file:match("%.cfg$") then
+        local path = baseDir .. file
+        local readOk, contents = pcall(function()
+          return g_resources.readFileContents(path)
+        end)
+        if readOk and type(contents) == "string" then
+          snapshot[file] = contents
+        end
+      end
+    end
+  end
+  return snapshot
+end
+
+local function writeFilesSnapshot(relativeDir, snapshot)
+  if type(snapshot) ~= "table" then
+    return
+  end
+  local baseDir = getElfConfigDir() .. "/" .. relativeDir .. "/"
+  if not g_resources.directoryExists(baseDir) then
+    g_resources.makeDir(baseDir)
+  end
+  if not g_resources.directoryExists(baseDir) then
+    return
+  end
+  for file, contents in pairs(snapshot) do
+    file = tostring(file or "")
+    if (file:match("%.json$") or file:match("%.cfg$")) and type(contents) == "string" then
+      g_resources.writeFileContents(baseDir .. file, contents)
+    end
+  end
+end
+
+local function getVBotProfileDirName()
+  local profile = g_settings and g_settings.getNumber and g_settings.getNumber("profile") or 1
+  profile = tonumber(profile) or 1
+  return "vBot_configs/profile_" .. profile
+end
+
+local function saveRuntimeConfigs()
+  safeCall("save icon positions", function()
+    if ImperialElfBot_SaveIconPositions then ImperialElfBot_SaveIconPositions() end
+  end)
   safeCall("save heal", function() if vBotConfigSave then vBotConfigSave("heal") end end)
   safeCall("save attack", function() if vBotConfigSave then vBotConfigSave("atk") end end)
   safeCall("save supply", function() if vBotConfigSave then vBotConfigSave("supply") end end)
   safeCall("save cavebot", function() if CaveBot and CaveBot.save then CaveBot.save() end end)
   safeCall("save targetbot", function() if TargetBot and TargetBot.save then TargetBot.save() end end)
-  showMessage("ImperialBot: configuracoes salvas.")
+  safeCall("save custom hotkeys", function()
+    if elfHotkeysSave then
+      elfHotkeysSave(true)
+    elseif modules and modules.game_bot and modules.game_bot.elfHotkeysSave then
+      modules.game_bot.elfHotkeysSave(true)
+    end
+  end)
+  safeCall("save profile storage", function()
+    if saveConfig then saveConfig() end
+  end)
+end
+
+local function buildElfProfileData()
+  if type(storage) == "table" then
+    storage.elfbotSelectedProfile = getSelectedElfProfile()
+  end
+  return {
+    schema = 1,
+    selectedProfile = getSelectedElfProfile(),
+    storage = storage,
+    files = {
+      [getVBotProfileDirName()] = readFilesSnapshot(getVBotProfileDirName()),
+      cavebot_configs = readFilesSnapshot("cavebot_configs"),
+      targetbot_configs = readFilesSnapshot("targetbot_configs")
+    }
+  }
+end
+
+local function saveElfProfile(name, silent)
+  name = setSelectedElfProfile(name or getSelectedElfProfile(), true)
+  if not ensureElfProfileDir() then
+    showMessage(elfText("ElfBot: nao foi possivel criar a pasta de perfis.", "ElfBot: could not create profiles folder."))
+    return false
+  end
+  saveRuntimeConfigs()
+  local ok, encoded = pcall(function()
+    return json.encode(buildElfProfileData(), 2)
+  end)
+  if not ok then
+    showMessage("ElfBot: profile save failed: " .. tostring(encoded))
+    return false
+  end
+  g_resources.writeFileContents(getElfProfileFile(name), encoded)
+  if type(saveConfig) == "function" then
+    pcall(saveConfig)
+  end
+  if not silent then
+    showMessage(elfText("ElfBot: perfil salvo: ", "ElfBot: profile saved: ") .. name)
+  end
+  return true
+end
+
+local function loadElfProfile(name)
+  name = validElfProfileName(name or getSelectedElfProfile())
+  local file = getElfProfileFile(name)
+  if not g_resources.fileExists(file) then
+    local legacyFile = getLegacyStorageProfileFile()
+    if (name == "default" or name == "profile_1") and g_resources.fileExists(legacyFile) then
+      file = legacyFile
+    else
+      showMessage(elfText("ElfBot: perfil nao encontrado: ", "ElfBot: profile not found: ") .. name)
+      return false
+    end
+  end
+  local ok, data = pcall(function()
+    return json.decode(g_resources.readFileContents(file))
+  end)
+  if not ok or type(data) ~= "table" then
+    showMessage("ElfBot: profile load failed: " .. tostring(data))
+    return false
+  end
+
+  local loadedStorage = type(data.storage) == "table" and data.storage or data
+  if type(storage) == "table" then
+    for key in pairs(storage) do
+      storage[key] = nil
+    end
+    for key, value in pairs(loadedStorage) do
+      storage[key] = value
+    end
+  end
+  setSelectedElfProfile(name, true)
+
+  if type(data.files) == "table" then
+    for relativeDir, snapshot in pairs(data.files) do
+      writeFilesSnapshot(relativeDir, snapshot)
+    end
+  end
+
+  if modules and modules.game_bot then
+    modules.game_bot.elfbotPendingManualProfileLoad = true
+    modules.game_bot.elfbotProfileLoadedThisSession = true
+    modules.game_bot.elfbotRuntimeOnlySession = false
+    modules.game_bot.elfbotSelectedProfileName = name
+    modules.game_bot.elfbotReopenAfterManualLoad = true
+  end
+  if type(saveConfig) == "function" then
+    pcall(saveConfig)
+  end
+  showMessage(elfText("ElfBot: perfil carregado: ", "ElfBot: profile loaded: ") .. name)
+  schedule(100, function()
+    if modules and modules.game_bot and modules.game_bot.reload then
+      modules.game_bot.reload()
+    else
+      reload()
+    end
+    schedule(450, function()
+      if modules and modules.game_bot and modules.game_bot.showElfBotNgWindow then
+        modules.game_bot.showElfBotNgWindow()
+      elseif ImperialElfBot and ImperialElfBot.show then
+        ImperialElfBot.show()
+      end
+    end)
+  end)
+  return true
+end
+
+local elfProfileWindow = nil
+
+local function refreshElfProfileWindow()
+  if not elfProfileWindow or (elfProfileWindow.isDestroyed and elfProfileWindow:isDestroyed()) then
+    return
+  end
+  local selected = getSelectedElfProfile()
+  local profiles = listElfProfiles()
+  local hasSelected = false
+  for _, name in ipairs(profiles) do
+    if name == selected then
+      hasSelected = true
+      break
+    end
+  end
+  if not hasSelected then
+    table.insert(profiles, 1, selected)
+  end
+
+  elfProfileWindow:setText(elfText("Perfis do ElfBot", "ElfBot Profiles"))
+  elfProfileWindow.selectedLabel:setText(elfText("Perfil selecionado:", "Selected profile:"))
+  elfProfileWindow.nameLabel:setText(elfText("Nome:", "Name:"))
+  elfProfileWindow.hintLabel:setText(elfText(
+    "Escolha ou crie um perfil aqui. Depois use Salvar/Carregar na janela principal.",
+    "Choose or create a profile here. Then use Save/Load on the main window."
+  ))
+  elfProfileWindow.selectButton:setText(elfText("Selecionar", "Select"))
+  elfProfileWindow.newButton:setText(elfText("Novo", "New"))
+  elfProfileWindow.deleteButton:setText(elfText("Excluir", "Delete"))
+  elfProfileWindow.closeButton:setText(elfText("Fechar", "Close"))
+
+  elfProfileWindow.profileList.onOptionChange = nil
+  elfProfileWindow.profileList:clear()
+  for _, name in ipairs(profiles) do
+    elfProfileWindow.profileList:addOption(name)
+  end
+  if elfProfileWindow.profileList:isOption(selected) then
+    elfProfileWindow.profileList:setCurrentOption(selected, true)
+  elseif #profiles > 0 then
+    elfProfileWindow.profileList:setCurrentIndex(1, true)
+  end
+  elfProfileWindow.profileName:setText(selected)
+  elfProfileWindow.profileList.onOptionChange = function(widget)
+    local option = widget:getCurrentOption()
+    if option and option.text then
+      setSelectedElfProfile(option.text)
+      elfProfileWindow.profileName:setText(option.text)
+    end
+  end
+end
+
+local function openElfProfileWindow()
+  if not elfProfileWindow or (elfProfileWindow.isDestroyed and elfProfileWindow:isDestroyed()) then
+    local root = g_ui.getRootWidget()
+    if root and root.recursiveGetChildById then
+      local old = root:recursiveGetChildById("elfProfileWindow")
+      if old then old:destroy() end
+    end
+    elfProfileWindow = g_ui.createWidget("ElfBotProfileWindow", g_ui.getRootWidget())
+    elfProfileWindow:setId("elfProfileWindow")
+    elfProfileWindow.botWidget = true
+    elfProfileWindow.selectButton.onClick = function()
+      local name = setSelectedElfProfile(elfProfileWindow.profileName:getText())
+      refreshElfProfileWindow()
+      showMessage(elfText("ElfBot: perfil selecionado: ", "ElfBot: profile selected: ") .. name)
+    end
+    elfProfileWindow.newButton.onClick = function()
+      UI.SinglelineEditorWindow(getSelectedElfProfile(), {
+        title = elfText("Novo perfil ElfBot", "New ElfBot profile"),
+        description = elfText("Digite o nome do novo perfil. Ele sera criado com as configuracoes atuais.", "Enter the new profile name. It will be created with current settings.")
+      }, function(text)
+        local name = validElfProfileName(text)
+        saveElfProfile(name, true)
+        setSelectedElfProfile(name)
+        refreshElfProfileWindow()
+        showMessage(elfText("ElfBot: perfil criado: ", "ElfBot: profile created: ") .. name)
+      end)
+    end
+    elfProfileWindow.deleteButton.onClick = function()
+      local name = validElfProfileName(elfProfileWindow.profileName:getText())
+      local file = getElfProfileFile(name)
+      if g_resources.fileExists(file) then
+        g_resources.deleteFile(file)
+        showMessage(elfText("ElfBot: perfil removido: ", "ElfBot: profile removed: ") .. name)
+      end
+      setSelectedElfProfile("default")
+      refreshElfProfileWindow()
+    end
+    elfProfileWindow.closeButton.onClick = function()
+      elfProfileWindow:hide()
+    end
+  end
+  refreshElfProfileWindow()
+  showWidget(elfProfileWindow)
+end
+
+local function saveAll()
+  if type(ImperialElfBot_IsProfileLoaded) == "function" and not ImperialElfBot_IsProfileLoaded() then
+    showMessage(elfText("ElfBot: carregue um perfil antes de salvar.", "ElfBot: load a profile before saving."))
+    return
+  end
+  local name = getSelectedElfProfile()
+  if saveElfProfile(name, true) then
+    showMessage(elfText("ElfBot: configuracoes salvas no perfil ", "ElfBot: settings saved to profile ") .. name)
+  end
 end
 
 if modules and modules.game_bot then
@@ -785,26 +1170,26 @@ if rootWidget then
     end
 
     local buttonTexts = {
-      healingButton = {"Healing", "Healing"},
-      aimbotButton = {"Aimbot", "Aimbot"},
-      listsButton = {"Listas", "Lists"},
-      hudButton = {"HUD", "HUD"},
-      extrasButton = {"Extras", "Extras"},
-      hotkeysButton = {"Hotkeys", "Hotkeys"},
-      shortkeysButton = {"Shortkeys", "Shortkeys"},
-      reconnectButton = {"Reconectar", "Reconnect"},
-      saveButton = {"Salvar", "Save"},
-      customButton = {"Custom", "Custom"},
-      cavebotButton = {"Cavebot", "Cavebot"},
-      navigationButton = {"Navegacao", "Navigation"},
-      linksButton = {"Links", "Links"},
-      creatureSpyButton = {"Creature Spy", "Creature Spy"},
-      loadButton = {"Carregar", "Load"},
-      helpButton = {"Ajuda", "Help"},
-      targetingButton = {"Targeting", "Targeting"},
-      proxyButton = {"Proxy", "Proxy"},
-      iconsButton = {"Icones", "Icons"},
-      pvpButton = {"PVP", "PVP"}
+      healingButton = {"Cura", "Healing", "Cura", "Healing"},
+      aimbotButton = {"Mira", "Aimbot", "Mira/Combate automatico", "Automatic aim/combat"},
+      listsButton = {"Listas", "Lists", "Listas", "Lists"},
+      hudButton = {"HUD", "HUD", "Interface na tela", "Heads-up display"},
+      extrasButton = {"Extras", "Extras", "Extras", "Extras"},
+      hotkeysButton = {"Teclas", "Hotkeys", "Teclas rapidas", "Hotkeys"},
+      shortkeysButton = {"Atalhos", "Shortkeys", "Atalhos curtos", "Shortkeys"},
+      reconnectButton = {"Reconectar", "Reconnect", "Reconectar", "Reconnect"},
+      saveButton = {"Salvar", "Save", "Salvar o perfil ElfBot selecionado", "Save selected ElfBot profile"},
+      customButton = {"Personal.", "Custom", "Personalizado: selecionar/criar perfil", "Custom: select/create profile"},
+      cavebotButton = {"Cavebot", "Cavebot", "Cavebot", "Cavebot"},
+      navigationButton = {"Navegacao", "Navigation", "Navegacao", "Navigation"},
+      linksButton = {"Links", "Links", "Links", "Links"},
+      creatureSpyButton = {"Espiao", "Creature Spy", "Espiao de criaturas", "Creature Spy"},
+      loadButton = {"Carregar", "Load", "Carregar o perfil ElfBot selecionado", "Load selected ElfBot profile"},
+      helpButton = {"Ajuda", "Help", "Ajuda", "Help"},
+      targetingButton = {"Alvos", "Targeting", "Alvos", "Targeting"},
+      proxyButton = {"Proxy", "Proxy", "Proxy", "Proxy"},
+      iconsButton = {"Icones", "Icons", "Icones", "Icons"},
+      pvpButton = {"PVP", "PVP", "PVP", "PVP"}
     }
 
     for id, labels in pairs(buttonTexts) do
@@ -812,14 +1197,19 @@ if rootWidget then
       if button and button.setText then
         button:setText(elfText(labels[1], labels[2]))
       end
+      if button and button.setTooltip then
+        button:setTooltip(elfText(labels[3] or labels[1], labels[4] or labels[2]))
+      end
     end
 
     if elfWindow.languageButton then
       elfWindow.languageButton:setText(getElfLanguage() == "en" and "EN/PT" or "PT/EN")
       if elfWindow.languageButton.setTooltip then
-        elfWindow.languageButton:setTooltip(elfText("Trocar idioma do ElfBot para portugues/ingles.", "Switch ElfBot language between Portuguese/English."))
+        elfWindow.languageButton:setTooltip(elfText("Ingles/Portugues", "English/Portuguese"))
       end
     end
+
+    refreshElfProfileWindow()
   end
 
   ImperialElfBot.refreshLanguage = refreshElfWindowLanguage
@@ -885,7 +1275,7 @@ if rootWidget then
         safeCall("Profile " .. i, function()
           if HealBot and HealBot.setActiveProfile then HealBot.setActiveProfile(i) end
           if AttackBot and AttackBot.setActiveProfile then AttackBot.setActiveProfile(i) end
-          showMessage("ImperialBot: profile " .. i .. " selecionado.")
+          showMessage(elfText("ElfBot: perfil " .. i .. " selecionado.", "ElfBot: profile " .. i .. " selected."))
         end)
       end
     end
@@ -913,7 +1303,7 @@ if rootWidget then
     safeCall("Shortkeys", function()
       UI.MultilineEditorWindow(storage.ingame_shortkeys or "", {
         title = "Shortkeys editor",
-        description = "Area para shortkeys/scripts rapidos customizados. Ao salvar, o bot sera recarregado."
+        description = elfText("Area para shortkeys/scripts rapidos customizados. Ao salvar, o bot sera recarregado.", "Area for custom quick shortkeys/scripts. Saving reloads the bot.")
       }, function(text)
         storage.ingame_shortkeys = text
         reload()
@@ -933,13 +1323,7 @@ if rootWidget then
 
   elfWindow.customButton.onClick = function()
     safeCall("Custom", function()
-      if fbnWindows then
-        showWidget(fbnWindows)
-      elseif extrasWindow then
-        showWidget(extrasWindow)
-      else
-        tryTab("Main")
-      end
+      openElfProfileWindow()
     end)
   end
 
@@ -990,17 +1374,13 @@ if rootWidget then
 
   elfWindow.loadButton.onClick = function()
     safeCall("Load", function()
-      if modules and modules.game_bot and modules.game_bot.reload then
-        modules.game_bot.reload()
-      else
-        reload()
-      end
+      loadElfProfile(getSelectedElfProfile())
     end)
   end
 
   elfWindow.helpButton.onClick = function()
     safeCall("Help", function()
-      showMessage("ImperialBot ElfLayout: Healing=HealBot, Aimbot=AttackBot, HUD=Analyzer, Cavebot/Targeting usam os sistemas ja existentes.")
+      showMessage(elfText("ElfBot: Healing=HealBot, Aimbot=AttackBot, HUD=Analyzer, Cavebot/Targeting usam os sistemas existentes.", "ElfBot: Healing=HealBot, Aimbot=AttackBot, HUD=Analyzer, Cavebot/Targeting use the existing systems."))
     end)
   end
 
@@ -1021,7 +1401,7 @@ if rootWidget then
 
   elfWindow.proxyButton.onClick = function()
     safeCall("Proxy", function()
-      showMessage("Proxy nao existe nesse pack do IMPERIALBOT. Botao mantido apenas para layout ElfBot.")
+      showMessage(elfText("Proxy nao existe nesse pack. Botao mantido apenas para o layout ElfBot.", "Proxy does not exist in this pack. Button is kept only for the ElfBot layout."))
     end)
   end
 
@@ -1035,7 +1415,7 @@ if rootWidget then
         PainelDeIconesController.openButton.onClick(PainelDeIconesController.openButton)
       else
         tryTab("Main")
-        showMessage("Painel de Icones ainda nao carregou. Abra pelo botao Painel de Icones na aba Main.")
+        showMessage(elfText("Painel de Icones ainda nao carregou. Abra pelo botao Painel de Icones na aba Main.", "Icon Panel has not loaded yet. Open it with the Icon Panel button on the Main tab."))
       end
     end)
   end
@@ -1059,12 +1439,4 @@ if rootWidget then
   end)
   UI.Separator()
 
-  if storage.imperialElfBotAutoOpen == nil then
-    storage.imperialElfBotAutoOpen = true
-  end
-  if storage.imperialElfBotAutoOpen then
-    schedule(500, function()
-      if ImperialElfBot and ImperialElfBot.show then ImperialElfBot.show() end
-    end)
-  end
 end

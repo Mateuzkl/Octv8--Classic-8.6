@@ -63,7 +63,7 @@ FbnCheckBox < BotSwitch
   margin-top: 7
 
 FbnWindow < MainWindow
-  !text: tr('ImperialScripts: Module v1')
+  !text: tr('ElfBot Scripts: Module v1')
   size: 440 360
   padding: 25
 

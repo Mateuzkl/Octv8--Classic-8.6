@@ -1127,11 +1127,15 @@ local function ensureRingProfiles()
   end
 
   if not ringProfileDebugState.bootLogged then
-    print("BOOT Active profile loaded: " .. activeId)
+    if type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded() then
+      print("BOOT Active profile loaded: " .. activeId)
+    end
     ringProfileDebugState.bootLogged = true
   end
   if ringProfileDebugState.lastSanitizedProfile ~= activeId then
-    print("SANITIZE Active profile after sanitize: " .. activeId)
+    if type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded() then
+      print("SANITIZE Active profile after sanitize: " .. activeId)
+    end
     ringProfileDebugState.lastSanitizedProfile = activeId
   end
 
@@ -1183,7 +1187,9 @@ local function applyRingProfileState(profileId)
   if id == "" then
     return
   end
-  print("APPLY Applying profile: " .. id)
+  if type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded() then
+    print("APPLY Applying profile: " .. id)
+  end
   local entry = profiles.configs[id]
   local data = type(entry) == "table" and entry.data or nil
   if type(data) ~= "table" then
@@ -4133,7 +4139,9 @@ end)
 -- MENSAGEM DE CARREGAMENTO
 -- ============================================
 
-modules.game_textmessage.displayGameMessage("[Ring/Amulet Setup] Sistema carregado! Configure Rings/Amulets e use o botao Backpacks.")
+if type(ImperialElfBot_IsProfileLoaded) == "function" and ImperialElfBot_IsProfileLoaded() then
+  modules.game_textmessage.displayGameMessage("ElfBot: Ring/Amulet Setup loaded. Configure Rings/Amulets and use Backpacks.")
+end
 
 
 end
@@ -4849,11 +4857,8 @@ local function setTooltipPair(widget, ptText, enText)
     end
     local pt = tostring(ptText or "")
     local en = tostring(enText or "")
-    if en ~= "" then
-        widget:setTooltip(string.format("PT: %s\nEN: %s", pt, en))
-    else
-        widget:setTooltip("PT: " .. pt)
-    end
+    local language = type(storage) == "table" and storage.elfbotLanguageExplicit == true and tostring(storage.elfbotLanguage):lower() or "en"
+    widget:setTooltip((language == "pt" or language == "br" or language == "portuguese" or language == "portugues") and pt or (en ~= "" and en or pt))
 end
 
 local function setOnOffButtonStyle(button, label, isOn)
