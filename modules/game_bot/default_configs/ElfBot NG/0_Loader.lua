@@ -50,6 +50,7 @@ local luaFiles = {
   "xeno_menu",
   "hold_target",
   "cavebot_control_panel",
+  "elfbot_hotkeys",
   "elfbot_layout"
 }
 

@@ -98,6 +98,7 @@ function executeBot(config, storage, tabs, msgCallback, saveConfigCallback, relo
   }
   context.load = function(str) return assert(load(str, nil, nil, context)) end
   context.loadstring = context.load
+  context.determineKeyComboDesc = determineKeyComboDesc
   context.assert = assert
   context.dofile = function(file) assert(load(g_resources.readFileContents("/bot/" .. config .. "/" .. file), file, nil, context))() end
   context.gcinfo = gcinfo

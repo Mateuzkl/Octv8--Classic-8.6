@@ -413,7 +413,11 @@ function elfHotkeysInit()
     end
   end
   if g_settings.getBoolean('elfbot_hotkeys_enabled') then
-    scheduleEvent(function() elfHotkeysStart() end, 500)
+    scheduleEvent(function()
+      if not (modules and modules.game_bot and modules.game_bot.elfHotkeysCustom == true) then
+        elfHotkeysStart()
+      end
+    end, 500)
   end
   updateWindow()
 end

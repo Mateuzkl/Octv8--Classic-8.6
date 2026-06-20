@@ -2,6 +2,8 @@
 -- Suporta as hotkeys mais comuns do ElfBot: auto, if, say, useoncreature, sd target,
 -- equipring/equipamulet/equipammo, eatfood, playsound, screenshot, setcavebot/settargeting/setlooting.
 
+local legacyHotkeysStop = modules and modules.game_bot and modules.game_bot.elfHotkeysStop
+
 local function elfHotkeysLog(level, text)
   text = tostring(text)
   if g_logger and g_logger[level] then
@@ -341,7 +343,7 @@ local function executeOneCommand(cmd)
 
   local label = cmd:match("^[Gg][Oo][Tt][Oo][Ll][Aa][Bb][Ee][Ll]%s+(.+)$")
   if label then
-    msg("gotolabel '" .. label .. "' reconhecido, mas precisa estar ligado ao CaveBot do seu pack.")
+    msg("gotolabel '" .. label .. "' is recognized, but it must be connected to this pack's CaveBot.")
     return
   end
 
@@ -351,7 +353,7 @@ local function executeOneCommand(cmd)
   local spell = cmd:match("^[Ss][Aa][Yy][Nn][Pp][Cc]%s+(.+)$")
   if spell then return g_game.talk(spell) end
 
-  elfHotkeysLog("warning", "[ElfBot Hotkeys] Comando ainda nao suportado: " .. cmd)
+  elfHotkeysLog("warning", "[ElfBot Hotkeys] Unsupported command: " .. cmd)
 end
 
 local function executeCommand(cmd)
@@ -360,95 +362,434 @@ local function executeCommand(cmd)
   end
 end
 
-local function scheduleHotkey(interval, cond, action)
-  elfHotkeysNextEventId = (elfHotkeysNextEventId or 0) + 1
-  local eventId = elfHotkeysNextEventId
+local SETTINGS_KEY = "elfbot_custom_hotkeys"
+local hotkeysConfig = nil
+local hotkeyEvents = {}
+local hotkeyBindings = {}
+local hotkeyRows = {}
+local captureEntryId = nil
+local selectedEntryId = nil
+local nextScheduleId = 0
+
+local function getHotkeysLanguage()
+  if type(ImperialElfBot_GetLanguage) == "function" then
+    local ok, language = pcall(ImperialElfBot_GetLanguage)
+    if ok and tostring(language):lower() == "pt" then
+      return "pt"
+    end
+  end
+  if type(storage) == "table" and storage.elfbotLanguageExplicit == true and tostring(storage.elfbotLanguage):lower() == "pt" then
+    return "pt"
+  end
+  return "en"
+end
+
+local function hotkeyText(ptText, enText)
+  return getHotkeysLanguage() == "pt" and ptText or enText
+end
+
+local function getEntry(entryId)
+  for _, entry in ipairs(hotkeysConfig.entries or {}) do
+    if entry.id == entryId then
+      return entry
+    end
+  end
+  return nil
+end
+
+local function saveConfig()
+  g_settings.setNode(SETTINGS_KEY, hotkeysConfig)
+  g_settings.save()
+end
+
+local function normalizeConfig()
+  local saved = g_settings.getNode(SETTINGS_KEY)
+  hotkeysConfig = type(saved) == "table" and saved or {}
+  hotkeysConfig.enabled = hotkeysConfig.enabled == true
+  hotkeysConfig.persistent = hotkeysConfig.persistent == true
+  hotkeysConfig.nextId = math.max(1, tonumber(hotkeysConfig.nextId) or 1)
+  hotkeysConfig.entries = type(hotkeysConfig.entries) == "table" and hotkeysConfig.entries or {}
+
+  local entries = {}
+  for _, rawEntry in ipairs(hotkeysConfig.entries) do
+    if type(rawEntry) == "table" then
+      local entry = {
+        id = tostring(rawEntry.id or hotkeysConfig.nextId),
+        hotkey = tostring(rawEntry.hotkey or ""),
+        name = tostring(rawEntry.name or hotkeyText("Nova hotkey", "New hotkey")),
+        script = tostring(rawEntry.script or ""),
+        enabled = rawEntry.enabled == true
+      }
+      entries[#entries + 1] = entry
+      hotkeysConfig.nextId = hotkeysConfig.nextId + 1
+    end
+  end
+  hotkeysConfig.entries = entries
+
+  if #entries == 0 then
+    local legacyScript = tostring(g_settings.get("elfbot_hotkeys_text") or "")
+    if legacyScript ~= "" then
+      entries[1] = {
+        id = tostring(hotkeysConfig.nextId),
+        hotkey = "",
+        name = hotkeyText("Script legado importado", "Imported legacy script"),
+        script = legacyScript,
+        enabled = false
+      }
+      hotkeysConfig.nextId = hotkeysConfig.nextId + 1
+    end
+  end
+
+  if not hotkeysConfig.persistent then
+    hotkeysConfig.enabled = false
+    for _, entry in ipairs(entries) do
+      entry.enabled = false
+    end
+  end
+end
+
+local function stopEntry(entryId)
+  local events = hotkeyEvents[entryId]
+  if events then
+    for _, event in pairs(events) do
+      removeEvent(event)
+    end
+  end
+  hotkeyEvents[entryId] = nil
+end
+
+local function stopAllEntries()
+  for entryId in pairs(hotkeyEvents) do
+    stopEntry(entryId)
+  end
+end
+
+local function isEntryRunning(entryId)
+  local entry = getEntry(entryId)
+  return hotkeysConfig.enabled and entry and entry.enabled
+end
+
+local function scheduleEntryCommand(entryId, interval, condition, action)
+  nextScheduleId = nextScheduleId + 1
+  local scheduleId = nextScheduleId
+  hotkeyEvents[entryId] = hotkeyEvents[entryId] or {}
 
   local function loop()
-    if not elfHotkeysRunning then
-      elfHotkeysEvents[eventId] = nil
+    if not isEntryRunning(entryId) then
       return
     end
     pcall(function()
-      if g_game.isOnline() and evalCondition(cond) then
+      if g_game.isOnline() and evalCondition(condition) then
         executeCommand(action)
       end
     end)
-    elfHotkeysEvents[eventId] = scheduleEvent(loop, interval)
+    if isEntryRunning(entryId) then
+      hotkeyEvents[entryId][scheduleId] = scheduleEvent(loop, interval)
+    end
   end
 
-  elfHotkeysEvents[eventId] = scheduleEvent(loop, interval)
+  hotkeyEvents[entryId][scheduleId] = scheduleEvent(loop, interval)
 end
 
-local function updateWindow()
-  if not elfHotkeysWindow then return end
-  local count = #splitLines(elfHotkeysText)
-  if elfHotkeysWindow.status then
-    if elfHotkeysRunning then
-      local text = "Status: ligado - " .. count .. " linha(s)"
-      if elfHotkeysWindow.status:getText() ~= text then
-        elfHotkeysWindow.status:setText(text)
-      end
-      elfHotkeysWindow.status:setColor("#00ff66")
+local function startEntry(entry)
+  if not entry or not hotkeysConfig.enabled or not entry.enabled then
+    return
+  end
+  stopEntry(entry.id)
+
+  for _, line in ipairs(splitLines(entry.script)) do
+    local interval, condition, action = line:match("^[Aa][Uu][Tt][Oo]%s+(%d+)%s+[Ii][Ff]%s+%[(.-)%]%s+(.+)$")
+    if interval and action then
+      scheduleEntryCommand(entry.id, math.max(50, tonumber(interval) or 1000), condition, action)
     else
-      local text = "Status: desligado - " .. count .. " linha(s)"
-      if elfHotkeysWindow.status:getText() ~= text then
-        elfHotkeysWindow.status:setText(text)
+      interval, action = line:match("^[Aa][Uu][Tt][Oo]%s+(%d+)%s+(.+)$")
+      if interval and action then
+        scheduleEntryCommand(entry.id, math.max(50, tonumber(interval) or 1000), "true", action)
+      else
+        pcall(function() executeCommand(line) end)
       end
-      elfHotkeysWindow.status:setColor("#ff5555")
     end
   end
-  if elfHotkeysWindow.preview then
-    local preview = elfHotkeysText
-    if preview:len() > 420 then preview = preview:sub(1, 420) .. "\n..." end
-    if preview:len() == 0 then preview = "Nenhum script carregado." end
-    if elfHotkeysWindow.preview:getText() ~= preview then
-      elfHotkeysWindow.preview:setText(preview)
+end
+
+local function getGameRoot()
+  if modules and modules.game_interface and modules.game_interface.getRootPanel then
+    return modules.game_interface.getRootPanel()
+  end
+  return nil
+end
+
+local function unbindEntry(entry)
+  local binding = entry and hotkeyBindings[entry.id]
+  if not binding then
+    return
+  end
+  g_keyboard.unbindKeyPress(binding.hotkey, binding.callback, getGameRoot())
+  hotkeyBindings[entry.id] = nil
+end
+
+local refreshWindow
+local setEntryEnabled
+
+local function bindEntry(entry)
+  unbindEntry(entry)
+  if not entry or not hotkeysConfig.enabled or entry.hotkey == "" then
+    return
+  end
+
+  local callback = function()
+    local currentEntry = getEntry(entry.id)
+    if currentEntry then
+      setEntryEnabled(currentEntry.id, not currentEntry.enabled)
+    end
+    return true
+  end
+  hotkeyBindings[entry.id] = {hotkey = entry.hotkey, callback = callback}
+  g_keyboard.bindKeyPress(entry.hotkey, callback, getGameRoot())
+end
+
+local function bindAllEntries()
+  for _, entry in ipairs(hotkeysConfig.entries) do
+    bindEntry(entry)
+  end
+end
+
+local function unbindAllEntries()
+  for _, entry in ipairs(hotkeysConfig.entries) do
+    unbindEntry(entry)
+  end
+end
+
+local function updateStatus()
+  if not elfHotkeysWindow or not elfHotkeysWindow.footer or not elfHotkeysWindow.footer.status then
+    return
+  end
+  local active = 0
+  for _, entry in ipairs(hotkeysConfig.entries) do
+    if entry.enabled then active = active + 1 end
+  end
+  local status = elfHotkeysWindow.footer.status
+  status:setText(hotkeysConfig.enabled
+    and string.format(hotkeyText("Ligado - %d/%d hotkeys ativas", "Enabled - %d/%d hotkeys active"), active, #hotkeysConfig.entries)
+    or hotkeyText("Desligado", "Disabled"))
+  status:setColor(hotkeysConfig.enabled and "#00ff66" or "#ff5555")
+end
+
+local function setMasterEnabled(enabled)
+  hotkeysConfig.enabled = enabled == true
+  elfHotkeysRunning = hotkeysConfig.enabled
+  stopAllEntries()
+  unbindAllEntries()
+  if hotkeysConfig.enabled then
+    bindAllEntries()
+    for _, entry in ipairs(hotkeysConfig.entries) do
+      startEntry(entry)
     end
   end
-  if elfHotkeysWindow.toggleScripts then
-    local text = elfHotkeysRunning and "Reiniciar" or "Ligar"
-    if elfHotkeysWindow.toggleScripts:getText() ~= text then
-      elfHotkeysWindow.toggleScripts:setText(text)
+  saveConfig()
+  if refreshWindow then refreshWindow() end
+end
+
+setEntryEnabled = function(entryId, enabled)
+  local entry = getEntry(entryId)
+  if not entry then return end
+  entry.enabled = enabled == true
+  stopEntry(entry.id)
+  if entry.enabled and hotkeysConfig.enabled then
+    startEntry(entry)
+  end
+  saveConfig()
+  if refreshWindow then refreshWindow() end
+end
+
+local function scriptPreview(script)
+  local preview = tostring(script or ""):gsub("[\r\n]+", " ")
+  if #preview > 70 then
+    return preview:sub(1, 67) .. "..."
+  end
+  return preview
+end
+
+local function setCaptureHint(text)
+  if elfHotkeysWindow and elfHotkeysWindow.footer and elfHotkeysWindow.footer.status then
+    elfHotkeysWindow.footer.status:setText(text)
+    elfHotkeysWindow.footer.status:setColor("#f4cd50")
+  end
+end
+
+local function assignHotkey(entryId, hotkey)
+  local entry = getEntry(entryId)
+  if not entry then return end
+  hotkey = tostring(hotkey or "")
+
+  for _, otherEntry in ipairs(hotkeysConfig.entries) do
+    if otherEntry.id ~= entry.id and otherEntry.hotkey == hotkey then
+      unbindEntry(otherEntry)
+      otherEntry.hotkey = ""
     end
   end
+  unbindEntry(entry)
+  entry.hotkey = hotkey
+  if hotkeysConfig.enabled then
+    bindEntry(entry)
+  end
+  saveConfig()
+  if refreshWindow then refreshWindow() end
+end
+
+local function beginCapture(entry)
+  if not entry or not elfHotkeysWindow then return end
+  captureEntryId = entry.id
+  setCaptureHint(hotkeyText("Pressione uma tecla para " .. entry.name .. ". Pressione Escape para cancelar.", "Press a key for " .. entry.name .. ". Press Escape to cancel."))
+  elfHotkeysWindow:grabKeyboard()
+end
+
+local function editScript(entry)
+  if not entry or not modules.client_textedit then return end
+  modules.client_textedit.multilineEditor(hotkeyText("Script da Hotkey - ", "Hotkey Script - ") .. entry.name, entry.script or "", function(newText)
+    entry.script = tostring(newText or "")
+    if entry.enabled and hotkeysConfig.enabled then
+      startEntry(entry)
+    end
+    saveConfig()
+    if refreshWindow then refreshWindow() end
+  end)
+end
+
+local function createRow(entry)
+  local row = g_ui.createWidget("ElfHotkeyRow", elfHotkeysWindow.hotkeyList)
+  hotkeyRows[entry.id] = row
+  row.enabled:setChecked(entry.enabled)
+  row.keyButton:setText(entry.hotkey ~= "" and entry.hotkey or hotkeyText("Definir tecla", "Set key"))
+  row.name:setText(entry.name)
+  row.enabled.onClick = function()
+    setEntryEnabled(entry.id, not entry.enabled)
+    return true
+  end
+  row.keyButton.onClick = function()
+    beginCapture(entry)
+    return true
+  end
+  row.name.onTextChange = function(_, text)
+    entry.name = tostring(text or "")
+  end
+  row.name.onFocusChange = function(_, focused)
+    if focused then
+      selectedEntryId = entry.id
+    end
+  end
+  row.onMousePress = function()
+    selectedEntryId = entry.id
+    return false
+  end
+end
+
+refreshWindow = function()
+  if not elfHotkeysWindow then return end
+  elfHotkeysWindow:setText(hotkeyText("Hotkeys Personalizadas", "Custom Hotkeys"))
+  elfHotkeysWindow.header.listLabel:setText(hotkeyText("Lista de Hotkeys", "Hotkey List"))
+  elfHotkeysWindow.header.masterEnabled:setText(hotkeyText("Hotkeys ligadas", "Hotkeys enabled"))
+  elfHotkeysWindow.header.persistent:setText(hotkeyText("Persistente", "Persistent"))
+  elfHotkeysWindow.header.editButton:setText(hotkeyText("Editar", "Edit"))
+  elfHotkeysWindow.header.addButton:setText(hotkeyText("Criar Hotkey", "Create Hotkey"))
+  elfHotkeysWindow.header.masterEnabled:setChecked(hotkeysConfig.enabled)
+  elfHotkeysWindow.header.persistent:setChecked(hotkeysConfig.persistent)
+  elfHotkeysWindow.hotkeyList:destroyChildren()
+  hotkeyRows = {}
+  for _, entry in ipairs(hotkeysConfig.entries) do
+    createRow(entry)
+  end
+  updateStatus()
+  if elfHotkeysWindow.hotkeyList.updateLayout then
+    elfHotkeysWindow.hotkeyList:updateLayout()
+  end
+end
+
+local function addHotkey(script)
+  local entry = {
+    id = tostring(hotkeysConfig.nextId),
+    hotkey = "",
+    name = hotkeyText("Utamo Vita", "Utamo Vita"),
+    script = script or "auto 1000 if [$manashielded == 0] say utamo vita",
+    enabled = false
+  }
+  hotkeysConfig.nextId = hotkeysConfig.nextId + 1
+  table.insert(hotkeysConfig.entries, entry)
+  selectedEntryId = entry.id
+  saveConfig()
+  if refreshWindow then refreshWindow() end
+  beginCapture(entry)
 end
 
 function elfHotkeysInit()
-  elfHotkeysText = g_settings.get('elfbot_hotkeys_text') or ""
+  if legacyHotkeysStop then
+    pcall(legacyHotkeysStop)
+    legacyHotkeysStop = nil
+  end
+  normalizeConfig()
 
   local rootWidget = g_ui.getRootWidget()
   if rootWidget and rootWidget.recursiveGetChildById then
-    local oldWindow = rootWidget:recursiveGetChildById('elfHotkeysWindow')
-    if oldWindow then
-      oldWindow:destroy()
+    local oldWindow = rootWidget:recursiveGetChildById("elfHotkeysWindow")
+    if oldWindow then oldWindow:destroy() end
+  end
+  elfHotkeysWindow = g_ui.createWidget("ElfHotkeysWindow", rootWidget)
+  elfHotkeysWindow:hide()
+
+  elfHotkeysWindow.closeButton.onClick = elfHotkeysClose
+  elfHotkeysWindow.header.editButton.onClick = function()
+    local entry = getEntry(selectedEntryId) or hotkeysConfig.entries[1]
+    if entry then
+      selectedEntryId = entry.id
+      editScript(entry)
+    else
+      addHotkey()
+    end
+    return true
+  end
+  elfHotkeysWindow.header.addButton.onClick = function()
+    addHotkey()
+  end
+  elfHotkeysWindow.header.masterEnabled.onClick = function()
+    setMasterEnabled(not hotkeysConfig.enabled)
+    return true
+  end
+  elfHotkeysWindow.header.persistent.onClick = function()
+    hotkeysConfig.persistent = not hotkeysConfig.persistent
+    saveConfig()
+    refreshWindow()
+    return true
+  end
+  elfHotkeysWindow.onKeyDown = function(_, keyCode, keyboardModifiers)
+    if not captureEntryId then return false end
+    local hotkey = determineKeyComboDesc(keyCode, keyboardModifiers)
+    local capturedEntryId = captureEntryId
+    captureEntryId = nil
+    elfHotkeysWindow:ungrabKeyboard()
+    if hotkey ~= "Escape" then
+      assignHotkey(capturedEntryId, hotkey)
+    else
+      refreshWindow()
+    end
+    return true
+  end
+
+  if hotkeysConfig.enabled then
+    bindAllEntries()
+    for _, entry in ipairs(hotkeysConfig.entries) do
+      startEntry(entry)
     end
   end
-
-  local ok, win = pcall(function()
-    if UI and UI.createWindow then
-      return UI.createWindow('ElfHotkeysWindow', rootWidget)
-    end
-  end)
-
-  if ok and win then
-    elfHotkeysWindow = win
-  else
-    local ok2, win2 = pcall(function() return g_ui.displayUI('elfhotkeys') end)
-    if ok2 then elfHotkeysWindow = win2 end
+  elfHotkeysRunning = hotkeysConfig.enabled
+  if type(ImperialElfBot_RegisterLanguageRefresher) == "function" then
+    ImperialElfBot_RegisterLanguageRefresher("customHotkeys", refreshWindow)
   end
-
-  if elfHotkeysWindow then
-    elfHotkeysWindow:hide()
-  end
-
-  -- Auto-start removido intencionalmente: o usuario deve clicar Ligar explicitamente.
-  -- O toggle liga/desliga corretamente sem conflito com auto-start.
-  updateWindow()
+  refreshWindow()
 end
 
 function elfHotkeysTerminate()
-  elfHotkeysStop()
+  stopAllEntries()
+  unbindAllEntries()
   if elfHotkeysWindow then
     elfHotkeysWindow:destroy()
     elfHotkeysWindow = nil
@@ -456,18 +797,8 @@ function elfHotkeysTerminate()
 end
 
 function elfHotkeysOpen()
-  if not elfHotkeysWindow then
-    local root = g_ui.getRootWidget()
-    if root and root.recursiveGetChildById then
-      elfHotkeysWindow = root:recursiveGetChildById('elfHotkeysWindow')
-    end
-  end
-  if not elfHotkeysWindow then
-    local ok, win = pcall(function() return g_ui.displayUI('elfhotkeys') end)
-    if ok and win then elfHotkeysWindow = win end
-  end
   if not elfHotkeysWindow then return end
-  updateWindow()
+  refreshWindow()
   elfHotkeysWindow:show()
   elfHotkeysWindow:raise()
   elfHotkeysWindow:focus()
@@ -475,86 +806,48 @@ end
 
 function elfHotkeysClose()
   if elfHotkeysWindow then
+    captureEntryId = nil
+    elfHotkeysWindow:ungrabKeyboard()
     elfHotkeysWindow:hide()
   end
 end
 
-function elfHotkeysEdit()
-  modules.client_textedit.multilineEditor("ElfBot Hotkeys Original", elfHotkeysText or "", function(newText)
-    elfHotkeysText = newText or ""
-    elfHotkeysSave()
-    updateWindow()
-  end)
-end
-
 function elfHotkeysSave()
-  g_settings.set('elfbot_hotkeys_text', elfHotkeysText or "")
-  g_settings.set('elfbot_hotkeys_enabled', elfHotkeysRunning and true or false)
-  g_settings.save()
-  updateWindow()
-  msg("Hotkeys ElfBot salvas.")
+  saveConfig()
+  if hotkeysConfig.enabled then
+    stopAllEntries()
+    for _, entry in ipairs(hotkeysConfig.entries) do
+      if entry.enabled then startEntry(entry) end
+    end
+  end
+  refreshWindow()
+  msg(hotkeyText("Hotkeys personalizadas salvas.", "Custom hotkeys saved."))
 end
 
 function elfHotkeysLoadPreset(name)
   if presets[name] then
-    elfHotkeysText = presets[name]
-    elfHotkeysSave()
-    msg("Preset " .. name .. " carregado. Clique Ligar para testar.")
+    addHotkey(presets[name])
   end
+end
+
+function elfHotkeysEdit()
+  addHotkey()
 end
 
 function elfHotkeysStop()
-  elfHotkeysRunning = false
-  for _, ev in pairs(elfHotkeysEvents) do
-    removeEvent(ev)
-  end
-  elfHotkeysEvents = {}
-  g_settings.set('elfbot_hotkeys_enabled', false)
-  g_settings.save()
-  updateWindow()
+  setMasterEnabled(false)
 end
 
 function elfHotkeysStart()
-  elfHotkeysStop()
-  elfHotkeysRunning = true
-  local lines = splitLines(elfHotkeysText)
-  local autoCount = 0
-
-  for _, line in ipairs(lines) do
-    local interval, cond, action = line:match("^[Aa][Uu][Tt][Oo]%s+(%d+)%s+[Ii][Ff]%s+%[(.-)%]%s+(.+)$")
-    if interval and action then
-      scheduleHotkey(math.max(50, tonumber(interval) or 1000), cond, action)
-      autoCount = autoCount + 1
-    else
-      interval, action = line:match("^[Aa][Uu][Tt][Oo]%s+(%d+)%s+(.+)$")
-      if interval and action then
-        scheduleHotkey(math.max(50, tonumber(interval) or 1000), "true", action)
-        autoCount = autoCount + 1
-      else
-        pcall(function() executeCommand(line) end)
-      end
-    end
-  end
-
-  g_settings.set('elfbot_hotkeys_enabled', true)
-  g_settings.save()
-  updateWindow()
-  msg("Hotkeys ElfBot ligadas: " .. autoCount .. " macro(s).")
+  setMasterEnabled(true)
 end
 
 function elfHotkeysToggle()
-  if elfHotkeysRunning then
-    elfHotkeysStop()
-  else
-    elfHotkeysStart()
-  end
+  setMasterEnabled(not hotkeysConfig.enabled)
 end
 
-schedule(50, function()
-  elfHotkeysInit()
-end)
+schedule(50, elfHotkeysInit)
 
--- exports para callbacks do OTUI e layout ElfBot
 if modules and modules.game_bot then
   modules.game_bot.elfHotkeysOpen = elfHotkeysOpen
   modules.game_bot.elfHotkeysClose = elfHotkeysClose
@@ -564,4 +857,5 @@ if modules and modules.game_bot then
   modules.game_bot.elfHotkeysStart = elfHotkeysStart
   modules.game_bot.elfHotkeysToggle = elfHotkeysToggle
   modules.game_bot.elfHotkeysLoadPreset = elfHotkeysLoadPreset
+  modules.game_bot.elfHotkeysCustom = true
 end
