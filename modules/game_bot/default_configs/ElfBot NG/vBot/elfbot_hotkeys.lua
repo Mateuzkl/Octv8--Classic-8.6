@@ -565,8 +565,10 @@ local function varValue(var)
   quoted = var:match("^screencount%.'(.+)'$")
   if quoted then return screenCountByName(quoted) end
 
-  local relation, relationName = var:match("^(isfriend|isenemy|issubfriend|issubenemy|isleader)%.'(.+)'$")
-  if relation and relationName then return boolNumber(relationByName(relation, relationName)) end
+  local relation, relationName = var:match("^([%a]+)%.'(.+)'$")
+  if relationName and (relation == "isfriend" or relation == "isenemy" or relation == "issubfriend" or relation == "issubenemy" or relation == "isleader") then
+    return boolNumber(relationByName(relation, relationName))
+  end
 
   r = var:match("^key%.(%d+)$")
   if r then return boolNumber(keyPressed(r)) end
@@ -940,7 +942,7 @@ local function scheduleEntryCommand(entryId, interval, condition, action)
   hotkeyEvents[entryId][scheduleId] = runner
 end
 
-local function startEntry(entry)
+local function startEntry(entry, runImmediate)
   if not entry or not hotkeysConfig.enabled or not entry.enabled then
     return
   end
@@ -954,7 +956,7 @@ local function startEntry(entry)
       interval, action = line:match("^[Aa][Uu][Tt][Oo]%s+(%d+)%s+(.+)$")
       if interval and action then
         scheduleEntryCommand(entry.id, math.max(50, tonumber(interval) or 1000), "true", action)
-      else
+      elseif runImmediate then
         pcall(function() executeCommand(line) end)
       end
     end
@@ -1032,7 +1034,7 @@ setEntryEnabled = function(entryId, enabled)
   entry.enabled = enabled == true
   stopEntry(entry.id)
   if entry.enabled and hotkeysConfig.enabled then
-    startEntry(entry)
+    startEntry(entry, true)
   end
   saveConfig()
   if refreshWindow then refreshWindow() end

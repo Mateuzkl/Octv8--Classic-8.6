@@ -9,7 +9,10 @@ function ImperialElfBot_IsProfileLoaded()
     return modules and modules.game_bot and modules.game_bot.elfbotProfileLoadedThisSession == true
 end
 
-if ImperialElfBot_IsProfileLoaded() then
+if ImperialElfBot_IsProfileLoaded()
+    and modules
+    and modules.game_textmessage
+    and type(modules.game_textmessage.displayGameMessage) == "function" then
     modules.game_textmessage.displayGameMessage("ElfBot Loaded")
 end
 addButton("reloadid", "Load-Bot", function()

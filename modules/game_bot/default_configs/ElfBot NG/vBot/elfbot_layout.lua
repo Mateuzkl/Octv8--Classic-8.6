@@ -384,8 +384,26 @@ local function readFilesSnapshot(relativeDir)
   return snapshot
 end
 
+local function isSafeSnapshotDirectory(relativeDir)
+  relativeDir = tostring(relativeDir or "")
+  return relativeDir == "cavebot_configs"
+    or relativeDir == "targetbot_configs"
+    or relativeDir:match("^vBot_configs/profile_%d+$") ~= nil
+end
+
+local function isSafeSnapshotFile(file)
+  file = tostring(file or "")
+  if not file:match("^[%w%._%-]+$") or file:find("..", 1, true) then
+    return false
+  end
+  return file:match("%.json$") ~= nil or file:match("%.cfg$") ~= nil
+end
+
 local function writeFilesSnapshot(relativeDir, snapshot)
   if type(snapshot) ~= "table" then
+    return
+  end
+  if not isSafeSnapshotDirectory(relativeDir) then
     return
   end
   local baseDir = getElfConfigDir() .. "/" .. relativeDir .. "/"
@@ -397,7 +415,7 @@ local function writeFilesSnapshot(relativeDir, snapshot)
   end
   for file, contents in pairs(snapshot) do
     file = tostring(file or "")
-    if (file:match("%.json$") or file:match("%.cfg$")) and type(contents) == "string" then
+    if isSafeSnapshotFile(file) and type(contents) == "string" then
       g_resources.writeFileContents(baseDir .. file, contents)
     end
   end

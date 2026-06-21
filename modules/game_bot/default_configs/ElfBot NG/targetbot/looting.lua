@@ -173,6 +173,7 @@ TargetBot.Looting.removeLootEntry = function(kind, index)
   if not ui then return false end
   index = tonumber(index)
   if not index then return false end
+  if kind ~= "item" and kind ~= "container" then return false end
   local widget = kind == "container" and ui.containers or ui.items
   local nextItems = widget:getItems()
   if index < 1 or index > #nextItems then return false end
