@@ -153,7 +153,7 @@ local function isDecorationKitWrapable(thing)
 end
 
 local function isDecorationKitThing(thing)
-	return thing and thing:isItem() and (thing:getId() == ITEM_DECORATION_KIT or isDecorationKitWrapable(thing))
+	return thing and thing:isItem() and thing:getId() == ITEM_DECORATION_KIT
 end
 
 local function showDecorationKitMenu(menuPosition, lookThing, useThing, creatureThing)
