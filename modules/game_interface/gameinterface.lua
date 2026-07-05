@@ -152,6 +152,19 @@ local function isDecorationKitWrapable(thing)
 	return false
 end
 
+local function isDecorationKitThing(thing)
+	return thing and thing:isItem() and (thing:getId() == ITEM_DECORATION_KIT or isDecorationKitWrapable(thing))
+end
+
+local function showDecorationKitMenu(menuPosition, lookThing, useThing, creatureThing)
+	if not isDecorationKitThing(useThing) then
+		return false
+	end
+
+	createThingMenu(menuPosition, lookThing, useThing, creatureThing)
+	return true
+end
+
 function init()
 	g_ui.importStyle("styles/countwindow")
 	connect(g_game, {
@@ -647,27 +660,29 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
 	end
 
 	if useThing then
-		if useThing:isContainer() then
-			if useThing:getParentContainer() then
-				menu:addOption(tr("Open"), function ()
-					g_game.open(useThing, useThing:getParentContainer())
+		if not isDecorationKitThing(useThing) then
+			if useThing:isContainer() then
+				if useThing:getParentContainer() then
+					menu:addOption(tr("Open"), function ()
+						g_game.open(useThing, useThing:getParentContainer())
+					end, shortcut)
+					menu:addOption(tr("Open in new window"), function ()
+						g_game.open(useThing)
+					end)
+				else
+					menu:addOption(tr("Open"), function ()
+						g_game.open(useThing)
+					end, shortcut)
+				end
+			elseif useThing:isMultiUse() then
+				menu:addOption(tr("Use with ..."), function ()
+					startUseWith(useThing)
 				end, shortcut)
-				menu:addOption(tr("Open in new window"), function ()
-					g_game.open(useThing)
-				end)
 			else
-				menu:addOption(tr("Open"), function ()
-					g_game.open(useThing)
+				menu:addOption(tr("Use"), function ()
+					g_game.use(useThing)
 				end, shortcut)
 			end
-		elseif useThing:isMultiUse() then
-			menu:addOption(tr("Use with ..."), function ()
-				startUseWith(useThing)
-			end, shortcut)
-		else
-			menu:addOption(tr("Use"), function ()
-				g_game.use(useThing)
-			end, shortcut)
 		end
 
 		if useThing:isRotateable() then
@@ -928,6 +943,10 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
 			if useThing then
 				resetLeftActions()
 
+				if showDecorationKitMenu(menuPosition, lookThing, useThing, creatureThing) then
+					return true
+				end
+
 				if useThing:isContainer() then
 					if useThing:getParentContainer() then
 						g_game.open(useThing, useThing:getParentContainer())
@@ -939,6 +958,8 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
 				elseif useThing:isMultiUse() then
 					startUseWith(useThing)
 
+					return true
+				elseif showDecorationKitMenu(menuPosition, lookThing, useThing, creatureThing) then
 					return true
 				else
 					g_game.use(useThing)
@@ -991,6 +1012,10 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
 
 			return true
 		elseif useThing and keyboardModifiers == KeyboardCtrlModifier and (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) then
+			if showDecorationKitMenu(menuPosition, lookThing, useThing, creatureThing) then
+				return true
+			end
+
 			if useThing:isContainer() then
 				if useThing:getParentContainer() then
 					g_game.open(useThing, useThing:getParentContainer())
@@ -1002,6 +1027,8 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
 			elseif useThing:isMultiUse() then
 				startUseWith(useThing)
 
+				return true
+			elseif showDecorationKitMenu(menuPosition, lookThing, useThing, creatureThing) then
 				return true
 			else
 				g_game.use(useThing)
@@ -1020,9 +1047,17 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
 			return true
 		end
 	elseif useThing and keyboardModifiers == KeyboardNoModifier and mouseButton == MouseRightButton and not g_mouse.isPressed(MouseLeftButton) then
+		if showDecorationKitMenu(menuPosition, lookThing, useThing, creatureThing) then
+			return true
+		end
+
 		local thing = g_things.getThingType(useThing:getId())
 
 		if thing:hasAttribute(ThingAttrForceUse) and (not attackCreature or attackCreature == player) and (not creatureThing or creatureThing == player or creatureThing:getPosition().z ~= autoWalkPos.z) then
+			if showDecorationKitMenu(menuPosition, lookThing, useThing, creatureThing) then
+				return true
+			end
+
 			g_game.use(useThing)
 
 			return true
@@ -1051,6 +1086,8 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
 		elseif useThing:isMultiUse() then
 			startUseWith(useThing)
 
+			return true
+		elseif showDecorationKitMenu(menuPosition, lookThing, useThing, creatureThing) then
 			return true
 		else
 			g_game.use(useThing)
@@ -1555,7 +1592,7 @@ function setupLeftActions()
 
 			local thing = tile:getTopUseThing()
 
-			if thing then
+			if thing and not isDecorationKitThing(thing) then
 				g_game.use(thing)
 			end
 		end
