@@ -17,6 +17,7 @@ bottomSplitter = nil
 limitedZoom = false
 hookedMenuOptions = {}
 lastDirTime = g_clock.millis()
+local ITEM_DECORATION_KIT = 23398
 
 function init()
 	g_ui.importStyle("styles/countwindow")
@@ -548,7 +549,7 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
 			end)
 		end
 
-		if useThing:isUnwrapable() then
+		if useThing:isUnwrapable() or useThing:getId() == ITEM_DECORATION_KIT then
 			menu:addOption(tr("Unwrap"), function ()
 				g_game.wrap(useThing)
 			end)
