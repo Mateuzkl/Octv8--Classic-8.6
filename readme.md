@@ -4,6 +4,13 @@
 
 If you add custom feature, make sure it's optional and can be enabled via g_game.enableFeature function, otherwise your pull request will be rejected.
 
+## Protocol Features
+
+Read the feature guide before changing `g_game.enableFeature` or `g_game.disableFeature`:
+
+- English: `docs/protocol-features-8.60.md`
+- PT-BR: `docs/protocol-features-8.60.pt-BR.md`
+
 ## Compilation
 
 ### Windows
