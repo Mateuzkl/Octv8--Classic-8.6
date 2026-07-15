@@ -229,8 +229,9 @@ GameDisplayItemDuration = 129
 GameThingUpgradeClassification = 130
 GameItemTierByte = 131
 GameProficiency = 132
+GameZoneWeather = 144
 
-LastGameFeature = 133
+LastGameFeature = 145
         
 TextColors = {
   red       = '#f55e5e', --'#c83200'
