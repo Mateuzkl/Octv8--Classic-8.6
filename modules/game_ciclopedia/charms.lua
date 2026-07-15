@@ -60,13 +60,24 @@ local function firstToUpper(str)
     return (str:gsub("^%l", string.upper))
 end
 
+function readCyclopediaCharmResources(msg)
+	return {
+		charmPoints = msg:getU32(),
+		minorEchoes = msg:getU32(),
+		maxCharmPoints = msg:getU32(),
+		maxMinorEchoes = msg:getU32(),
+		gold = msg:getU64()
+	}
+end
+
 function sendBestiaryCharmsData(msg)
 local charmsView = isCharmsView()
 if charmsView and not charmsWindow then
 	charmsWindow = g_ui.loadUI("styles/charms", getContentContainer())
 	end
-	local charmsAmount = msg:getU32()
-	local goldAmount = msg:getU64()
+	local resources = readCyclopediaCharmResources(msg)
+	local charmsAmount = resources.charmPoints
+	local goldAmount = resources.gold
 	if charmsView and charmAmount then
 		charmAmount:setText(charmsAmount)
 	end
@@ -114,7 +125,8 @@ if charmsView and not charmsWindow then
 		createCharms(charmsList, charmsAmount) -- We use the data that we filled
 	end
 	
-	msg:getU8() -- Unknown byte
+	msg:getU32() -- Charm reset cost
+	msg:getU8() -- Empty charm slots
 	
 	local finishedMonstersSize = msg:getU16()
 	local generatedMonsters = {}

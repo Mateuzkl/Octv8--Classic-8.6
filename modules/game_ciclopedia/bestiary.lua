@@ -588,8 +588,7 @@ function registerBestiaryProtocol()
 		local secondUnlock = msg:getU16()
 		local toKill = msg:getU16()
 		local raceOutfit = readCyclopediaCreatureOutfit(msg)
-		local charmAmount = msg:getU32()
-		local goldAmount = msg:getU32()
+		local resources = readCyclopediaCharmResources(msg)
 
 		applyBestiaryProgressUpdate({
 			raceId = raceId,
@@ -600,7 +599,7 @@ function registerBestiaryProtocol()
 			toKill = toKill,
 			outfit = raceOutfit
 		})
-		BestiaryChangeAmount(charmAmount, goldAmount)
+		BestiaryChangeAmount(resources.charmPoints, resources.gold)
 	end)
 
 	ProtocolGame.unregisterOpcode(CyclopediaOpcode.Send)
