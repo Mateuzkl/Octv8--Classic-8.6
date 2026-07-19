@@ -493,8 +493,9 @@ namespace Otc
         GameThingUpgradeClassification = 130,
         GameItemTierByte = 131,
         GameProficiency = 132,
+        GameZoneWeather = 144,
 
-        LastGameFeature = 133
+        LastGameFeature = 145
     };
 
     enum PathFindResult {

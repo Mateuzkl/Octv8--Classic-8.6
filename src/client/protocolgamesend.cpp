@@ -126,6 +126,7 @@ void ProtocolGame::sendLoginPacket(uint challengeTimestamp, uint8 challengeRando
         }
         msg->addU16(atoi(version.c_str()));
         msg->addString(std::string("OTCv8TierByte"));
+        msg->addString(std::string("OTCv8ZoneWeather"));
     }
 
     // encrypt with RSA
