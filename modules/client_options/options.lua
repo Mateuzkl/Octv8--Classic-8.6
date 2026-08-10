@@ -478,7 +478,7 @@ function setOption(key, value, force)
 	elseif key == "antialiasing" then
 		g_app.setSmooth(value)
 	elseif key == "hdmodeBox" then
-		if not force then
+		if not force and value ~= startupHdSpriteUpscaling then
 			displayInfoBox(tr("HD Sprite Upscaling"), tr("Restart the client to apply HD Sprite Upscaling."))
 		end
 	end
