@@ -453,3 +453,7 @@ function onOverlayGeometryChange()
 	topHealthBar:setMarginLeft(math.max(minMargin, (width - height + 50) / 2 + 2))
 	topManaBar:setMarginRight(math.max(minMargin, (width - height + 50) / 2 + 2))
 end
+
+if g_resources.getLayout() == "retro" then
+	dofile("/layouts/retro/modules/game_healthinfo/healthinfo.lua")
+end

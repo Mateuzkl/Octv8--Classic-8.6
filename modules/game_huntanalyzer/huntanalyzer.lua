@@ -93,13 +93,17 @@ function init()
 	expWindow:hide()
 
 	local rightPanel = modules.game_interface.getRightPanel()
-	exphButton = rightPanel:recursiveGetChildById("exphButton")
+	exphButton = modules.game_sidebuttons and modules.game_sidebuttons.expHourButton or rightPanel:recursiveGetChildById("exphButton")
 
-	exphButton:setOn(mainWindow:isVisible())
+	if exphButton then
+		exphButton:setOn(mainWindow:isVisible())
+	end
 	g_keyboard.bindKeyDown("Ctrl+H", toggle)
 
 	function mainWindow.onClose()
-		exphButton:setOn(false)
+		if exphButton then
+			exphButton:setOn(false)
+		end
 	end
 
 	expWindow:setup()
@@ -140,7 +144,7 @@ function terminate()
 	expWindow:destroy()
 	dropWindow:destroy()
 	trackWindow:destroy()
-	exphButton:destroy()
+	exphButton = nil
 end
 
 function online()
@@ -169,7 +173,9 @@ function toggle()
 		mainWindow:open()
 	end
 
-	exphButton:setOn(mainWindow:isVisible())
+	if exphButton then
+		exphButton:setOn(mainWindow:isVisible())
+	end
 end
 
 function showExpWindow()

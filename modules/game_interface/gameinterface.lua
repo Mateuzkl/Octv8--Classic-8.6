@@ -194,7 +194,11 @@ function init()
 		onExit = save
 	})
 
-	gameRootPanel = g_ui.displayUI("gameinterface")
+	local gameInterfaceUi = "gameinterface"
+	if g_resources.getLayout() == "retro" then
+		gameInterfaceUi = "/layouts/retro/modules/game_interface/gameinterface.otui"
+	end
+	gameRootPanel = g_ui.displayUI(gameInterfaceUi)
 
 	gameRootPanel:hide()
 	gameRootPanel:lower()

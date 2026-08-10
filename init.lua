@@ -1,7 +1,7 @@
 -- CONFIG
 APP_NAME = "tibiaotcv8"  -- important, change it, it's name for config dir and files in appdata
 APP_VERSION = 1342       -- client version for updater and login to identify outdated client
-DEFAULT_LAYOUT = "default" -- on android it's forced to "mobile", check code bellow
+DEFAULT_LAYOUT = "classic" -- on android it's forced to "mobile", check code bellow
 
 -- If you don't use updater or other service, set it to updater = ""
 Services = {
@@ -49,7 +49,12 @@ local layout = DEFAULT_LAYOUT
 if g_app.isMobile() then
   layout = "mobile"
 elseif settings:exists('layout') then
-  layout = settings:getValue('layout')
+  layout = settings:getValue('layout'):lower()
+  if layout == "default" then
+    layout = DEFAULT_LAYOUT
+  elseif layout == "otcv8" then
+    layout = "retro"
+  end
 end
 g_resources.setLayout(layout)
 

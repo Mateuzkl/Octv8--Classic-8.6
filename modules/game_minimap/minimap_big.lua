@@ -13,7 +13,11 @@ local function cancelCameraUpdate()
 end
 
 function init()
-	minimapWindowBig = g_ui.loadUI("minimap_big", modules.game_interface.getRootPanel())
+	local minimapUi = "minimap_big"
+	if g_resources.getLayout() == "retro" then
+		minimapUi = "/layouts/retro/modules/game_minimap/minimap_big.otui"
+	end
+	minimapWindowBig = g_ui.loadUI(minimapUi, modules.game_interface.getRootPanel())
 	minimapWidget = minimapWindowBig:recursiveGetChildById("minimapWidgetBig")
 	minimapWidget.onMousePress = onMinimapMousePress
 

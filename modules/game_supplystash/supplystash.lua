@@ -11,7 +11,7 @@ local stowAllEvent = nil
 local currentCategoryFilter = "all"
 local OPCODE_SUPPLY_STASH_REQUEST = 0x28
 local OPCODE_SUPPLY_STASH_SEND = 0x29
-local SUPPLY_STASH_DETAILS_MARKER = 0x5353
+local SUPPLY_STASH_DETAILS_MARKER = 0x5354
 local SUPPLY_STASH_ITEM_ID = 28750
 local ACTION_OPEN = 1
 local ACTION_STOW_ALL = 2
@@ -317,18 +317,25 @@ local function registerProtocol()
 				local details = {}
 				local detailCount = msg:getU16()
 				for i = 1, detailCount do
-					if msg:getUnreadSize() < 7 then
+					if msg:getUnreadSize() < 4 then
 						break
 					end
 
 					local itemId = msg:getU16()
+					local nameLength = msg:peekU16()
+					if msg:getUnreadSize() < nameLength + 9 then
+						break
+					end
+
 					local name = msg:getString()
 					local category = msg:getU16()
 					local stackable = msg:getU8() ~= 0
+					local npcPrice = msg:getU32()
 					details[itemId] = {
 						name = name,
 						category = category,
-						stackable = stackable
+						stackable = stackable,
+						npcPrice = npcPrice
 					}
 				end
 

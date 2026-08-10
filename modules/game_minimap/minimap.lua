@@ -15,7 +15,11 @@ local function cancelCameraUpdate()
 end
 
 function init()
-	minimapWindow = g_ui.loadUI("minimap", modules.game_interface.getRightPanel())
+	local minimapUi = "minimap"
+	if g_resources.getLayout() == "retro" then
+		minimapUi = "/layouts/retro/modules/game_minimap/minimap.otui"
+	end
+	minimapWindow = g_ui.loadUI(minimapUi, modules.game_interface.getRightPanel())
 
 	minimapWindow:setContentMinimumHeight(64)
 

@@ -1,0 +1,112 @@
+OptionPanel
+  OptionCheckBox
+    id: classicControl
+    !text: tr('Classic control')
+
+    $mobile:
+      visible: false
+
+  OptionCheckBox
+    id: autoChaseOverride
+    !text: tr('Allow auto chase override')
+
+  OptionCheckBox
+    id: dash
+    !text: tr('Enable fast walking (DASH)')
+    !tooltip: tr('Allows to execute next move without server confirmation of previous one')
+
+  OptionCheckBox
+    id: smartWalk
+    !text: tr('Enable smart walking')
+    !tooltip: tr('Will detect when to use diagonal step based on the\nkeys you are pressing')
+
+  Label
+    id: hotkeyDelayLabel
+    !tooltip: tr('Give you some time to make a turn while walking if you press many keys simultaneously')
+    @onSetup: |
+      local value = modules.client_options.getOption('hotkeyDelay')
+      self:setText(tr('Hotkey delay: %s ms', value))
+
+  OptionScrollbar
+    id: hotkeyDelay
+    minimum: 5
+    maximum: 1000
+
+  Label
+    id: walkFirstStepDelayLabel
+    @onSetup: |
+      local value = modules.client_options.getOption('walkFirstStepDelay')
+      self:setText(tr('Walk delay after first step: %s ms', value))
+
+    $mobile:
+      visible: false
+
+  OptionScrollbar
+    id: walkFirstStepDelay
+    minimum: 50
+    maximum: 300
+
+    $mobile:
+      visible: false
+
+  Label
+    id: walkTurnDelayLabel
+    @onSetup: |
+      local value = modules.client_options.getOption('walkTurnDelay')
+      self:setText(tr('Walk delay after turn: %s ms', value))
+
+    $mobile:
+      visible: false
+
+  OptionScrollbar
+    id: walkTurnDelay
+    minimum: 0
+    maximum: 300
+
+    $mobile:
+      visible: false
+
+  Label
+    id: walkCtrlTurnDelayLabel
+    $mobile:
+      visible: false
+    @onSetup: |
+      local value = modules.client_options.getOption('walkCtrlTurnDelay')
+      self:setText(tr('Walk delay after ctrl turn: %s ms', value))
+
+  OptionScrollbar
+    id: walkCtrlTurnDelay
+    minimum: 0
+    maximum: 300    
+    $mobile:
+      visible: false
+
+  Label
+    id: walkStairsDelayLabel
+    @onSetup: |
+      local value = modules.client_options.getOption('walkStairsDelay')
+      self:setText(tr('Walk delay after floor change: %s ms', value))
+    $mobile:
+      visible: false
+
+  OptionScrollbar
+    id: walkStairsDelay
+    minimum: 0
+    maximum: 300
+    $mobile:
+      visible: false
+
+  Label
+    id: walkTeleportDelayLabel
+    @onSetup: |
+      local value = modules.client_options.getOption('walkTeleportDelay')
+      self:setText(tr('Walk delay after teleport: %s ms', value))
+    $mobile:
+      visible: false
+
+  OptionScrollbar
+    id: walkTeleportDelay
+    minimum: 0
+    maximum: 300
+    $mobile:
+      visible: false

@@ -690,3 +690,7 @@ end
 function EnterGame.disableMotd()
 	motdEnabled = false
 end
+
+if g_resources.getLayout() == "retro" then
+	dofile("/layouts/retro/modules/client_entergame/entergame.lua")
+end

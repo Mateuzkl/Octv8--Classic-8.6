@@ -27,7 +27,9 @@ function init()
 	cooldownPanel = cooldownWindow:getChildById("cooldownPanel")
 	local console = modules.game_console.consolePanel
 
-	if console then
+	if g_resources.getLayout() == "retro" then
+		cooldownWindow:hide()
+	elseif console then
 		console:addAnchor(AnchorTop, cooldownWindow:getId(), AnchorBottom)
 	end
 

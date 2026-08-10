@@ -506,3 +506,7 @@ function CharacterList.cancelWait()
 	CharacterList.destroyLoadBox()
 	CharacterList.showAgain()
 end
+
+if g_resources.getLayout() == "retro" then
+	dofile("/layouts/retro/modules/client_entergame/characterlist.lua")
+end

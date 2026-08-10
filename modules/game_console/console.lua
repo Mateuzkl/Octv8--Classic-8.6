@@ -220,7 +220,11 @@ function init()
 		onGameEnd = offline
 	})
 
-	consolePanel = g_ui.loadUI("console", modules.game_interface.getBottomPanel())
+	local consoleUi = "console"
+	if g_resources.getLayout() == "retro" then
+		consoleUi = "/layouts/retro/modules/game_console/console.otui"
+	end
+	consolePanel = g_ui.loadUI(consoleUi, modules.game_interface.getBottomPanel())
 	consoleTextEdit = consolePanel:recursiveGetChildById("consoleTextEdit")
 	consoleContentPanel = consolePanel:recursiveGetChildById("consoleContentPanel")
 	consoleTabBar = consolePanel:recursiveGetChildById("consoleTabBar")

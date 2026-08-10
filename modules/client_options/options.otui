@@ -13,7 +13,7 @@ OptionPanel < Panel
 MainWindow
   id: optionsWindow
   !text: tr('Options')
-  size: 285 300
+  size: 285 335
   @onEscape: modules.client_options.hide()
 
   LongButton
@@ -23,6 +23,15 @@ MainWindow
     anchors.top: parent.top
     anchors.left: parent.left
     @onClick: modules.client_options.toggleSubWindow('general')
+
+  LongButton
+    id: InterfaceButton
+    !text: tr('Interface')
+    width: 90
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    margin-top: 15
+    @onClick: modules.client_options.toggleSubWindow('interface')
 
   LongButton
     id: GraphicsButton
@@ -91,6 +100,21 @@ MainWindow
     anchors.left: GeneralButtonText.left
     margin-top: 12
     @onClick: modules.client_options.toggleSubWindow('general')
+
+  Label
+    id: InterfaceButtonText
+    !text: tr('Choose the client')
+    anchors.top: InterfaceButton.top
+    anchors.left: InterfaceButton.left
+    margin-left: 100
+    @onClick: modules.client_options.toggleSubWindow('interface')
+
+  Label
+    !text: tr('layout and interface')
+    anchors.top: InterfaceButtonText.top
+    anchors.left: InterfaceButtonText.left
+    margin-top: 12
+    @onClick: modules.client_options.toggleSubWindow('interface')
 
   Label
     id: GraphicsButtonText

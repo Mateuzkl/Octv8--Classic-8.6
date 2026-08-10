@@ -25,7 +25,7 @@ StashItem < UIItem
   image-source: /images/ui/item/none
   size: 32 32
   draggable: false
-  @onDrop: function(self, widget, mousePos) return blockItemDrop(self, widget, mousePos) end
+  @onDrop: function(self, widget, mousePos) return modules.game_supplystash.blockItemDrop(self, widget, mousePos) end
 
   UIWidget
     id: tier
@@ -48,7 +48,7 @@ StashItem < UIItem
     margin-right: 2
     text-align: right
     font: verdana-11px-rounded
-    @onDrop: function(self, widget, mousePos) return blockItemDrop(self, widget, mousePos) end
+    @onDrop: function(self, widget, mousePos) return modules.game_supplystash.blockItemDrop(self, widget, mousePos) end
 
   $disabled:
     image-source: assets/emptySlot
@@ -58,8 +58,8 @@ SupplyStashWindow
   !text: tr('Supply Stash')
   color: #909090
   visible: false
-  @onEscape: toggle()
-  @onDrop: function(self, widget, mousePos) return blockItemDrop(self, widget, mousePos) end
+  @onEscape: modules.game_supplystash.toggle()
+  @onDrop: function(self, widget, mousePos) return modules.game_supplystash.blockItemDrop(self, widget, mousePos) end
 
   ComboBox
     id: categoryFilter
@@ -75,7 +75,7 @@ SupplyStashWindow
     anchors.left: prev.right
     margin-left: 7
     text-align: center
-    @onOptionChange: placeholder()
+    @onOptionChange: modules.game_supplystash.placeholder()
     @onSetup: |
       self:addOption("No trader selected")
 
@@ -91,7 +91,7 @@ SupplyStashWindow
     anchors.left: prev.right
     margin-left: 10
     size: 138 20
-    @onEnter: placeholder()
+    @onEnter: modules.game_supplystash.placeholder()
 
   Label
     id: freeSlots
@@ -112,7 +112,7 @@ SupplyStashWindow
     anchors.bottom: horizontalSeparator.top
     anchors.left: parent.left
     margin-bottom: 7
-    @onDrop: function(self, widget, mousePos) return blockItemDrop(self, widget, mousePos) end
+    @onDrop: function(self, widget, mousePos) return modules.game_supplystash.blockItemDrop(self, widget, mousePos) end
 
     UIScrollArea
       id: supplyItems
@@ -128,7 +128,7 @@ SupplyStashWindow
       layout: verticalBox
       padding: 1
       auto-focus: none
-      @onDrop: function(self, widget, mousePos) return blockItemDrop(self, widget, mousePos) end
+      @onDrop: function(self, widget, mousePos) return modules.game_supplystash.blockItemDrop(self, widget, mousePos) end
       layout:
         type: grid
         cell-size: 32 32
@@ -154,7 +154,7 @@ SupplyStashWindow
     !text: tr('Close')
     font: cipsoftFont
     margin-right: 0
-    @onClick: toggle()
+    @onClick: modules.game_supplystash.toggle()
 
   Button
     id: stowAllButton
@@ -164,7 +164,7 @@ SupplyStashWindow
     !text: tr('Stow All')
     font: cipsoftFont
     margin-right: 8
-    @onClick: stowAll()
+    @onClick: modules.game_supplystash.stowAll()
 
   HorizontalSeparator
     id: horizontalSeparator

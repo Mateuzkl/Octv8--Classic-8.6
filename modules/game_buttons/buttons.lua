@@ -12,6 +12,12 @@ function init()
 	if not buttonsWindow.forceOpen or not contentsPanel.buttons then
 		buttonsWindow:close()
 	end
+
+	-- Retro uses the complete Classic feature panel instead of Kondrah's
+	-- duplicated generic button grid.
+	if g_resources.getLayout() == "retro" then
+		buttonsWindow:hide()
+	end
 end
 
 function terminate()
