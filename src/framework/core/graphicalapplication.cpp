@@ -102,9 +102,9 @@ void GraphicalApplication::terminate()
 
     g_mouse.terminate();
 
-    // terminate graphics
-    g_graphicsDispatcher.shutdown();
+    // Destroy graphics resources while the dispatcher and context are alive.
     g_graphics.terminate();
+    g_graphicsDispatcher.shutdown();
     g_window.terminate();
 
     m_terminated = true;
