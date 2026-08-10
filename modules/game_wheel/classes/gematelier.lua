@@ -12,6 +12,7 @@ local lastSelectedVessel = nil
 local currentGemList = {}
 local totalGemList = {}
 local currentSearchText = ""
+local gemLockEvent = nil
 
 local cachedBasicMods = {}
 local cachedSupremeMods = {}
@@ -27,6 +28,13 @@ GemSwitchPrice = {
   [1] = 250000,   -- Regular
   [2] = 1000000   -- Greater
 }
+
+function GemAtelier.cancelPendingEvents()
+	if gemLockEvent then
+		removeEvent(gemLockEvent)
+		gemLockEvent = nil
+	end
+end
 
 function GemAtelier.resetFields()
 	lockedOnly = false
@@ -932,7 +940,12 @@ function sendgemAction(actionType, param, pos)
 	g_game.gemAction(actionType, param, pos)
 
 	if actionType == 3 then
-		scheduleEvent(function()
+		GemAtelier.cancelPendingEvents()
+		gemLockEvent = scheduleEvent(function()
+			gemLockEvent = nil
+			if not g_game.isOnline() then
+				return
+			end
 			local gem = GemAtelier.getGemDataById(param)
 			if not gem then
 				g_logger.debug(string.format("[GemAtelier] Failed to toggle lock: gem id=%d not found.", param))
@@ -943,12 +956,14 @@ function sendgemAction(actionType, param, pos)
 			g_logger.debug(string.format("[GemAtelier] Toggled local lock of gem id=%d -> %s",
 				param, gem.locked == 1 and "locked" or "unlocked"))
 
-			if lastSelectedGem and lastSelectedGem.locker then
+			if lastSelectedGem and not lastSelectedGem:isDestroyed() and lastSelectedGem.locker then
 				lastSelectedGem.locker:setChecked(gem.locked == 1)
 			end
 
 			local lastIndex = lastSelectedGem and lastSelectedGem.gemIndex or 1
-			GemAtelier.showGems(false, lastIndex)
+			if gemAtelierWindow and not gemAtelierWindow:isDestroyed() then
+				GemAtelier.showGems(false, lastIndex)
+			end
 		end, 300)
 	end
 end

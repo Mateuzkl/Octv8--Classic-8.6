@@ -1,6 +1,27 @@
 local window, previousType, currentType
 local bestiaryPanel
 
+local function ensureWindow()
+	if window and not window:isDestroyed() then
+		return window
+	end
+
+	window = g_ui.displayUI('ciclopedia')
+	if not window then
+		return nil
+	end
+
+	contentContainer = window:recursiveGetChildById('contentContainer')
+	buttonSelection = window:recursiveGetChildById('buttonSelection')
+	items = buttonSelection:recursiveGetChildById('items')
+	bestiary = buttonSelection:recursiveGetChildById('bestiary')
+	charms = buttonSelection:recursiveGetChildById('charms')
+	map = buttonSelection:recursiveGetChildById('map')
+	houses = buttonSelection:recursiveGetChildById('houses')
+	character = buttonSelection:recursiveGetChildById('character')
+	return window
+end
+
 function init()
 	
 	-- The rest
@@ -15,17 +36,7 @@ function init()
 	end
     
 	g_ui.importStyle('styles/bestiary_tracker')
-	window 	   = g_ui.displayUI('ciclopedia')
-	
-  ciclopediaButton = modules.client_topmenu.addRightGameToggleButton('ciclopediaButton', tr('Ciclopedia'), '/images/topbuttons/ciclopedia', toggle, false, 8)
-	contentContainer = window:recursiveGetChildById('contentContainer')
-	buttonSelection = window:recursiveGetChildById('buttonSelection')
-		items = buttonSelection:recursiveGetChildById('items')
-		bestiary = buttonSelection:recursiveGetChildById('bestiary')
-		charms = buttonSelection:recursiveGetChildById('charms')
-		map = buttonSelection:recursiveGetChildById('map')
-		houses = buttonSelection:recursiveGetChildById('houses')
-		character = buttonSelection:recursiveGetChildById('character')
+	ciclopediaButton = modules.client_topmenu.addRightGameToggleButton('ciclopediaButton', tr('Ciclopedia'), '/images/topbuttons/ciclopedia', toggle, false, 8)
 end
 
 function terminate()
@@ -41,6 +52,9 @@ function terminate()
 	
 	-- Hooked opcodes
 	ProtocolGame.unregisterOpcode(0x29)
+	if cancelCharmsRefresh then
+		cancelCharmsRefresh()
+	end
 	if terminateBestiary then
 		terminateBestiary()
 	elseif unregisterBestiaryProtocol then
@@ -48,14 +62,31 @@ function terminate()
 	else
 		ProtocolGame.unregisterOpcode(CyclopediaOpcode and CyclopediaOpcode.Send or 0x39)
 	end
-	window:destroy()
+	if window then
+		window:destroy()
+		window = nil
+	end
+	if ciclopediaButton then
+		ciclopediaButton:destroy()
+		ciclopediaButton = nil
+	end
 	
 	if buyWindow then
 		buyWindow:destroy()
+		buyWindow = nil
 	end
+	contentContainer = nil
+	buttonSelection = nil
+	items = nil
+	bestiary = nil
+	charms = nil
+	map = nil
+	houses = nil
+	character = nil
 end
 
 function getContentContainer()
+	ensureWindow()
 	return contentContainer
 end
 
@@ -64,12 +95,21 @@ function getCurrentType()
 end
 
 function onCiclopediaGameEnd()
+	if cancelCharmsRefresh then
+		cancelCharmsRefresh()
+	end
+	if cancelBestiaryEvents then
+		cancelBestiaryEvents()
+	end
 	if window then
 		window:hide()
 	end
 end
 
 function toggle()
+	if not ensureWindow() then
+		return
+	end
 	if window:isVisible() then
 		window:hide()
 	else

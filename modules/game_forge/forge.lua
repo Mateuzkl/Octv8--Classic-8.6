@@ -6,6 +6,30 @@ selectedItemFusionConvectionRadio = nil
 local protocol = runinsandbox("forgeprotocol")
 local forgeDebugEnabled = false
 local forgeItemTiers = setmetatable({}, { __mode = 'k' })
+local forgeAnimationEvent = nil
+local forgeResultLabelEvent = nil
+
+local function cancelForgeEvents()
+  if forgeAnimationEvent then
+    removeEvent(forgeAnimationEvent)
+    forgeAnimationEvent = nil
+  end
+  if forgeResultLabelEvent then
+    removeEvent(forgeResultLabelEvent)
+    forgeResultLabelEvent = nil
+  end
+  ForgeSystem.inForgeFusion = false
+end
+
+local function scheduleForgeAnimation(callback, delay)
+  if forgeAnimationEvent then
+    removeEvent(forgeAnimationEvent)
+  end
+  forgeAnimationEvent = scheduleEvent(function()
+    forgeAnimationEvent = nil
+    callback()
+  end, delay)
+end
 
 local function debugForge(message)
 end
@@ -221,19 +245,31 @@ local function bindButtonClick(widget, callback)
   end
 end
 
-function init()
-  forgeWindow = g_ui.displayUI('forge')
-  if not forgeWindow then
-    print("Erro: Não foi possível carregar forge.otui")
-    return
+local function ensureForgeWindow()
+  if forgeWindow and not forgeWindow:isDestroyed() then
+    if not resultWindow or resultWindow:isDestroyed() then
+      resultWindow = g_ui.displayUI('styles/result')
+      if resultWindow then
+        resultWindow:hide()
+      end
+    end
+    return forgeWindow
   end
 
+  forgeWindow = g_ui.displayUI('forge')
+  if not forgeWindow then
+    return nil
+  end
   forgeWindow:hide()
+
   resultWindow = g_ui.displayUI('styles/result')
   if resultWindow then
     resultWindow:hide()
   end
+  return forgeWindow
+end
 
+function init()
   connect(g_game, {
     onGameStart = onGameStart,
     onResourceBalance = onResourceBalance,
@@ -243,6 +279,7 @@ function init()
 end
 
 function onGameStart()
+  cancelForgeEvents()
   if forgeWindow then
     forgeWindow:hide()
   end
@@ -255,8 +292,21 @@ function onGameStart()
 end
 
 function terminate()
+  cancelForgeEvents()
   protocol.terminateProtocol()
 
+  if selectedItemFusionRadio then
+    selectedItemFusionRadio:destroy()
+    selectedItemFusionRadio = nil
+  end
+  if selectedConvergenceFusionRadio then
+    selectedConvergenceFusionRadio:destroy()
+    selectedConvergenceFusionRadio = nil
+  end
+  if selectedItemFusionConvectionRadio then
+    selectedItemFusionConvectionRadio:destroy()
+    selectedItemFusionConvectionRadio = nil
+  end
   if forgeWindow then
     forgeWindow:destroy()
     forgeWindow = nil
@@ -273,8 +323,7 @@ function terminate()
 end
 
 function toggle()
-  if not forgeWindow then
-    print("Erro: forgeWindow não está inicializado")
+  if not ensureForgeWindow() then
     return
   end
   if forgeWindow:isVisible() then
@@ -296,8 +345,7 @@ function hideForge()
 end
 
 function show()
-  if not forgeWindow then
-    print("Erro: forgeWindow não está inicializado")
+  if not ensureForgeWindow() then
     return
   end
   if not forgeWindow:isVisible() then
@@ -399,6 +447,7 @@ function loadMenu(menuId)
 end
 
 function offlineForge()
+  cancelForgeEvents()
   if forgeWindow then
     forgeWindow:hide()
     ForgeSystem.clearFusion()
@@ -446,6 +495,10 @@ function onResourceBalance(type, amount)
 end
 
 function ForgeSystem.init(classPrice, transferMap, fusionPrices, transferPrices, baseMultipier, slivers, totalSlivers, dustCost, dustPrice, maxDust, dustFusion, convergenceDustFusion, dustTransfer, convergenceDustTransfer, success, improveRateSuccess, tierLoss)
+  if not ensureForgeWindow() then
+    return
+  end
+
   ForgeSystem.classPrice = classPrice
   ForgeSystem.transferMap = transferMap
   ForgeSystem.fusionPrices = fusionPrices
@@ -548,6 +601,10 @@ function ForgeSystem.init(classPrice, transferMap, fusionPrices, transferPrices,
 end
 
 function ForgeSystem.onForgeData(fusionData, fusionConvergenceData, transferData, transferConvergenceData, maxPlayerDust)
+  if not ensureForgeWindow() then
+    return
+  end
+
   debugForge(
     "apply data maxDust=" .. tostring(maxPlayerDust) ..
     " fusion=" .. tostring(#fusionData) ..
@@ -1022,11 +1079,12 @@ function onConvergenceFusionChange(_, isChecked)
 end
 
 function ForgeSystem.onForgeFusion(convergence, success, otherItem, otherTier, itemId, tier, resultType, itemResult, tierResult, count)
-  if not resultWindow then
+  if not ensureForgeWindow() or not resultWindow then
     print("Erro: resultWindow não está inicializado em ForgeSystem.onForgeFusion")
     return
   end
 
+  cancelForgeEvents()
   ForgeSystem.inForgeFusion = true
   hideForge()
   resultWindow:show(true)
@@ -1059,18 +1117,25 @@ function ForgeSystem.onForgeFusion(convergence, success, otherItem, otherTier, i
     resultWindowPanel.finishButton.onClick = function() modules.game_forge.ForgeSystem.closeFinish() end
   else
     resultWindowPanel.finishButton.onClick = function() modules.game_forge.ForgeSystem.openBonusFinish(convergence, ForgeSystem.fusionPrice, resultType, itemResult, tierResult, count) end
-    scheduleEvent(function() resultWindowPanel.finishButton:setText("Next") end, 3550)
+    forgeResultLabelEvent = scheduleEvent(function()
+      forgeResultLabelEvent = nil
+      if resultWindow and not resultWindow:isDestroyed() and
+          resultWindowPanel and not resultWindowPanel:isDestroyed() then
+        resultWindowPanel.finishButton:setText("Next")
+      end
+    end, 3550)
   end
 
-  scheduleEvent(function() ForgeSystemEventFusionColor(false, success, otherItem, otherTier, itemId, tier, resultType, itemResult, tierResult, count, 1) end, 750)
+  scheduleForgeAnimation(function() ForgeSystemEventFusionColor(false, success, otherItem, otherTier, itemId, tier, resultType, itemResult, tierResult, count, 1) end, 750)
 end
 
 function ForgeSystem.onForgeTransfer(convergence, success, otherItem, otherTier, itemId, tier)
-  if not resultWindow then
+  if not ensureForgeWindow() or not resultWindow then
     print("Erro: resultWindow não está inicializado em ForgeSystem.onForgeTransfer")
     return
   end
 
+  cancelForgeEvents()
   ForgeSystem.inForgeFusion = true
   hideForge()
   resultWindow:show(true)
@@ -1101,7 +1166,7 @@ function ForgeSystem.onForgeTransfer(convergence, success, otherItem, otherTier,
   resultWindowPanel.finishButton.locked:setVisible(true)
   resultWindowPanel.finishButton.onClick = function() modules.game_forge.ForgeSystem.closeFinish() end
 
-  scheduleEvent(function() ForgeSystemEventFusionColor(true, success, otherItem, otherTier, itemId, tier, 0, 0, 0, 0, 1) end, 750)
+  scheduleForgeAnimation(function() ForgeSystemEventFusionColor(true, success, otherItem, otherTier, itemId, tier, 0, 0, 0, 0, 1) end, 750)
 end
 
 function ForgeSystem.sendForgeFusion(convergence)
@@ -1466,7 +1531,7 @@ function ForgeSystemEventFusionColor(transfer, success, otherItem, otherTier, it
     return
   end
 
-  if not resultWindow then
+  if not resultWindow or resultWindow:isDestroyed() then
     print("Erro: resultWindow não está inicializado em ForgeSystemEventFusionColor")
     return
   end
@@ -1509,9 +1574,11 @@ function ForgeSystemEventFusionColor(transfer, success, otherItem, otherTier, it
       else
         resultWindowPanel.transferItem:setItemShader("item_red")
         resultWindowPanel.recvItem:setItemShader("item_red")
-        scheduleEvent(function()
-          resultWindowPanel.transferItem:setItemId(0)
-          resultWindowPanel.recvItem:setItemId(0)
+        scheduleForgeAnimation(function()
+          if resultWindow and not resultWindow:isDestroyed() then
+            resultWindowPanel.transferItem:setItemId(0)
+            resultWindowPanel.recvItem:setItemId(0)
+          end
         end, 500)
       end
     else
@@ -1540,7 +1607,7 @@ function ForgeSystemEventFusionColor(transfer, success, otherItem, otherTier, it
     return
   end
 
-  scheduleEvent(function() ForgeSystemEventFusionColor(transfer, success, otherItem, otherTier, itemId, tier, resultType, itemResult, tierResult, count, eventCount + 1) end, 750)
+  scheduleForgeAnimation(function() ForgeSystemEventFusionColor(transfer, success, otherItem, otherTier, itemId, tier, resultType, itemResult, tierResult, count, eventCount + 1) end, 750)
 end
 
 function ForgeSystem.openBonusFinish(convergence, price, resultType, itemResult, tierResult, count)
@@ -1579,7 +1646,7 @@ function ForgeSystem.openBonusFinish(convergence, price, resultType, itemResult,
 end
 
 function ForgeSystem.closeFinish()
-  ForgeSystem.inForgeFusion = false
+  cancelForgeEvents()
   if resultWindow then
     resultWindow:hide()
   end
@@ -1706,6 +1773,10 @@ function ForgeSystem.updateConversion()
 end
 
 function ForgeSystem.onForgeHistory(history)
+  if not ensureForgeWindow() then
+    return
+  end
+
   local contentPanel = forgeWindow:getChildById('contentPanel')
   if not contentPanel then
     print("Erro: contentPanel não encontrado em ForgeSystem.onForgeHistory")

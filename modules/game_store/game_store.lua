@@ -37,6 +37,7 @@ local categoryIconClips = {
 local categories = {}
 local offers = {}
 local history = {}
+local loadedStoreTextures = {}
 
 local gameStoreWindow = nil
 local gameStoreButton = nil
@@ -85,6 +86,7 @@ local function getStoreImage(icon)
 
   local source = "/images/store/" .. icon
   if g_resources.fileExists(source .. ".png") then
+    loadedStoreTextures[source] = true
     return source
   end
 
@@ -162,24 +164,16 @@ function terminate()
 end
 
 function create()
-  if gameStoreWindow then
-    return
+  if not gameStoreButton then
+    gameStoreButton = modules.client_topmenu.addRightGameToggleButton(
+      "gameStoreButton",
+      tr("Store"),
+      "/images/topbuttons/shop2",
+      toggle,
+      false,
+      8
+    )
   end
-
-  gameStoreWindow = g_ui.displayUI("game_store")
-  gameStoreWindow:hide()
-
-  gameStoreButton = modules.client_topmenu.addRightGameToggleButton(
-    "gameStoreButton",
-    tr("Store"),
-    "/images/topbuttons/shop2",
-    toggle,
-    false,
-    8
-  )
-
-  createTransferWindow()
-  requestCatalog()
 end
 
 function destroy()
@@ -208,6 +202,13 @@ function destroy()
     changeNameWindow = nil
   end
 
+  if g_textures.unload then
+    for texturePath in pairs(loadedStoreTextures) do
+      g_textures.unload(texturePath)
+    end
+  end
+  loadedStoreTextures = {}
+
   categories = {}
   offers = {}
   history = {}
@@ -217,7 +218,7 @@ function destroy()
 end
 
 local function ensureStoreWindow()
-  if gameStoreWindow then
+  if gameStoreWindow and not gameStoreWindow:isDestroyed() then
     return true
   end
 
@@ -225,7 +226,12 @@ local function ensureStoreWindow()
     return false
   end
 
-  create()
+  gameStoreWindow = g_ui.displayUI("game_store")
+  if not gameStoreWindow then
+    return false
+  end
+  gameStoreWindow:hide()
+  createTransferWindow()
   return gameStoreWindow ~= nil
 end
 
@@ -281,6 +287,9 @@ end
 
 function onStoreMessage(protocol, msg)
   local response = msg:getU8()
+  if not ensureStoreWindow() then
+    return
+  end
   if response == RESP_CATALOG then
     parseCatalog(msg)
   elseif response == RESP_SUCCESS then

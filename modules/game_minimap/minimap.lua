@@ -5,6 +5,14 @@ fullmapView = false
 loaded = false
 oldZoom = nil
 oldPos = nil
+local cameraUpdateEvent = nil
+
+local function cancelCameraUpdate()
+	if cameraUpdateEvent then
+		removeEvent(cameraUpdateEvent)
+		cameraUpdateEvent = nil
+	end
+end
 
 function init()
 	minimapWindow = g_ui.loadUI("minimap", modules.game_interface.getRightPanel())
@@ -48,6 +56,8 @@ function init()
 end
 
 function terminate()
+	cancelCameraUpdate()
+
 	if g_game.isOnline() then
 		saveMap()
 	end
@@ -94,19 +104,25 @@ function onMiniWindowClose()
 end
 
 function online()
+	cancelCameraUpdate()
 	loadMap()
 	-- Give it a bit more time and check for layout
 	local function safeUpdate()
-		if minimapWidget and minimapWidget:getLayout() then
+		cameraUpdateEvent = nil
+		if not g_game.isOnline() then
+			return
+		end
+		if minimapWidget and not minimapWidget:isDestroyed() and minimapWidget:getLayout() then
 			updateCameraPosition()
 		else
-			scheduleEvent(safeUpdate, 100)
+			cameraUpdateEvent = scheduleEvent(safeUpdate, 100)
 		end
 	end
 	safeUpdate()
 end
 
 function offline()
+	cancelCameraUpdate()
 	saveMap()
 end
 

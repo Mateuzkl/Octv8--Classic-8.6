@@ -3,6 +3,14 @@ minimapWindowBig = nil
 loaded = false
 oldZoom = nil
 oldPos = nil
+local cameraUpdateEvent = nil
+
+local function cancelCameraUpdate()
+	if cameraUpdateEvent then
+		removeEvent(cameraUpdateEvent)
+		cameraUpdateEvent = nil
+	end
+end
 
 function init()
 	minimapWindowBig = g_ui.loadUI("minimap_big", modules.game_interface.getRootPanel())
@@ -25,6 +33,8 @@ function init()
 end
 
 function terminate()
+	cancelCameraUpdate()
+
 	disconnect(g_game, {
 		onGameStart = online,
 		onGameEnd = offline
@@ -52,15 +62,26 @@ function close()
 end
 
 function online()
+	cancelCameraUpdate()
 	loadMap()
 	local function safeUpdate()
-		if minimapWidget and minimapWidget:isVisible() and minimapWidget:getLayout() then
-			updateCameraPosition()
+		cameraUpdateEvent = nil
+		if not g_game.isOnline() then
+			return
+		end
+		if minimapWidget and not minimapWidget:isDestroyed() and minimapWidget:getLayout() then
+			if minimapWidget:isVisible() then
+				updateCameraPosition()
+			end
 		else
-			scheduleEvent(safeUpdate, 100)
+			cameraUpdateEvent = scheduleEvent(safeUpdate, 100)
 		end
 	end
 	safeUpdate()
+end
+
+function offline()
+	cancelCameraUpdate()
 end
 
 function loadMap()

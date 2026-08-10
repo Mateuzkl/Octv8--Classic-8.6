@@ -6,6 +6,7 @@ local bankGold = 0
 local inventoryGold = 0
 local rerollPrice = 0
 local bonusRerolls = 0
+local bindSideButtonsEvent = nil
 
 local PREY_OPCODE_OPEN = 0xE8
 local PREY_OPCODE_SELECT = 0xE9
@@ -135,6 +136,13 @@ local function bindSideButtons()
 	end
 	if preyTrackerButton then
 		preyTrackerButton:setOn(preyTracker and preyTracker:isVisible())
+	end
+end
+
+local function cancelBindSideButtons()
+	if bindSideButtonsEvent then
+		removeEvent(bindSideButtonsEvent)
+		bindSideButtonsEvent = nil
 	end
 end
 
@@ -414,6 +422,8 @@ function onHover(widget)
 end
 
 function terminate()
+	cancelBindSideButtons()
+
 	disconnect(g_game, {
 		onGameStart = check,
 		onGameEnd = hide,
@@ -475,9 +485,15 @@ function setUnsupportedSettings()
 end
 
 function check()
+	cancelBindSideButtons()
 	bindSideButtons()
 	if not preyButton or not preyTrackerButton then
-		scheduleEvent(bindSideButtons, 100)
+		bindSideButtonsEvent = scheduleEvent(function()
+			bindSideButtonsEvent = nil
+			if g_game.isOnline() and preyWindow and not preyWindow:isDestroyed() then
+				bindSideButtons()
+			end
+		end, 100)
 	end
 	requestOpen()
 end
@@ -496,7 +512,10 @@ function toggleTracker()
 end
 
 function hide()
-	preyWindow:hide()
+	cancelBindSideButtons()
+	if preyWindow then
+		preyWindow:hide()
+	end
 	if preyButton then
 		preyButton:setOn(false)
 	end

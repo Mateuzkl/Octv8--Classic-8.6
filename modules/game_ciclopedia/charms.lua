@@ -27,8 +27,16 @@ local bankGold = 0
 local inventoryGold = 0
 local selectedRaceId = 0
 local goldPoints
+local charmsRefreshEvent = nil
 withdrawWindow = nil
 storedContentContainer = nil
+
+function cancelCharmsRefresh()
+	if charmsRefreshEvent then
+		removeEvent(charmsRefreshEvent)
+		charmsRefreshEvent = nil
+	end
+end
 
 local function readCharmCreatureOutfit(msg)
 	if readCyclopediaCreatureOutfit then
@@ -461,12 +469,6 @@ function initCharms()
 			charmInfoPrice = charmPriceContainer:recursiveGetChildById('charmInfoPrice')
 		monsterSelecter = informationContainer:recursiveGetChildById('monsterSelecter')
 	
-	connect(g_game, {
-		onEnterGame = registerCharmsProtocol, 
-		onPendingGame = registerCharmsProtocol,
-		onGameStart = registerCharmsProtocol
-	})
-	
 	registerCharmsProtocol()
 
 	-- We make the request
@@ -476,9 +478,14 @@ end
 function resetCharmsData()
 	clearCharmsContainer()
 	clearCharmsMonsterList()
-	
-	scheduleEvent(function() 
-	requestBestiaryInfo()
+
+	cancelCharmsRefresh()
+	charmsRefreshEvent = scheduleEvent(function()
+		charmsRefreshEvent = nil
+		if g_game.isOnline() and isCharmsView() and charmsWindow and
+			not charmsWindow:isDestroyed() then
+			requestBestiaryInfo()
+		end
 	end, 10)
 end
 
