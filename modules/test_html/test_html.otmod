@@ -1,12 +1,9 @@
 Module
   name: test_html
-  description: Simple HTML/CSS button test
+  description: HTML/CSS System — Full Test
   author: Test
   version: 1
-  sandboxed: true
-  autoload: true
-  autoload-priority: 1000
-  dependencies: [ modulelib ]
+  autoLoad: true
+  autoLoadPriority: 9999
   scripts: [ test.lua ]
   @onLoad: TestHtmlModule:onInit()
-  @onUnload: TestHtmlModule:onTerminate()

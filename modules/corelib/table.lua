@@ -13,26 +13,6 @@ function table.dump(t, depth)
 	end
 end
 
-function table.isIn(tbl, val)
-	for _, v in ipairs(tbl) do
-		if v == val then
-			return true
-		end
-	end
-
-	return false
-end
-
-function table.reserve(count, default)
-	local t = {}
-
-	for i = 1, count do
-		t[i] = default
-	end
-
-	return t
-end
-
 function table.clear(t)
 	for k, v in pairs(t) do
 		t[k] = nil
@@ -240,12 +220,6 @@ function table.collect(t, func)
 	return res
 end
 
-function table.insertall(t, s)
-	for k, v in pairs(s) do
-		table.insert(t, v)
-	end
-end
-
 function table.equals(t, comp)
 	if type(t) == "table" and type(comp) == "table" then
 		for k, v in pairs(t) do
@@ -341,25 +315,6 @@ function table.encodeStringPairList(t)
 	end
 
 	return ret
-end
-
-function table.remove_if(t, fnc)
-	local j, n = 1, #t
-
-	for i = 1, n do
-		if not fnc(i, t[i]) then
-			if i ~= j then
-				t[j] = t[i]
-				t[i] = nil
-			end
-
-			j = j + 1
-		else
-			t[i] = nil
-		end
-	end
-
-	return t
 end
 
 function table.decodeStringPairList(l)

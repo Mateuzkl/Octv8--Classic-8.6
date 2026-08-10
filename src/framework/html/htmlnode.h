@@ -108,7 +108,7 @@ public:
     friend HtmlNodePtr parseHtml(const std::string& html);
     friend void invalidateIndexCachesUp(HtmlNode* n);
 
-    UIWidgetPtr getWidget() const { return m_widget.lock(); }
+    const UIWidgetPtr& getWidget() const { return m_widget; }
     void setWidget(const UIWidgetPtr& widget) { m_widget = widget; }
 
     HtmlNodePtr getPrev() const { return prev.lock(); }
@@ -163,7 +163,7 @@ private:
     std::unordered_map<std::string, std::map<std::string, std::string>> m_inheritableStyles;
 
     std::map<std::string, std::string> m_attrStyles;
-    std::weak_ptr<UIWidget> m_widget;
+    UIWidgetPtr m_widget;
 
     mutable int cacheIndexAmongElements = -1;
     mutable int cacheIndexAmongType = -1;

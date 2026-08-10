@@ -32,209 +32,11 @@
 #include <framework/otml/otmlnode.h>
 #include <framework/ui/uimanager.h>
 #include <framework/ui/uiwidget.h>
-#include <algorithm>
-#include <cctype>
 
 HtmlManager g_html;
 
 namespace {
     static std::vector<css::StyleSheet> GLOBAL_STYLES;
-
-    std::string trimCopy(std::string value) {
-        stdext::trim(value);
-        return value;
-    }
-
-    std::string lowerCopy(std::string value) {
-        std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
-            return static_cast<char>(std::tolower(c));
-        });
-        return value;
-    }
-
-    bool isCssColorProperty(const std::string& prop) {
-        return prop == "background" ||
-               prop == "background-color" ||
-               prop == "color" ||
-               prop == "border-color" ||
-               prop == "border-top-color" ||
-               prop == "border-right-color" ||
-               prop == "border-bottom-color" ||
-               prop == "border-left-color" ||
-               prop == "image-color";
-    }
-
-    std::string cssNamedColor(const std::string& value) {
-        static const std::unordered_map<std::string, std::string> colors = {
-            {"transparent", "#00000000"},
-            {"black", "#000000"},
-            {"white", "#ffffff"},
-            {"red", "#ff0000"},
-            {"green", "#008000"},
-            {"blue", "#0000ff"},
-            {"yellow", "#ffff00"},
-            {"gray", "#808080"},
-            {"grey", "#808080"},
-            {"silver", "#c0c0c0"},
-            {"orange", "#ffa500"},
-            {"darkorange", "#ff8c00"},
-            {"purple", "#800080"},
-            {"navy", "#000080"},
-            {"teal", "#008080"},
-            {"olive", "#808000"},
-            {"maroon", "#800000"},
-            {"brown", "#a52a2a"},
-            {"sienna", "#a0522d"},
-            {"indigo", "#4b0082"},
-            {"darkviolet", "#9400d3"},
-            {"darkslateblue", "#483d8b"},
-            {"darkslategray", "#2f4f4f"},
-            {"darkslategrey", "#2f4f4f"},
-            {"midnightblue", "#191970"},
-            {"darkred", "#8b0000"},
-            {"darkgreen", "#006400"},
-            {"darkolivegreen", "#556b2f"},
-            {"crimson", "#dc143c"},
-            {"firebrick", "#b22222"},
-            {"coral", "#ff7f50"},
-            {"tomato", "#ff6347"},
-            {"royalblue", "#4169e1"},
-            {"steelblue", "#4682b4"},
-            {"slateblue", "#6a5acd"},
-            {"darkblue", "#00008b"},
-            {"darkcyan", "#008b8b"},
-            {"lightgray", "#d3d3d3"},
-            {"lightgrey", "#d3d3d3"},
-            {"darkgray", "#a9a9a9"},
-            {"darkgrey", "#a9a9a9"},
-            {"lightblue", "#add8e6"},
-            {"rebeccapurple", "#663399"},
-            {"lime", "#00ff00"},
-            {"cyan", "#00ffff"},
-            {"aqua", "#00ffff"},
-            {"magenta", "#ff00ff"},
-            {"fuchsia", "#ff00ff"},
-            {"gold", "#ffd700"},
-            {"pink", "#ffc0cb"},
-            {"violet", "#ee82ee"}
-        };
-
-        auto it = colors.find(lowerCopy(trimCopy(value)));
-        return it == colors.end() ? std::string{} : it->second;
-    }
-
-    std::string normalizeCssHexColor(const std::string& value) {
-        auto color = lowerCopy(trimCopy(value));
-        if (color.size() < 2 || color[0] != '#')
-            return {};
-
-        const auto hex = color.substr(1);
-        for (char c : hex) {
-            if (!std::isxdigit(static_cast<unsigned char>(c)))
-                return {};
-        }
-
-        if (hex.size() == 3 || hex.size() == 4) {
-            std::string expanded = "#";
-            expanded.reserve(hex.size() * 2 + 1);
-            for (char c : hex) {
-                expanded.push_back(c);
-                expanded.push_back(c);
-            }
-            return expanded;
-        }
-
-        if (hex.size() == 6 || hex.size() == 8)
-            return color;
-
-        return {};
-    }
-
-    std::string normalizeCssLengthToken(std::string token) {
-        token = trimCopy(token);
-        if (token.empty())
-            return token;
-
-        auto lower = lowerCopy(token);
-        if (lower == "auto" || lower == "fit-content" || lower == "max-content" ||
-            lower == "min-content" || lower.find("calc(") != std::string::npos) {
-            return token;
-        }
-
-        auto stripUnit = [&](const std::string& suffix) -> bool {
-            if (lower.size() <= suffix.size())
-                return false;
-            if (lower.compare(lower.size() - suffix.size(), suffix.size(), suffix) != 0)
-                return false;
-
-            const auto numeric = token.substr(0, token.size() - suffix.size());
-            bool valid = !numeric.empty();
-            for (char c : numeric) {
-                if (!std::isdigit(static_cast<unsigned char>(c)) && c != '-' && c != '+') {
-                    valid = false;
-                    break;
-                }
-            }
-            if (valid)
-                token = numeric;
-            return valid;
-        };
-
-        stripUnit("px") || stripUnit("em") || stripUnit("rem");
-        return token;
-    }
-
-    std::string normalizeCssBoxValue(const std::string& value) {
-        std::vector<std::string> out;
-        for (auto token : stdext::split(value, " ")) {
-            token = normalizeCssLengthToken(token);
-            if (!token.empty())
-                out.emplace_back(token);
-        }
-        return stdext::join(out, " ");
-    }
-
-    std::string normalizeCssBorderValue(const std::string& value) {
-        std::string width;
-        std::string color;
-
-        for (auto token : stdext::split(value, " ")) {
-            token = trimCopy(token);
-            if (token.empty())
-                continue;
-
-            const auto lower = lowerCopy(token);
-            if (lower == "solid" || lower == "dashed" || lower == "dotted" ||
-                lower == "double" || lower == "groove" || lower == "ridge" ||
-                lower == "inset" || lower == "outset")
-                continue;
-
-            if (lower == "none" || lower == "hidden")
-                return "0 #00000000";
-
-            if (color.empty()) {
-                if (!cssNamedColor(token).empty()) {
-                    color = cssNamedColor(token);
-                    continue;
-                }
-                if (const auto hex = normalizeCssHexColor(token); !hex.empty()) {
-                    color = hex;
-                    continue;
-                }
-                if (html_compat::starts_with(lower, "rgb")) {
-                    color = token;
-                    continue;
-                }
-            }
-
-            if (width.empty())
-                width = normalizeCssLengthToken(token);
-        }
-
-        if (!width.empty() && !color.empty())
-            return width + " " + color;
-        return normalizeCssBoxValue(value);
-    }
 
     static const std::unordered_map<std::string, std::string> IMG_ATTR_TRANSLATED = {
         {"offset-x", "image-offset-x"},
@@ -312,19 +114,16 @@ namespace {
         return kProps.find(prop) != kProps.end();
     }
 
-    void setChildrenStyles(std::string_view htmlId, const HtmlNodePtr& node, const std::string& style, const std::string& prop, const std::string& value) {
-        if (!node)
-            return;
+    void setChildrenStyles(std::string_view htmlId, HtmlNode* n, const std::string& style, const std::string& prop, const std::string& value) {
+        if (n->getType() == NodeType::Element)
+            n->getInheritableStyles()[style][prop] = value;
 
-        if (node->getType() == NodeType::Element)
-            node->getInheritableStyles()[style][prop] = value;
-
-        for (const auto& child : node->getChildren()) {
+        for (const auto& child : n->getChildren()) {
             auto& styleMap = child->getStyles()[style];
             auto it = styleMap.find(prop);
             if (it == styleMap.end() || !it->second.important) {
                 child->getStyles()[style][prop] = { value , std::string{htmlId} };
-                setChildrenStyles(htmlId, child, style, prop, value);
+                setChildrenStyles(htmlId, child.get(), style, prop, value);
             }
         }
     }
@@ -394,10 +193,7 @@ namespace {
         return styleName;
     }
 
-    void createRadioGroup(const HtmlNodePtr& node, std::unordered_map<std::string, UIWidgetPtr>& groups) {
-        if (!node)
-            return;
-
+    void createRadioGroup(const HtmlNode* node, std::unordered_map<std::string, UIWidgetPtr>& groups) {
         const auto& name = node->getAttr("name");
         if (name.empty())
             return;
@@ -413,10 +209,7 @@ namespace {
         group->callLuaField("addWidget", node->getWidget());
     }
 
-    void applyStyleSheet(const HtmlNodePtr& mainNode, std::string_view htmlPath, const css::StyleSheet& sheet, bool checkRuleExist) {
-        if (!mainNode)
-            return;
-
+    void applyStyleSheet(HtmlNode* mainNode, std::string_view htmlPath, const css::StyleSheet& sheet, bool checkRuleExist) {
         for (const auto& rule : sheet.rules) {
             const auto& selectors = stdext::join(rule.selectors);
             const auto& nodes = mainNode->querySelectorAll(selectors);
@@ -428,7 +221,7 @@ namespace {
             }
 
             for (const auto& node : nodes) {
-                const auto widget = node->getWidget();
+                const auto widget = node->getWidget().get();
                 if (widget && !node->isStyleResolved()) {
                     bool hasMeta = false;
                     for (const auto& metas : rule.selectorMeta) {
@@ -444,7 +237,7 @@ namespace {
                                 if (it == styleMap.end() || !it->second.important) {
                                     styleMap[decl.property] = { decl.value , "", decl.important };
                                     if (!is_all && isInheritable(decl.property)) {
-                                        setChildrenStyles(widget->getHtmlId(), node, style, decl.property, decl.value);
+                                        setChildrenStyles(widget->getHtmlId(), node.get(), style, decl.property, decl.value);
                                     }
                                 }
                             }
@@ -461,7 +254,7 @@ namespace {
                         if (it == styleMap.end() || !it->second.important) {
                             styleMap[decl.property] = { decl.value , "", decl.important };
                             if (!is_all && isInheritable(decl.property)) {
-                                setChildrenStyles(widget->getHtmlId(), node, "styles", decl.property, decl.value);
+                                setChildrenStyles(widget->getHtmlId(), node.get(), "styles", decl.property, decl.value);
                             }
                         }
                     }
@@ -470,17 +263,13 @@ namespace {
         }
     };
 
+    // Converte valores CSS para formato OTML compatível com o V8
     std::string convertCssValueToOtml(const std::string& prop, const std::string& value) {
-        const auto lowerValue = lowerCopy(trimCopy(value));
+        // ── COR: rgb(r, g, b) ou rgba(r, g, b, a) → #RRGGBBAA ──────────────
+        if (prop == "background-color" || prop == "color" ||
+            prop == "border-color"     || prop == "image-color") {
 
-        if (isCssColorProperty(prop)) {
-            if (const auto named = cssNamedColor(value); !named.empty())
-                return named;
-
-            if (const auto hex = normalizeCssHexColor(value); !hex.empty())
-                return hex;
-
-            if (html_compat::starts_with(lowerValue, "rgb")) {
+            if (html_compat::starts_with(value, "rgb")) {
                 std::string nums = value;
                 auto start = nums.find('(');
                 auto end   = nums.rfind(')');
@@ -505,39 +294,41 @@ namespace {
                     return std::string(buf);
                 }
             }
-            return value;
+            return value; // já em #hex ou nome
         }
 
+        // ── DIMENSÃO: auto e fit-content são tratados pelo sistema HTML ──────
         if (prop == "width" || prop == "height" ||
             prop == "min-width" || prop == "min-height" ||
             prop == "max-width" || prop == "max-height") {
-            if (lowerValue.find("calc(") != std::string::npos) {
-                return "";
+            if (value == "auto" || value == "fit-content" ||
+                value == "max-content" || value == "min-content") {
+                return ""; // sinaliza: não aplicar via OTML
             }
-            return normalizeCssLengthToken(value);
         }
 
+        // ── MARGIN/PADDING com 'auto' ─────────────────────────────────────
         if (html_compat::starts_with(prop, "margin") ||
-            html_compat::starts_with(prop, "padding") ||
-            html_compat::starts_with(prop, "gap")) {
-            if (lowerValue.find("calc(") != std::string::npos)
-                return "";
-            return normalizeCssBoxValue(value);
+            html_compat::starts_with(prop, "padding")) {
+            if (value == "auto") {
+                return ""; // não aplicar via OTML
+            }
         }
 
-        if (prop == "border")
-            return normalizeCssBorderValue(value);
-
-        if (html_compat::starts_with(prop, "border-width") ||
-            html_compat::starts_with(prop, "border-top-width") ||
-            html_compat::starts_with(prop, "border-right-width") ||
-            html_compat::starts_with(prop, "border-bottom-width") ||
-            html_compat::starts_with(prop, "border-left-width") ||
-            prop == "top" || prop == "right" || prop == "bottom" || prop == "left") {
-            return normalizeCssLengthToken(value);
+        // ── Sufixo px: remover para OTML (ex: "400px" → "400") ──────────────
+        if (value.size() > 2 &&
+            value[value.size()-2] == 'p' &&
+            value[value.size()-1] == 'x') {
+            const auto numeric = value.substr(0, value.size() - 2);
+            bool isNum = !numeric.empty();
+            for (char c : numeric)
+                if (!std::isdigit(c) && c != '-' && c != '.')
+                    { isNum = false; break; }
+            if (isNum)
+                return numeric;
         }
 
-        return value;
+        return value; // demais valores: passar direto
     }
 }
 
@@ -598,10 +389,7 @@ UIWidgetPtr createWidgetFromNode(const HtmlNodePtr& node, const UIWidgetPtr& par
     return widget;
 }
 
-void applyAttributesAndStyles(const UIWidgetPtr& widget, const HtmlNodePtr& node, std::unordered_map<std::string, UIWidgetPtr>& groups, const std::string& moduleName) {
-    if (!widget || !node)
-        return;
-
+void applyAttributesAndStyles(UIWidget* widget, HtmlNode* node, std::unordered_map<std::string, UIWidgetPtr>& groups, const std::string& moduleName) {
     const auto& styleValue = node->getAttr("style");
     if (!styleValue.empty()) {
         parseAttrPropList(styleValue, node->getAttrStyles());
@@ -667,8 +455,6 @@ void applyAttributesAndStyles(const UIWidgetPtr& widget, const HtmlNodePtr& node
 
         if (html_compat::starts_with(attr, "on") || html_compat::starts_with(attr, "*for")) {
             // lua call
-        } else if (attr == "image-source" && trimCopy(value).empty()) {
-            // Ignore empty <img src="">. OTUI texture loading treats it as a broken path.
         } else if (attr == "anchor") {
             // ignore
         } else if (attr == "style" || attr == "id") {
@@ -759,7 +545,7 @@ UIWidgetPtr HtmlManager::readNode(DataRoot& root, const UIWidgetPtr& parent, con
     if (widget && !script.empty())
         widget->callLuaField("__scriptHtml", moduleName, script, scriptStr);
 
-    const auto mainNode = root.node;
+    const auto mainNode = root.node.get();
 
     if (isDynamic) {
         if (insertWithOrder) {
@@ -781,13 +567,13 @@ UIWidgetPtr HtmlManager::readNode(DataRoot& root, const UIWidgetPtr& parent, con
             continue;
         }
 
-        const auto node = widget->getHtmlNode();
+        const auto node = widget->getHtmlNode().get();
         if (!node)
             continue;
-
-        applyAttributesAndStyles(widget, node, root.groups, moduleName);
-        widget->scheduleHtmlTask(PropApplyAnchorAlignment);
-        widget->callLuaField("onCreateByHTML", node->getTag(), std::map<std::string, std::string>(node->getAttributesMap().begin(), node->getAttributesMap().end()), moduleName, node->toString());
+        const auto w = widget.get();
+        applyAttributesAndStyles(w, node, root.groups, moduleName);
+        w->scheduleHtmlTask(PropApplyAnchorAlignment);
+        w->callLuaField("onCreateByHTML", node->getTag(), std::map<std::string, std::string>(node->getAttributesMap().begin(), node->getAttributesMap().end()), moduleName, node->toString());
     }
 
     if (isDynamic) {
@@ -847,20 +633,18 @@ void HtmlManager::destroy(uint32_t id) {
     if (it == m_nodes.end())
         return;
 
-    std::vector<UIWidgetPtr> widgets;
+    std::vector<UIWidget*> widgets;
 
     if (const auto& html = it->second.node->querySelector("html")) {
         widgets.reserve(html->getChildren().size());
         for (const auto& node : html->getChildren()) {
-            if (const auto widget = node->getWidget())
+            if (const auto widget = node->getWidget().get())
                 widgets.emplace_back(widget);
         }
     }
 
-    for (const auto& widget : widgets) {
-        if (widget && !widget->isDestroyed())
-            widget->destroy();
-    }
+    for (auto widget : widgets)
+        widget->destroy();
 
     for (const auto& [name, group] : it->second.groups) {
         group->destroy();

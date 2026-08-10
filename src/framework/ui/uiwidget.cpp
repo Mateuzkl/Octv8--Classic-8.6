@@ -884,14 +884,6 @@ void UIWidget::internalDestroy()
 
     callLuaField("onDestroy");
 
-    if (m_htmlNode) {
-        auto htmlNode = m_htmlNode;
-        htmlNode->setWidget(nullptr);
-        if (htmlNode->getParent())
-            htmlNode->destroy();
-        m_htmlNode.reset();
-    }
-
     releaseLuaFieldsTable();
 
     g_ui.onWidgetDestroy(static_self_cast<UIWidget>());
@@ -1156,8 +1148,6 @@ void UIWidget::setVirtualOffset(const Point& offset)
     m_virtualOffset = offset;
     if(m_layout)
         m_layout->update();
-    if(isOnHtml())
-        refreshHtml(true);
 }
 
 bool UIWidget::isAnchored()
@@ -1935,10 +1925,8 @@ UIWidgetPtr UIWidget::querySelector(const std::string& selector)
     if (!m_htmlNode)
         return nullptr;
     const auto& node = m_htmlNode->querySelector(selector);
-    if (node) {
-        if (auto widget = node->getWidget())
-            return widget;
-    }
+    if (node && node->getWidget())
+        return node->getWidget();
     return nullptr;
 }
 
@@ -1950,7 +1938,7 @@ std::vector<UIWidgetPtr> UIWidget::querySelectorAll(const std::string& selector)
     const auto& nodeList = m_htmlNode->querySelectorAll(selector);
     list.reserve(nodeList.size());
     for (const auto& node : nodeList) {
-        if (auto widget = node->getWidget())
+        if (const auto& widget = node->getWidget())
             list.push_back(widget);
     }
     return list;

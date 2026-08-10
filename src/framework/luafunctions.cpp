@@ -35,8 +35,6 @@
 #include <framework/stdext/net.h>
 #include <framework/platform/platform.h>
 #include <framework/util/stats.h>
-#include <algorithm>
-#include <cctype>
 #include <regex>
 
 #ifdef FW_SOUND
@@ -500,31 +498,6 @@ void Application::registerLuaFunctions()
     g_lua.bindClassMemberFunction<UIWidget>("setStyleFromNode", &UIWidget::setStyleFromNode);
     g_lua.bindClassMemberFunction<UIWidget>("setEnabled", &UIWidget::setEnabled);
     g_lua.bindClassMemberFunction<UIWidget>("setVisible", &UIWidget::setVisible);
-    g_lua.bindClassMemberFunction<UIWidget>("setResultConditionIf", &UIWidget::setResultConditionIf);
-    g_lua.bindClassStaticFunction<UIWidget>("setDisplay", [](const UIWidgetPtr& self, std::string value) {
-        std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
-            return static_cast<char>(std::tolower(c));
-        });
-
-        DisplayType display = DisplayType::Initial;
-        if (value == "none") display = DisplayType::None;
-        else if (value == "block") display = DisplayType::Block;
-        else if (value == "inline") display = DisplayType::Inline;
-        else if (value == "inline-block") display = DisplayType::InlineBlock;
-        else if (value == "flex") display = DisplayType::Flex;
-        else if (value == "inline-flex") display = DisplayType::InlineFlex;
-        else if (value == "grid") display = DisplayType::Grid;
-        else if (value == "inline-grid") display = DisplayType::InlineGrid;
-        else if (value == "table") display = DisplayType::Table;
-        else if (value == "table-row-group") display = DisplayType::TableRowGroup;
-        else if (value == "table-header-group") display = DisplayType::TableHeaderGroup;
-        else if (value == "table-footer-group") display = DisplayType::TableFooterGroup;
-        else if (value == "table-row") display = DisplayType::TableRow;
-        else if (value == "table-cell") display = DisplayType::TableCell;
-        else if (value == "table-caption") display = DisplayType::TableCaption;
-
-        self->setDisplay(display);
-    });
     g_lua.bindClassMemberFunction<UIWidget>("setOn", &UIWidget::setOn);
     g_lua.bindClassMemberFunction<UIWidget>("setChecked", &UIWidget::setChecked);
     g_lua.bindClassMemberFunction<UIWidget>("setFocusable", &UIWidget::setFocusable);
@@ -776,13 +749,11 @@ void Application::registerLuaFunctions()
     g_lua.bindClassMemberFunction<UIWidget>("hasEventListener", &UIWidget::hasEventListener);
     g_lua.bindClassMemberFunction<UIWidget>("querySelector", &UIWidget::querySelector);
     g_lua.bindClassMemberFunction<UIWidget>("querySelectorAll", &UIWidget::querySelectorAll);
-    g_lua.bindClassStaticFunction<UIWidget>("isOnHtml", [](const UIWidgetPtr& self) { return self->isOnHtml(); });
     g_lua.bindClassMemberFunction<UIWidget>("append", &UIWidget::append);
     g_lua.bindClassMemberFunction<UIWidget>("prepend", &UIWidget::prepend);
     g_lua.bindClassMemberFunction<UIWidget>("insert", &UIWidget::insert);
     g_lua.bindClassMemberFunction<UIWidget>("html", &UIWidget::html);
     g_lua.bindClassMemberFunction<UIWidget>("remove", &UIWidget::remove);
-    g_lua.bindClassStaticFunction<UIWidget>("getHtmlId", [](const UIWidgetPtr& self) { return self->getHtmlId(); });
     g_lua.bindClassStaticFunction<UIWidget>("getHtmlRootId", [](const UIWidgetPtr& self) { return self->getHtmlRootId(); });
     g_lua.bindClassMemberFunction<UIWidget>("setTextOverflowLength", &UIWidget::setTextOverflowLength);
     g_lua.bindClassMemberFunction<UIWidget>("setTextOverflowCharacter", &UIWidget::setTextOverflowCharacter);

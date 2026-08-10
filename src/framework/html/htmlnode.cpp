@@ -247,8 +247,8 @@ void HtmlNode::attachChild(const HtmlNodePtr& child, size_t pos) {
     registerSubtreeInIndexes(child);
     invalidateIndexCachesUp(this);
 
-    if (auto widget = m_widget.lock())
-        widget->ensureUniqueId();
+    if (m_widget)
+        m_widget->ensureUniqueId();
 }
 
 void HtmlNode::registerInIndexes(const HtmlNodePtr& child) {
