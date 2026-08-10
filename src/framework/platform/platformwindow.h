@@ -28,6 +28,8 @@
 #include <framework/core/timer.h>
 #include <framework/graphics/declarations.h>
 
+#include <atomic>
+
 //@bindsingleton g_window
 class PlatformWindow
 {

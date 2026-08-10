@@ -64,6 +64,8 @@ int visualBuildFpsCap(GraphicalApplication& app, bool visible, bool focused)
         return UnfocusedFps;
     if (app.isUnlimitedFps())
         return 0;
+    if (app.isVerticalSyncRequested() && g_window.hasVerticalSyncApplied())
+        return 0;
 
     const int maxFps = app.getMaxFps();
     return maxFps > 0 ? maxFps : VSyncFallbackFps;

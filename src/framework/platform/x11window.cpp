@@ -1030,7 +1030,7 @@ void X11Window::setFullscreen(bool fullscreen)
 
 void X11Window::setVerticalSync(bool enable)
 {
-    if (std::this_thread::get_id() != g_mainThreadId) {
+    if (std::this_thread::get_id() != g_graphicsThreadId) {
         g_graphicsDispatcher.addEvent(std::bind(&X11Window::setVerticalSync, this, enable));
         return;
     }

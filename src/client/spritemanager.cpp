@@ -400,6 +400,9 @@ void SpriteManager::setScaleFactor(int factor)
         updateSpriteSize();
 
     clearImageCache();
+
+    if (g_things.isDatLoaded())
+        g_things.unloadTextures();
 }
 
 void SpriteManager::clearImageCache()
@@ -438,9 +441,7 @@ ImagePtr SpriteManager::upscaleSprite(const ImagePtr& sprite, int scaleFactor) c
         const size_t targetPixelCount = static_cast<size_t>(targetWidth) * targetHeight;
         const std::vector<uint8>& sourceData = sprite->getPixels();
         if (sourcePixelCount > sourceData.size() / 4 ||
-            targetPixelCount > static_cast<size_t>(std::numeric_limits<int>::max()) / 4 ||
-            sourcePixelCount > std::vector<uint32_t>().max_size() ||
-            targetPixelCount > std::vector<uint32_t>().max_size())
+            targetPixelCount > static_cast<size_t>(std::numeric_limits<int>::max()) / 4)
             return sprite;
 
         std::vector<uint32_t> sourcePixels(sourcePixelCount);

@@ -221,8 +221,19 @@ function toggleSubWindow(name)
 end
 
 function setup()
+	local vsync = g_settings.getBoolean("vsync")
+	local unlimitedFps = g_settings.getBoolean("unlimitedFps")
+	if vsync and unlimitedFps then
+		unlimitedFps = false
+	end
+
+	setOption("vsync", vsync, true)
+	setOption("unlimitedFps", unlimitedFps, true)
+
 	for k, v in pairs(defaultOptions) do
-		if type(v) == "boolean" then
+		if k == "vsync" or k == "unlimitedFps" then
+			-- Applied above in a deterministic order because they are exclusive.
+		elseif type(v) == "boolean" then
 			setOption(k, g_settings.getBoolean(k), true)
 		elseif type(v) == "number" then
 			setOption(k, g_settings.getNumber(k), true)

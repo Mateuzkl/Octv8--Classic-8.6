@@ -222,7 +222,10 @@ void WIN32Window::init()
 
 void WIN32Window::terminate()
 {
-    VALIDATE(std::this_thread::get_id() == g_graphicsThreadId);
+    if (std::this_thread::get_id() != g_graphicsThreadId) {
+        g_logger.error("WIN32Window::terminate must run on the graphics thread");
+        return;
+    }
 
     SetCursor(NULL);
     if(m_defaultCursor) {
@@ -1051,7 +1054,7 @@ void WIN32Window::setVerticalSync(bool enable)
     m_verticalSync = enable;
     m_verticalSyncApplied = false;
 #ifdef OPENGL_ES
-    g_graphicsDispatcher.addEvent([&, enable] {
+    g_graphicsDispatcher.addEvent([this, enable] {
         if (eglSwapInterval(m_eglDisplay, enable ? 1 : 0) != EGL_TRUE) {
             g_logger.error("Error while setting vsync");
         } else {
@@ -1059,7 +1062,7 @@ void WIN32Window::setVerticalSync(bool enable)
         }
     });
 #else
-    g_graphicsDispatcher.addEvent([&, enable] {
+    g_graphicsDispatcher.addEvent([this, enable] {
         typedef BOOL(WINAPI* wglSwapIntervalProc)(int);
 
         auto tryWglSwapInterval = [&](int interval) -> bool {

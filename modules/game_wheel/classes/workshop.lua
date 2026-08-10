@@ -3,13 +3,14 @@ Workshop.__index = Workshop
 
 fragmentList = {}
 currentWorkshopPage = 1
-local gemLockEvent = nil
+local gemLockEvents = {}
+local nextGemLockEventId = 0
 
 function Workshop.cancelPendingEvents()
-	if gemLockEvent then
-		removeEvent(gemLockEvent)
-		gemLockEvent = nil
+	for _, event in pairs(gemLockEvents) do
+		removeEvent(event)
 	end
+	gemLockEvents = {}
 end
 
 local function matchText(text, search)
@@ -376,9 +377,10 @@ function sendgemAction(actionType, param, pos)
 
 	if actionType == 3 then
 		-- Toggle Lock locally after brief delay (until server returns)
-		Workshop.cancelPendingEvents()
-		gemLockEvent = scheduleEvent(function()
-			gemLockEvent = nil
+		nextGemLockEventId = nextGemLockEventId + 1
+		local eventId = nextGemLockEventId
+		gemLockEvents[eventId] = scheduleEvent(function()
+			gemLockEvents[eventId] = nil
 			if not g_game.isOnline() then
 				return
 			end

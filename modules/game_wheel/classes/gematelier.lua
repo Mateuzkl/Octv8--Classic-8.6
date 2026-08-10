@@ -12,7 +12,8 @@ local lastSelectedVessel = nil
 local currentGemList = {}
 local totalGemList = {}
 local currentSearchText = ""
-local gemLockEvent = nil
+local gemLockEvents = {}
+local nextGemLockEventId = 0
 
 local cachedBasicMods = {}
 local cachedSupremeMods = {}
@@ -30,10 +31,10 @@ GemSwitchPrice = {
 }
 
 function GemAtelier.cancelPendingEvents()
-	if gemLockEvent then
-		removeEvent(gemLockEvent)
-		gemLockEvent = nil
+	for _, event in pairs(gemLockEvents) do
+		removeEvent(event)
 	end
+	gemLockEvents = {}
 end
 
 function GemAtelier.resetFields()
@@ -940,9 +941,10 @@ function sendgemAction(actionType, param, pos)
 	g_game.gemAction(actionType, param, pos)
 
 	if actionType == 3 then
-		GemAtelier.cancelPendingEvents()
-		gemLockEvent = scheduleEvent(function()
-			gemLockEvent = nil
+		nextGemLockEventId = nextGemLockEventId + 1
+		local eventId = nextGemLockEventId
+		gemLockEvents[eventId] = scheduleEvent(function()
+			gemLockEvents[eventId] = nil
 			if not g_game.isOnline() then
 				return
 			end

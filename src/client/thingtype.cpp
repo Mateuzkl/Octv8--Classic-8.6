@@ -637,7 +637,7 @@ Rect ThingType::getDrawSize(const Point& dest, int layer, int xPattern, int yPat
 
     Point textureOffset = m_texturesFramesOffsets[animationPhase][frameIndex];
     Rect textureRect = m_texturesFramesRects[animationPhase][frameIndex];
-    return Rect(dest + textureOffset - m_displacement - (m_size.toPoint() - Point(1, 1)) * g_sprites.spriteSize(), textureRect.size());
+    return Rect(dest + textureOffset - m_displacement * g_sprites.getOffsetFactor() - (m_size.toPoint() - Point(1, 1)) * g_sprites.spriteSize(), textureRect.size());
 }
 
 void ThingType::drawWithShader(const Point& dest, int layer, int xPattern, int yPattern, int zPattern, int animationPhase, const std::string& shader, Color color, LightView* lightView)

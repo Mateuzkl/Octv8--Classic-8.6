@@ -420,6 +420,11 @@ void Protocol::onPlayerPacket(const std::shared_ptr<std::vector<uint8_t>>& packe
         const auto self = weakSelf.lock();
         if(!self || self->m_disconnected)
             return;
+        if(packet->size() > static_cast<size_t>(InputMessage::BUFFER_MAXSIZE)) {
+            g_logger.traceError(stdext::format("got a replay packet that exceeds input buffer, size: %zu", packet->size()));
+            self->disconnect();
+            return;
+        }
         self->m_inputMessage->reset();
 
         self->m_inputMessage->setHeaderSize(0);
