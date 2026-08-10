@@ -40,13 +40,30 @@ void TextureManager::init()
 void TextureManager::terminate()
 {
     m_textures.clear();
-    m_animatedTextures.clear();
 }
 
 void TextureManager::clearCache()
 {
-    m_animatedTextures.clear();
     m_textures.clear();
+}
+
+bool TextureManager::unload(const std::string& fileName)
+{
+    const std::string filePath = g_resources.resolvePath(fileName);
+    auto it = m_textures.find(fileName);
+    if (it == m_textures.end())
+        it = m_textures.find(filePath);
+    if (it == m_textures.end())
+        return false;
+
+    const TexturePtr texture = it->second;
+    for (auto textureIt = m_textures.begin(); textureIt != m_textures.end();) {
+        if (textureIt->second == texture)
+            textureIt = m_textures.erase(textureIt);
+        else
+            ++textureIt;
+    }
+    return true;
 }
 
 void TextureManager::reload()
@@ -130,7 +147,6 @@ TexturePtr TextureManager::loadTexture(std::stringstream& file, const std::strin
                 frames.emplace_back(std::make_shared<Image>(imageSize, apng.bpp, frameData));
             }
             auto animatedTexture = std::make_shared<AnimatedTexture>(imageSize, frames, framesDelay);
-            m_animatedTextures.push_back(animatedTexture);
             texture = animatedTexture;
         } else {
             auto image = std::make_shared<Image>(imageSize, apng.bpp, apng.pdata);
