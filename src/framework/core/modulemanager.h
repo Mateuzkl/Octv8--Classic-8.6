@@ -40,7 +40,6 @@ public:
 
     ModulePtr getModule(const std::string& moduleName);
     std::deque<ModulePtr> getModules() { return m_modules; }
-    ModulePtr getCurrentModule() { return m_currentModule; }
 
 protected:
     void updateModuleLoadOrder(ModulePtr module);
@@ -50,7 +49,6 @@ protected:
 private:
     std::deque<ModulePtr> m_modules;
     std::multimap<int, ModulePtr> m_autoLoadModules;
-    ModulePtr m_currentModule;
 };
 
 extern ModuleManager g_modules;

@@ -39,7 +39,6 @@
 #include <framework/graphics/textrender.h>
 #include <framework/graphics/shadermanager.h>
 #include <framework/input/mouse.h>
-#include <framework/html/htmlmanager.h>
 #include <framework/util/extras.h>
 #include <framework/util/stats.h>
 
@@ -91,7 +90,6 @@ void GraphicalApplication::deinit()
 void GraphicalApplication::terminate()
 {
     // destroy any remaining widget
-    g_html.terminate();
     g_ui.terminate();
 
     Application::terminate();

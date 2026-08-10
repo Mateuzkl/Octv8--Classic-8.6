@@ -36,7 +36,6 @@ class UIGridLayout;
 class UIAnchor;
 class UIAnchorGroup;
 class UIAnchorLayout;
-class UIFlexBox;
 
 using UIWidgetPtr = std::shared_ptr<UIWidget>;
 using UITextEditPtr = std::shared_ptr<UITextEdit>;

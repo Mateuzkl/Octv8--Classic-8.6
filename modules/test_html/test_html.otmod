@@ -1,9 +1,0 @@
-Module
-  name: test_html
-  description: HTML/CSS System — Full Test
-  author: Test
-  version: 1
-  autoLoad: true
-  autoLoadPriority: 9999
-  scripts: [ test.lua ]
-  @onLoad: TestHtmlModule:onInit()

@@ -61,7 +61,6 @@
 #include <framework/proxy/proxy.h>
 
 #include <framework/util/extras.h>
-#include <framework/html/htmlmanager.h>
 
 void Application::registerLuaFunctions()
 {
@@ -229,7 +228,6 @@ void Application::registerLuaFunctions()
     g_lua.bindSingletonFunction("g_modules", "reloadModules", &ModuleManager::reloadModules, &g_modules);
     g_lua.bindSingletonFunction("g_modules", "getModule", &ModuleManager::getModule, &g_modules);
     g_lua.bindSingletonFunction("g_modules", "getModules", &ModuleManager::getModules, &g_modules);
-    g_lua.bindSingletonFunction("g_modules", "getCurrentModule", &ModuleManager::getCurrentModule, &g_modules);
 
     // EventDispatcher
     g_lua.registerSingletonClass("g_dispatcher");
@@ -417,7 +415,6 @@ void Application::registerLuaFunctions()
     g_lua.bindSingletonFunction("g_ui", "importStyle", &UIManager::importStyle, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "importStyleFromString", &UIManager::importStyleFromString, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "getStyle", &UIManager::getStyle, &g_ui);
-    g_lua.bindSingletonFunction("g_ui", "getStyleName", &UIManager::getStyleName, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "getStyleClass", &UIManager::getStyleClass, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "loadUI", &UIManager::loadUI, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "loadUIFromString", &UIManager::loadUIFromString, &g_ui);
@@ -435,13 +432,6 @@ void Application::registerLuaFunctions()
     g_lua.bindSingletonFunction("g_ui", "getOTUIVar", &UIManager::getOTUIVar, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "getOTUIVarSafe", &UIManager::getOTUIVarSafe, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "addOTUIVar", &UIManager::addOTUIVar, &g_ui);
-
-    g_lua.registerSingletonClass("g_html");
-    g_lua.bindSingletonFunction("g_html", "load", &HtmlManager::load, &g_html);
-    g_lua.bindSingletonFunction("g_html", "destroy", &HtmlManager::destroy, &g_html);
-    g_lua.bindSingletonFunction("g_html", "addGlobalStyle", &HtmlManager::addGlobalStyle, &g_html);
-    g_lua.bindSingletonFunction("g_html", "getRootWidget", &HtmlManager::getRootWidget, &g_html);
-    g_lua.bindSingletonFunction("g_html", "createWidgetFromHTML", &HtmlManager::createWidgetFromHTML, &g_html);
 
     // FontManager
     g_lua.registerSingletonClass("g_fonts");
@@ -512,7 +502,7 @@ void Application::registerLuaFunctions()
     g_lua.bindClassMemberFunction<UIWidget>("isVisible", &UIWidget::isVisible);
     g_lua.bindClassMemberFunction<UIWidget>("isChildLocked", &UIWidget::isChildLocked);
     g_lua.bindClassMemberFunction<UIWidget>("hasChild", &UIWidget::hasChild);
-    g_lua.bindClassMemberFunction<UIWidget>("getChildIndex", static_cast<int(UIWidget::*)(const UIWidgetPtr&)>(&UIWidget::getChildIndex));
+    g_lua.bindClassMemberFunction<UIWidget>("getChildIndex", &UIWidget::getChildIndex);
     g_lua.bindClassMemberFunction<UIWidget>("getMarginRect", &UIWidget::getMarginRect);
     g_lua.bindClassMemberFunction<UIWidget>("getPaddingRect", &UIWidget::getPaddingRect);
     g_lua.bindClassMemberFunction<UIWidget>("getChildrenRect", &UIWidget::getChildrenRect);
@@ -747,14 +737,6 @@ void Application::registerLuaFunctions()
     g_lua.bindClassMemberFunction<UIWidget>("setEventListener", &UIWidget::setEventListener);
     g_lua.bindClassMemberFunction<UIWidget>("removeEventListener", &UIWidget::removeEventListener);
     g_lua.bindClassMemberFunction<UIWidget>("hasEventListener", &UIWidget::hasEventListener);
-    g_lua.bindClassMemberFunction<UIWidget>("querySelector", &UIWidget::querySelector);
-    g_lua.bindClassMemberFunction<UIWidget>("querySelectorAll", &UIWidget::querySelectorAll);
-    g_lua.bindClassMemberFunction<UIWidget>("append", &UIWidget::append);
-    g_lua.bindClassMemberFunction<UIWidget>("prepend", &UIWidget::prepend);
-    g_lua.bindClassMemberFunction<UIWidget>("insert", &UIWidget::insert);
-    g_lua.bindClassMemberFunction<UIWidget>("html", &UIWidget::html);
-    g_lua.bindClassMemberFunction<UIWidget>("remove", &UIWidget::remove);
-    g_lua.bindClassStaticFunction<UIWidget>("getHtmlRootId", [](const UIWidgetPtr& self) { return self->getHtmlRootId(); });
     g_lua.bindClassMemberFunction<UIWidget>("setTextOverflowLength", &UIWidget::setTextOverflowLength);
     g_lua.bindClassMemberFunction<UIWidget>("setTextOverflowCharacter", &UIWidget::setTextOverflowCharacter);
 

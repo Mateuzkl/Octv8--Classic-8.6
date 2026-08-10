@@ -38,8 +38,6 @@ bool Module::load()
     if(m_loaded)
         return true;
 
-    g_modules.m_currentModule = asModule();
-
     auto errorHandler = [&] (const std::string& error) {
         g_lua.getGlobalField("package", "loaded");
         g_lua.pushNil();
@@ -48,7 +46,6 @@ bool Module::load()
 
         if(m_sandboxed)
             g_lua.resetGlobalEnvironment();
-        g_modules.m_currentModule = nullptr;
         if(m_loadedOnStartup) // just reload, don't exit
             g_logger.error(stdext::format("Unable to load module '%s': %s", m_name, error));
         else
@@ -112,13 +109,11 @@ bool Module::load()
         m_loaded = true;
         g_logger.debug(stdext::format("Loaded module '%s'", m_name));
     } catch(stdext::exception& e) {
-        g_modules.m_currentModule = nullptr;
         // remove from package.loaded
         errorHandler(e.what());
         return false;
     }
 
-    g_modules.m_currentModule = nullptr;
     g_modules.updateModuleLoadOrder(asModule());
 
     for(const std::string& modName : m_loadLaterModules) {
