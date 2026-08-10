@@ -72,6 +72,7 @@ OptionPanel
     OptionCheckBox
       id: hdmodeBox
       !text: tr('Enable HD Graphics')
+      !tooltip: tr('Upscales classic 32x32 sprites with the xBRZ filter.\nIncreases CPU and memory usage significantly.\nRestart the client to apply this option.')
       anchors.left: parent.left
       anchors.right: parent.right
       anchors.top: parent.top
@@ -208,4 +209,3 @@ OptionPanel
     margin-top: 3
     minimum: 0
     maximum: 100
-
