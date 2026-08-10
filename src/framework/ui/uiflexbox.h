@@ -3,18 +3,16 @@
 
 #include "uilayout.h"
 
-namespace ui {
-    enum class FlexDirection {
-        ROW,
-        COLUMN
-    };
+enum class FlexDirection {
+    ROW,
+    COLUMN
+};
 
-    enum class AlignItems {
-        START,
-        STRETCH,
-        CENTER
-    };
-}
+enum class AlignItems {
+    START,
+    STRETCH,
+    CENTER
+};
 
 // @bindclass
 class UIFlexBox : public UILayout
@@ -26,13 +24,13 @@ public:
     void removeWidget(const UIWidgetPtr& widget);
     void addWidget(const UIWidgetPtr& widget);
 
-    void setFlexDirection(ui::FlexDirection direction) { m_flexDirection = direction; update(); }
-    void setAlignItems(ui::AlignItems align) { m_alignItems = align; update(); }
+    void setFlexDirection(FlexDirection direction) { m_flexDirection = direction; update(); }
+    void setAlignItems(AlignItems align) { m_alignItems = align; update(); }
     void setSpacing(int spacing) { m_spacing = spacing; update(); }
     void setAutoSpacing(bool spacing) { m_autoSpacing = spacing; update(); }
 
-    ui::FlexDirection getFlexDirection() { return m_flexDirection; }
-    ui::AlignItems getAlignItems() { return m_alignItems; }
+    FlexDirection getFlexDirection() { return m_flexDirection; }
+    AlignItems getAlignItems() { return m_alignItems; }
     int getSpacing() { return m_spacing; }
     bool getAutoSpacing() { return m_autoSpacing; }
 
@@ -42,8 +40,8 @@ protected:
     bool internalUpdate();
 
 private:
-    ui::FlexDirection m_flexDirection;
-    ui::AlignItems m_alignItems;
+    FlexDirection m_flexDirection;
+    AlignItems m_alignItems;
     int m_spacing;
     stdext::boolean<false> m_autoSpacing;
 };

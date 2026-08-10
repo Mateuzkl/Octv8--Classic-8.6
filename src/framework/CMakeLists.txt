@@ -135,19 +135,6 @@ set(framework_SOURCES ${framework_SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/otml/otmlparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/otml/otmlparser.h
 
-    # html
-    ${CMAKE_CURRENT_LIST_DIR}/html/declarations.h
-    ${CMAKE_CURRENT_LIST_DIR}/html/htmlmanager.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/html/htmlmanager.h
-    ${CMAKE_CURRENT_LIST_DIR}/html/htmlnode.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/html/htmlnode.h
-    ${CMAKE_CURRENT_LIST_DIR}/html/htmlparser.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/html/htmlparser.h
-    ${CMAKE_CURRENT_LIST_DIR}/html/cssparser.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/html/cssparser.h
-    ${CMAKE_CURRENT_LIST_DIR}/html/queryselector.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/html/queryselector.h
-
     # crash handler
     ${CMAKE_CURRENT_LIST_DIR}/platform/crashhandler.h
     ${CMAKE_CURRENT_LIST_DIR}/platform/unixcrashhandler.cpp
@@ -271,7 +258,6 @@ if(NOT WASM)
     find_package(PhysFS REQUIRED)
     find_package(OpenSSL REQUIRED)
     find_package(ZLIB REQUIRED)
-    find_package(RmlUi REQUIRED)
 
     set(framework_LIBRARIES ${framework_LIBRARIES}
         ${Boost_LIBRARIES}
@@ -282,7 +268,6 @@ if(NOT WASM)
         ${LIBZIP_LIBRARY}
 	${ZLIB_LIBRARY}
 	${BZIP2_LIBRARIES}
-        RmlUi::RmlUi
     )
 
     if(WIN32)
@@ -473,8 +458,6 @@ if(FRAMEWORK_GRAPHICS)
         ${CMAKE_CURRENT_LIST_DIR}/ui/uiboxlayout.h
         ${CMAKE_CURRENT_LIST_DIR}/ui/uiflexbox.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ui/uiflexbox.h
-        ${CMAKE_CURRENT_LIST_DIR}/ui/uilayoutflexbox.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/ui/uilayoutflexbox.h
         ${CMAKE_CURRENT_LIST_DIR}/ui/uigridlayout.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ui/uigridlayout.h
         ${CMAKE_CURRENT_LIST_DIR}/ui/uihorizontallayout.cpp
@@ -494,7 +477,6 @@ if(FRAMEWORK_GRAPHICS)
         ${CMAKE_CURRENT_LIST_DIR}/ui/uiwidgetbasestyle.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ui/uiwidgetimage.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ui/uiwidgettext.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/ui/uiwidgethtml.cpp
 
         # platform window
         ${CMAKE_CURRENT_LIST_DIR}/platform/platformwindow.cpp
@@ -505,16 +487,6 @@ if(FRAMEWORK_GRAPHICS)
         ${CMAKE_CURRENT_LIST_DIR}/platform/x11window.h
         ${CMAKE_CURRENT_LIST_DIR}/platform/sdlwindow.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platform/sdlwindow.h
-
-        # rmlui
-        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluirenderer.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluirenderer.h
-        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluisystem.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluisystem.h
-        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluifileinterface.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluifileinterface.h
-        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluimanager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/rmlui/rmluimanager.h
 
         # window input
         ${CMAKE_CURRENT_LIST_DIR}/input/mouse.cpp

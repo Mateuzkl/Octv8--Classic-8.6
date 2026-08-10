@@ -51,7 +51,6 @@ public:
     void importStyleFromOTML(const OTMLNodePtr& styleNode);
     void mergeStyle(std::string file, const UIWidgetPtr& widget);
     OTMLNodePtr getStyle(const std::string& styleName);
-    std::string getStyleName(const std::string& styleName);
     std::string getStyleClass(const std::string& styleName);
 
     UIWidgetPtr loadUIFromString(const std::string& data, const UIWidgetPtr& parent);
