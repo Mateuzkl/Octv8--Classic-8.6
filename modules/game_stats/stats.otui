@@ -2,7 +2,7 @@ UIWidget
   id: game_stats
   anchors.top: parent.top
   anchors.left: parent.left
-  margin-left: 3
+  margin-left: 12
   size: 100 100
   visible: false
   layout:
@@ -18,6 +18,6 @@ UIWidget
 
   Label
     id: almyriaLabel
-    text: Tibia Octv8
+    text: Tibia 8.60
     color: orange
     font: verdana-11px-rounded

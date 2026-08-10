@@ -17,6 +17,23 @@ bottomSplitter = nil
 limitedZoom = false
 hookedMenuOptions = {}
 lastDirTime = g_clock.millis()
+local panelArrowIds = {
+	"addRightPanelButton",
+	"removeRightPanelButton",
+	"addLeftPanelButton",
+	"removeLeftPanelButton"
+}
+
+local function updatePanelArrowVisibility(visible)
+	for _, id in ipairs(panelArrowIds) do
+		local button = gameRootPanel:getChildById(id)
+
+		if button then
+			button:setVisible(visible)
+		end
+	end
+end
+
 local ITEM_DECORATION_KIT = 23398
 -- 8.6 dat does not flag Store decoration-kit outputs as wrapable.
 local ITEM_DECORATION_KIT_WRAPABLE_RANGES = {
@@ -1308,7 +1325,7 @@ function getContainerPanel()
 	return gameLeftPanels:getChildByIndex(math.min(containerPanel, gameLeftPanels:getChildCount()))
 end
 
-local function addRightPanel()
+function addRightPanel()
 	if gameRightPanels:getChildCount() >= 4 then
 		return
 	end
@@ -1317,9 +1334,10 @@ local function addRightPanel()
 
 	panel:setId("rightPanel" .. gameRightPanels:getChildCount() + 1)
 	gameRightPanels:insertChild(1, panel)
+	g_settings.set("rightPanels", gameRightPanels:getChildCount())
 end
 
-local function addLeftPanel()
+function addLeftPanel()
 	if gameLeftPanels:getChildCount() >= 4 then
 		return
 	end
@@ -1328,9 +1346,10 @@ local function addLeftPanel()
 
 	panel:setId("leftPanel" .. gameLeftPanels:getChildCount() + 1)
 	gameLeftPanels:addChild(panel)
+	g_settings.set("leftPanels", gameLeftPanels:getChildCount() + 1)
 end
 
-local function removeRightPanel()
+function removeRightPanel()
 	if gameRightPanels:getChildCount() <= 1 then
 		return
 	end
@@ -1339,9 +1358,10 @@ local function removeRightPanel()
 
 	panel:moveTo(gameRightPanels:getChildByIndex(2))
 	gameRightPanels:removeChild(panel)
+	g_settings.set("rightPanels", gameRightPanels:getChildCount())
 end
 
-local function removeLeftPanel()
+function removeLeftPanel()
 	if gameLeftPanels:getChildCount() == 0 then
 		return
 	end
@@ -1355,6 +1375,7 @@ local function removeLeftPanel()
 	end
 
 	gameLeftPanels:removeChild(panel)
+	g_settings.set("leftPanels", gameLeftPanels:getChildCount() + 1)
 end
 
 function getBottomPanel()
@@ -1379,6 +1400,7 @@ end
 
 function refreshViewMode()
 	local classic = g_settings.getBoolean("classicView") and not g_app.isMobile()
+	updatePanelArrowVisibility(classic)
 	local rightPanels = g_settings.getNumber("rightPanels") - gameRightPanels:getChildCount()
 	local leftPanels = g_settings.getNumber("leftPanels") - 1 - gameLeftPanels:getChildCount()
 

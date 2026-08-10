@@ -216,3 +216,65 @@ UIWidget
     layout:
       type: verticalBox
       fit-children: true
+
+  Button
+    id: addRightPanelButton
+    size: 9 27
+    image-source: /images/ui/panel-arrow
+    image-clip: 0 0 9 27
+    anchors.top: gameTopBar.top
+    anchors.right: gameRightPanels.left
+    margin-right: -1
+    $hover:
+      image-source: /images/ui/panel-arrow
+      image-clip: 0 0 9 27
+    $mobile:
+      visible: false
+    @onClick: modules.game_interface.addRightPanel()
+
+  Button
+    id: removeRightPanelButton
+    size: 9 27
+    image-source: /images/ui/panel-arrow
+    image-clip: 9 27 9 28
+    anchors.top: addRightPanelButton.bottom
+    anchors.right: gameRightPanels.left
+    margin-top: 2
+    margin-right: -1
+    $hover:
+      image-source: /images/ui/panel-arrow
+      image-clip: 9 27 9 28
+    $mobile:
+      visible: false
+    @onClick: modules.game_interface.removeRightPanel()
+
+  Button
+    id: addLeftPanelButton
+    size: 9 27
+    image-source: /images/ui/panel-arrow
+    image-clip: 27 0 9 27
+    anchors.top: gameTopBar.top
+    anchors.left: gameLeftPanels.right
+    margin-left: 1
+    $hover:
+      image-source: /images/ui/panel-arrow
+      image-clip: 27 0 9 27
+    $mobile:
+      visible: false
+    @onClick: modules.game_interface.addLeftPanel()
+
+  Button
+    id: removeLeftPanelButton
+    size: 9 27
+    image-source: /images/ui/panel-arrow
+    image-clip: 36 26 9 27
+    anchors.top: addLeftPanelButton.bottom
+    anchors.left: gameLeftPanels.right
+    margin-top: 1
+    margin-left: 1
+    $hover:
+      image-source: /images/ui/panel-arrow
+      image-clip: 36 26 9 27
+    $mobile:
+      visible: false
+    @onClick: modules.game_interface.removeLeftPanel()
