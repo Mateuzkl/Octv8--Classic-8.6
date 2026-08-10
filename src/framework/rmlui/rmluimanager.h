@@ -68,7 +68,6 @@ private:
     Rml::Context* m_mainContext = nullptr;
     RmlUiRenderInterface* m_renderInterface = nullptr;
     RmlUiSystemInterface* m_systemInterface = nullptr;
-    RmlUiFileInterface* m_fileInterface = nullptr;
     bool m_initialized = false;
     std::vector<Rml::EventListener*> m_listeners;
 };
