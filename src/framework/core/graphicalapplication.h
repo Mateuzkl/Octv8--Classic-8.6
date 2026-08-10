@@ -42,14 +42,20 @@ public:
     void pollGraphics();
     void close();
 
-    bool willRepaint() { return m_mustRepaint; }
+    bool willRepaint() const { return m_mustRepaint.load(); }
     void repaint() { m_mustRepaint = true; }
 
     void setMaxFps(int maxFps) { m_maxFps = maxFps; }
-    int getMaxFps() { return m_maxFps; }
+    int getMaxFps() { return m_maxFps.load(); }
     int getFps() { return m_graphicsFrames.getFps(); }
     int getGraphicsFps() { return m_graphicsFrames.getFps(); }
     int getProcessingFps() { return m_processingFrames.getFps(); }
+
+    void setVerticalSyncRequested(bool enable) { m_vsyncRequested = enable; }
+    bool isVerticalSyncRequested() const { return m_vsyncRequested.load(); }
+
+    void setUnlimitedFps(bool unlimited) { m_unlimitedFps = unlimited; }
+    bool isUnlimitedFps() const { return m_unlimitedFps.load(); }
 
     bool isOnInputEvent() { return m_onInputEvent; }
 
@@ -74,8 +80,10 @@ private:
     std::atomic<float> m_scaling = 1.0;
     std::atomic<float> m_lastScaling = 1.0;
     std::atomic_int m_maxFps = 100;
+    std::atomic_bool m_vsyncRequested = false;
+    std::atomic_bool m_unlimitedFps = false;
     stdext::boolean<false> m_onInputEvent;
-    stdext::boolean<false> m_mustRepaint;
+    std::atomic_bool m_mustRepaint = false;
     FrameBufferPtr m_framebuffer, m_mapFramebuffer;
     FrameCounter m_graphicsFrames;
     FrameCounter m_processingFrames;

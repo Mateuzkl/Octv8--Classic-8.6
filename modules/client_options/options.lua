@@ -7,6 +7,7 @@ local defaultOptions = {
 	showFps = true,
 	hdmodeBox = false,
 	vsync = true,
+	unlimitedFps = false,
 	botSoundVolume = 0,
 	floorFading = 100,
 	crosshair = 1,
@@ -360,7 +361,16 @@ function setOption(key, value, force)
 	local gameMapPanel = modules.game_interface.getMapPanel()
 
 	if key == "vsync" then
+		if value and options.unlimitedFps then
+			setOption("unlimitedFps", false, true)
+		end
 		g_window.setVerticalSync(value)
+		g_app.setVerticalSyncRequested(value)
+	elseif key == "unlimitedFps" then
+		if value and options.vsync then
+			setOption("vsync", false, true)
+		end
+		g_app.setUnlimitedFps(value)
 	elseif key == "showFps" then
 		modules.client_topmenu.setFpsVisible(value)
 	elseif key == "showPing" then

@@ -296,7 +296,9 @@ void AndroidWindow::swapBuffers()
 
 void AndroidWindow::setVerticalSync(bool enable)
 {
-    //eglSwapInterval(m_eglDisplay, enable ? 1 : 0);
+    m_verticalSync = enable;
+    m_verticalSyncApplied = false;
+    // Use GraphicalApplication's software fallback on Android.
 }
 
 std::string AndroidWindow::getClipboardText()
@@ -612,4 +614,3 @@ extern "C"
         });
     }
 }
-

@@ -117,6 +117,19 @@ OptionPanel
     minimum: 10
     maximum: 200
 
+  FlatPanel
+    height: 22
+    margin-top: 8
+
+    OptionCheckBox
+      id: unlimitedFps
+      !text: tr('Unlimited FPS')
+      !tooltip: tr('Disables the software frame limit. This can significantly increase CPU and GPU usage.')
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: parent.top
+      margin: 5
+
   Label
     id: ambientLightLabel
     margin-top: 6

@@ -92,7 +92,9 @@ void SDLWindow::swapBuffers()
 
 void SDLWindow::setVerticalSync(bool enable)
 {
-    //eglSwapInterval(m_eglDisplay, enable ? 1 : 0);
+    m_verticalSync = enable;
+    const int result = SDL_GL_SetSwapInterval(enable ? 1 : 0);
+    m_verticalSyncApplied = enable && result == 0;
 }
 
 std::string SDLWindow::getClipboardText()

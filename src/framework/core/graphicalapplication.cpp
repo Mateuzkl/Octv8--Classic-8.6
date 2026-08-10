@@ -41,12 +41,64 @@
 #include <framework/input/mouse.h>
 #include <framework/util/extras.h>
 #include <framework/util/stats.h>
+#include <mutex>
 
 #ifdef FW_SOUND
 #include <framework/sound/soundmanager.h>
 #endif
 
 GraphicalApplication g_app;
+
+namespace
+{
+constexpr int VSyncFallbackFps = 100;
+constexpr int UnfocusedFps = 30;
+constexpr int HiddenFps = 10;
+constexpr ticks_t MaxFrameSleepUs = 2000;
+
+int visualBuildFpsCap(GraphicalApplication& app, bool visible, bool focused)
+{
+    if (!visible)
+        return HiddenFps;
+    if (!focused)
+        return UnfocusedFps;
+    if (app.isUnlimitedFps())
+        return 0;
+
+    const int maxFps = app.getMaxFps();
+    return maxFps > 0 ? maxFps : VSyncFallbackFps;
+}
+
+int effectiveFpsCap(GraphicalApplication& app)
+{
+    if (!g_window.isVisible())
+        return HiddenFps;
+    if (!g_window.hasFocus())
+        return UnfocusedFps;
+    if (app.isUnlimitedFps())
+        return 0;
+    if (app.isVerticalSyncRequested())
+        return g_window.hasVerticalSyncApplied() ? 0 : VSyncFallbackFps;
+
+    const int maxFps = app.getMaxFps();
+    return maxFps > 0 ? maxFps : VSyncFallbackFps;
+}
+
+ticks_t frameDelayForCap(int cap)
+{
+    return cap > 0 ? 1000000 / cap : 0;
+}
+
+bool shouldThrottleFrame(ticks_t lastRender, ticks_t frameDelay, ticks_t now)
+{
+    return frameDelay > 0 && lastRender + frameDelay > now;
+}
+
+ticks_t sleepUntilRender(ticks_t lastRender, ticks_t frameDelay, ticks_t now)
+{
+    return std::min(lastRender + frameDelay - now, MaxFrameSleepUs);
+}
+}
 
 void GraphicalApplication::init(std::vector<std::string>& args)
 {
@@ -143,63 +195,81 @@ void GraphicalApplication::run()
     std::shared_ptr<DrawQueue> drawQueue;
     std::shared_ptr<DrawQueue> drawMapQueue;
     std::shared_ptr<DrawQueue> drawMapForegroundQueue;
-    bool isOnline = false;
+    std::atomic_bool isOnline = false;
     size_t totalFrames = 0;
 
     std::mutex mutex;
     std::thread worker([&] {
         g_dispatcherThreadId = std::this_thread::get_id();
+        ticks_t lastVisualBuild = stdext::micros();
+        ticks_t lastLogicPoll = 0;
+
         while (!m_stopping) {
             m_processingFrames.addFrame();
-            {
+
+            const ticks_t now = stdext::micros();
+            if (now - lastLogicPoll >= 1000) {
                 g_clock.update();
                 poll();
                 g_clock.update();
+                lastLogicPoll = now;
             }
 
-            mutex.lock();
-            if (drawQueue && drawMapQueue && m_maxFps > 0) { // old drawQueue not processed yet
-                mutex.unlock();
+            const int visualCap = visualBuildFpsCap(*this, g_window.isVisible(), g_window.hasFocus());
+            const ticks_t visualDelay = frameDelayForCap(visualCap);
+            if (visualDelay > 0 && now - lastVisualBuild < visualDelay && !m_mustRepaint.load()) {
                 AutoStat s(STATS_MAIN, "Sleep");
-                stdext::millisleep(1);
+                stdext::microsleep(std::min(visualDelay - (now - lastVisualBuild), MaxFrameSleepUs));
                 continue;
             }
-            mutex.unlock();
+
+            {
+                std::unique_lock<std::mutex> lock(mutex);
+                if (drawQueue || drawMapQueue || drawMapForegroundQueue) {
+                    lock.unlock();
+                    AutoStat s(STATS_MAIN, "Sleep");
+                    stdext::microsleep(MaxFrameSleepUs);
+                    continue;
+                }
+            }
 
             ticks_t renderStart = stdext::millis();
+            std::shared_ptr<DrawQueue> mapBackgroundQueue;
             {
                 AutoStat s(STATS_MAIN, "DrawMapBackground");
                 g_drawQueue = std::make_shared<DrawQueue>();
                 g_ui.render(Fw::MapBackgroundPane);
+                mapBackgroundQueue = g_drawQueue;
             }
-            std::shared_ptr<DrawQueue> mapBackgroundQueue = g_drawQueue;
+            std::shared_ptr<DrawQueue> mapForegroundQueue;
             {
                 AutoStat s(STATS_MAIN, "DrawMapForeground");
                 g_drawQueue = std::make_shared<DrawQueue>();
                 g_ui.render(Fw::MapForegroundPane);
+                mapForegroundQueue = g_drawQueue;
             }
-
-            mutex.lock();
-            drawMapQueue = mapBackgroundQueue;
-            drawMapForegroundQueue = g_drawQueue;
-            mutex.unlock();
-
+            std::shared_ptr<DrawQueue> foregroundQueue;
             {
                 AutoStat s(STATS_MAIN, "DrawForeground");
                 g_drawQueue = std::make_shared<DrawQueue>();
                 g_ui.render(Fw::ForegroundPane);
+                foregroundQueue = g_drawQueue;
             }
 
-            mutex.lock();
-            drawQueue = g_drawQueue;
-            g_drawQueue = nullptr;
-            mutex.unlock();
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+                drawQueue = foregroundQueue;
+                drawMapQueue = mapBackgroundQueue;
+                drawMapForegroundQueue = mapForegroundQueue;
+                g_drawQueue = nullptr;
+            }
 
+            lastVisualBuild = now;
             g_graphs[GRAPH_CPU_FRAME_TIME].addValue(stdext::millis() - renderStart);
 
-            if (m_maxFps > 0 || g_window.hasVerticalSync()) {
+            if (visualDelay > 0) {
                 AutoStat s(STATS_MAIN, "Sleep");
-                stdext::millisleep(1);
+                stdext::microsleep(std::min(visualDelay, MaxFrameSleepUs));
             }
         }
         g_dispatcher.poll(); // last poll
@@ -216,37 +286,52 @@ void GraphicalApplication::run()
 
         if (!g_window.isVisible()) {
             AutoStat s(STATS_RENDER, "Sleep");
-            stdext::millisleep(1);
-            g_adaptiveRenderer.refresh();
+            const ticks_t delay = frameDelayForCap(HiddenFps);
+            const ticks_t now = stdext::micros();
+            if (shouldThrottleFrame(lastRender, delay, now)) {
+                stdext::microsleep(sleepUntilRender(lastRender, delay, now));
+            } else {
+                g_adaptiveRenderer.refresh();
+                lastRender = now;
+            }
             continue;
         }
 
-        int frameDelay = m_maxFps <= 0 ? 0 : (1000000 / m_maxFps);
-        if (lastRender + frameDelay > stdext::micros() && !m_mustRepaint) {
+        const ticks_t frameDelay = frameDelayForCap(effectiveFpsCap(*this));
+        const ticks_t now = stdext::micros();
+        if (shouldThrottleFrame(lastRender, frameDelay, now) && !m_mustRepaint.load()) {
             AutoStat s(STATS_RENDER, "Sleep");
-            stdext::millisleep(1);
+            stdext::microsleep(sleepUntilRender(lastRender, frameDelay, now));
             continue;
         }
 
-        mutex.lock();
-        if ((!drawQueue && !toDrawQueue) || 
-            ((!drawMapQueue || !drawMapForegroundQueue) && isOnline) || 
-            (m_mustRepaint && !drawQueue)) {
-            mutex.unlock();
-            AutoStat s(STATS_RENDER, "Wait");
-            stdext::millisleep(1);
-            continue;
+        {
+            std::unique_lock<std::mutex> lock(mutex);
+            if ((!drawQueue && !toDrawQueue) ||
+                ((!drawMapQueue || !drawMapForegroundQueue) && isOnline.load()) ||
+                (m_mustRepaint.load() && !drawQueue)) {
+                lock.unlock();
+                AutoStat s(STATS_RENDER, "Wait");
+                stdext::millisleep(1);
+                continue;
+            }
+            toDrawQueue = drawQueue ? drawQueue : toDrawQueue;
+            toDrawMapQueue = drawMapQueue;
+            toDrawMapForegroundQueue = drawMapForegroundQueue;
+            drawQueue = drawMapQueue = drawMapForegroundQueue = nullptr;
         }
-        toDrawQueue = drawQueue ? drawQueue : toDrawQueue;
-        toDrawMapQueue = drawMapQueue;
-        toDrawMapForegroundQueue = drawMapForegroundQueue;
-        drawQueue = drawMapQueue = drawMapForegroundQueue = nullptr;
-        mutex.unlock();
 
         g_adaptiveRenderer.newFrame();
         m_graphicsFrames.addFrame();
         m_mustRepaint = false;
-        lastRender = stdext::micros() > lastRender + frameDelay * 2 ? stdext::micros() : lastRender + frameDelay;
+        if (frameDelay > 0) {
+            lastRender += frameDelay;
+            const ticks_t renderNow = stdext::micros();
+            if (renderNow > lastRender + frameDelay)
+                lastRender = renderNow;
+        } else {
+            lastRender = stdext::micros();
+        }
 
         g_painter->resetDraws();
         if (m_scaling > 1.0f) {
