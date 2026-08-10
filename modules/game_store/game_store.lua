@@ -351,6 +351,19 @@ function parseCatalog(msg)
     addCategory(category)
   end
 
+  -- The server appends the home-banner payload to the catalog packet. Even
+  -- though the Classic store does not render it, every field must be consumed
+  -- so the protocol loop does not interpret the banner count as a new opcode.
+  if msg:getUnreadSize() > 0 then
+    local bannerCount = msg:getU8()
+    for i = 1, bannerCount do
+      msg:getString() -- image
+      msg:getU8()     -- action
+      msg:getU32()    -- target
+    end
+    msg:getU8()       -- rotation delay
+  end
+
   onGameStoreUpdatePoints({ points = premiumPoints })
 
   local firstCategory = categoriesList:getFirstChild()
