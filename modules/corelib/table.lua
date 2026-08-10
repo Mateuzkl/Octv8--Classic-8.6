@@ -13,6 +13,26 @@ function table.dump(t, depth)
 	end
 end
 
+function table.isIn(t, value)
+	for _, currentValue in ipairs(t) do
+		if currentValue == value then
+			return true
+		end
+	end
+
+	return false
+end
+
+function table.reserve(count, default)
+	local reserved = {}
+
+	for i = 1, count do
+		reserved[i] = default
+	end
+
+	return reserved
+end
+
 function table.clear(t)
 	for k, v in pairs(t) do
 		t[k] = nil
