@@ -1,0 +1,10 @@
+Module
+  name: game_minimap_big
+  description: Manage big minimap
+  author: edubart, BeniS
+  website: https://github.com/edubart/otclient
+  sandboxed: true
+  scripts: [ minimap_big ]
+  autoload: true
+  @onLoad: init()
+  @onUnload: terminate()

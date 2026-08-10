@@ -2,7 +2,7 @@ MainWindow
   id: countWindow
   !text: tr('Retreive Items')
   size: 245 143
-  @onEscape: withdrawHide()
+  @onEscape: modules.game_supplystash.withdrawHide()
 
   Item
     id: item

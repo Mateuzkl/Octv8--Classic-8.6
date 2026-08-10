@@ -607,7 +607,6 @@ function onInventoryChange(player, slot, item, oldItem)
     ItemsDatabase.setTier(itemWidget, item)
 end
 
-
 function onBlessingsChange(player, blessings, oldBlessings)
     local hasAdventurerBlessing = Bit.hasBit(blessings, Blessings.Adventurer)
 
@@ -957,4 +956,8 @@ function onSkullChange(localPlayer, skull)
         icon:setImageSource(skullIcon.path)
         icon:setTooltip(skullIcon.tooltip)
     end
+end
+
+if g_resources.getLayout() == "retro" then
+    dofile("/layouts/retro/modules/game_inventory/inventory.lua")
 end

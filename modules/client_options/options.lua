@@ -71,8 +71,35 @@ extraOptions = {}
 subWindows = {}
 local startupHdSpriteUpscaling = false
 local hdDefaultMigrationKey = "classicHdSpriteDefaultOffV1"
+local retroActionbarDefaultKey = "retroActionbarDefaultV1"
+local startupLayout = DEFAULT_LAYOUT
+local retroOptions = false
+local optionsTabBar = nil
+local retroTabs = {
+	game = { title = "Game", icon = "/images/optionstab/game" },
+	interface = { title = "Interface", icon = "/images/optionstab/game" },
+	console = { title = "Console", icon = "/images/optionstab/console" },
+	graphics = { title = "Graphics", icon = "/images/optionstab/graphics" },
+	audio = { title = "Audio", icon = "/images/optionstab/audio" },
+	extras = { title = "Extras", icon = "/images/optionstab/extras" },
+	custom = { title = "Custom", icon = "/images/optionstab/features" }
+}
 
 local function createSubWindow(id, title, uiName, size)
+	if retroOptions then
+		local window
+		if uiName and uiName ~= "extras" then
+			window = g_ui.loadUI(uiName)
+		else
+			window = g_ui.createWidget("OptionPanel")
+		end
+
+		window:setId(id)
+		local tab = retroTabs[uiName] or retroTabs.extras
+		optionsTabBar:addTab(tr(tab.title), window, tab.icon)
+		return window
+	end
+
 	local window = g_ui.createWidget("MainWindow", rootWidget)
 
 	window:setId(id)
@@ -119,10 +146,30 @@ local function createSubWindow(id, title, uiName, size)
 end
 
 function init()
+	retroOptions = g_resources.getLayout() == "retro"
+
 	for k, v in pairs(defaultOptions) do
 		g_settings.setDefault(k, v)
 
 		options[k] = v
+	end
+
+	local savedLayout = g_settings.getString("layout")
+	if savedLayout == "" or savedLayout:lower() == "default" then
+		g_settings.set("layout", DEFAULT_LAYOUT)
+	elseif savedLayout:lower() == "otcv8" then
+		g_settings.set("layout", "retro")
+	end
+	startupLayout = g_resources.getLayout()
+	if startupLayout == "" then
+		startupLayout = DEFAULT_LAYOUT
+	end
+
+	-- The original Kondrah Retro layout starts with the first bottom actionbar.
+	-- Apply this once so existing user choices remain untouched afterwards.
+	if startupLayout == "retro" and not g_settings.getBoolean(retroActionbarDefaultKey) then
+		g_settings.set("actionbar1", true)
+		g_settings.set(retroActionbarDefaultKey, true)
 	end
 
 	if not g_settings.getBoolean(hdDefaultMigrationKey) then
@@ -137,7 +184,19 @@ function init()
 		g_settings.setDefault("extras_" .. v, extraOptions[v])
 	end
 
-	optionsWindow = g_ui.displayUI("options")
+	local optionsUi = "options"
+	if retroOptions then
+		optionsUi = "/layouts/retro/modules/client_options/options.otui"
+	end
+	optionsWindow = g_ui.displayUI(optionsUi)
+	if not optionsWindow then
+		error("unable to load client options UI: " .. optionsUi)
+	end
+
+	if retroOptions then
+		optionsTabBar = optionsWindow:getChildById("optionsTabBar")
+		optionsTabBar:setContentWidget(optionsWindow:getChildById("optionsTabContent"))
+	end
 
 	optionsWindow:setDraggable(false)
 	optionsWindow:hide()
@@ -150,14 +209,35 @@ function init()
 		width = 250,
 		height = 380
 	})
+	subWindows.interface = createSubWindow("interfaceWindow", tr("Interface Options"), "interface", {
+		width = 300,
+		height = 300
+	})
+	if retroOptions then
+		subWindows.console = createSubWindow("consoleWindow", tr("Console"), "console", {
+			width = 320,
+			height = 280
+		})
+	end
 	subWindows.graphics = createSubWindow("graphicsWindow", tr("Graphics"), "graphics", {
 		width = 270,
 		height = 470
 	})
-	subWindows.console = createSubWindow("consoleWindow", tr("Console"), "console", {
-		width = 320,
-		height = 280
-	})
+	if not retroOptions then
+		subWindows.console = createSubWindow("consoleWindow", tr("Console"), "console", {
+			width = 320,
+			height = 280
+		})
+	end
+	if retroOptions then
+		subWindows.audio = createSubWindow("audioWindow", tr("Audio"), "audio")
+		subWindows.extras = createSubWindow("extrasWindow", tr("Extras"), "extras")
+		for _, extraName in ipairs(g_extras.getAll()) do
+			local checkbox = g_ui.createWidget("OptionCheckBox", subWindows.extras)
+			checkbox:setId(extraName)
+			checkbox:setText(extraName)
+		end
+	end
 	subWindows.actionbars = createSubWindow("actionbarsWindow", tr("Actionbars"), "custom", {
 		width = 300,
 		height = 290
@@ -193,15 +273,14 @@ function terminate()
 	})
 	g_keyboard.unbindKeyDown("Ctrl+Shift+F")
 	g_keyboard.unbindKeyDown("Ctrl+N")
-	optionsWindow:destroy()
-	optionsButton:destroy()
-	audioButton:destroy()
-
 	for _, win in pairs(subWindows) do
 		win:destroy()
 	end
 
 	subWindows = {}
+	optionsWindow:destroy()
+	optionsButton:destroy()
+	audioButton:destroy()
 end
 
 function toggleSubWindow(name)
@@ -305,7 +384,9 @@ local function syncOptionWidget(widget, value)
 	elseif widget:getStyle().__class == "UIScrollBar" then
 		widget:setValue(value)
 	elseif widget:getStyle().__class == "UIComboBox" then
-		if type(value) == "string" then
+		if widget:getId() == "layout" then
+			widget:setCurrentOptionByData(value, true)
+		elseif type(value) == "string" then
 			widget:setCurrentOption(value, true)
 		else
 			if value == nil or value < 1 then
@@ -481,6 +562,11 @@ function setOption(key, value, force)
 		if not force and value ~= startupHdSpriteUpscaling then
 			displayInfoBox(tr("HD Sprite Upscaling"), tr("Restart the client to apply HD Sprite Upscaling."))
 		end
+	elseif key == "layout" then
+		value = value:lower()
+		if not force and value ~= startupLayout then
+			displayInfoBox(tr("Client Layout"), tr("Restart the client to apply the selected layout."))
+		end
 	end
 
 	for _, win in pairs(subWindows) do
@@ -524,6 +610,18 @@ function getOption(key)
 	end
 
 	return options[key]
+end
+
+function showHotkeys()
+	if not modules.game_hotkeys then
+		return
+	end
+
+	if modules.game_hotkeys.show then
+		modules.game_hotkeys.show()
+	elseif modules.game_hotkeys.toggle then
+		modules.game_hotkeys.toggle()
+	end
 end
 
 function getStartupHdSpriteUpscaling()

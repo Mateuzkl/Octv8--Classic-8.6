@@ -1,28 +1,22 @@
 OptionPanel
   Label
-    visible: false
     width: 130
     id: layoutLabel
-    !text: tr("Layout (change requries client restart)")
+    !text: tr("Client layout (restart required)")
     $mobile:
       visible: false
   
   ComboBox
     id: layout
-    visible: false
     margin-top: 3
     margin-right: 2
     margin-left: 2
     $mobile:
       visible: false
-    @onOptionChange: modules.client_options.setOption(self:getId(), self:getCurrentOption().text)
+    @onOptionChange: modules.client_options.setOption(self:getId(), self:getCurrentOption().data)
     @onSetup: |
-      self:addOption("Default")
-      for _, file in ipairs(g_resources.listDirectoryFiles("/layouts", false, true)) do
-        if g_resources.directoryExists("/layouts/" .. file) then
-          self:addOption(file:gsub("^%l", string.upper))
-        end
-      end
+      self:addOption(tr("Classic 8.60"), "classic")
+      self:addOption(tr("OTCv8 Retro (Kondrah)"), "retro")
 
   OptionCheckBox
     id: mapView

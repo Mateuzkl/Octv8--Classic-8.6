@@ -5,6 +5,10 @@ function init()
 	background = g_ui.displayUI("background")
 
 	background:lower()
+	local menu = background:getChildById("menu")
+	if menu then
+		menu:setVisible(g_resources.getLayout() ~= "retro")
+	end
 
 	infoWindow = g_ui.createWidget("InfoWindow", rootWidget)
 	infoLabel = infoWindow:getChildById("infoLabel")

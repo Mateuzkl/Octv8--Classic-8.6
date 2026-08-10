@@ -1,0 +1,113 @@
+ComboBoxPopupScrollMenuButton < UIButton
+  height: 17
+  font: verdana-11px-monochrome
+  text-align: left
+  text-offset: 4 1
+  color: #c0c0c0
+  background-color: alpha
+
+  $hover !disabled:
+    color: #ffffff
+    background-color: #ffffff22
+
+  $disabled:
+    color: #c0c0c088
+
+ComboBoxPopupScrollMenu < UIPopupScrollMenu
+  image-source: /images/ui/combo_bg
+  image-border: 1
+  image-clip: 0 40 98 40
+
+ComboBoxPopupMenuButton < UIButton
+  height: 17
+  font: verdana-11px-monochrome
+  text-align: left
+  text-offset: 4 1
+  color: #c0c0c0
+  background-color: alpha
+
+  $hover !disabled:
+    color: #ffffff
+    background-color: #ffffff22
+
+  $disabled:
+    color: #c0c0c088
+
+ComboBoxPopupMenu < UIPopupMenu
+  image-source: /images/ui/combo_bg
+  image-border: 1
+  image-clip: 0 40 98 40
+
+ComboBox < UIComboBox
+  font: verdana-11px-antialised
+  color: #c0c0c0
+  opacity: 1.0
+  size: 91 23
+  text-offset: -20 2
+  text-align: center
+  image-source: /images/ui/combo_bg
+  image-border: 1
+  image-clip: 0 0 98 40
+
+  $on:
+    image-clip: 0 40 98 40
+
+  $disabled:
+    color: #c0c0c088
+    opacity: 0.8
+  
+  Panel
+    id: btn
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    image-source: /images/ui/combo_btn
+    image-clip: 0 0 20 20
+    image-border: 1
+
+    $on:
+      image-clip: 0 20 20 20
+
+ComboBoxRoundedPopupScrollMenuButton < UIButton
+  height: 23
+  font: verdana-11px-antialised
+  text-align: left
+  text-offset: 5 2
+  color: #c0c0c0
+  background-color: alpha
+
+  $hover !disabled:
+    color: #ffffff
+    background-color: #355d89
+
+  $disabled:
+    color: #c0c0c088
+
+ComboBoxRoundedPopupScrollMenu < UIPopupScrollMenu
+  image-source: /images/ui/combobox_rounded
+  image-clip: 0 69 91 23
+  image-border: 3
+
+ComboBoxRoundedPopupMenuButton < UIButton
+  height: 23
+  font: verdana-11px-antialised
+  text-align: left
+  text-offset: 5 2
+  color: #c0c0c0
+  background-color: alpha
+
+  $hover !disabled:
+    color: #ffffff
+    background-color: #355d89
+
+  $disabled:
+    color: #c0c0c088
+
+ComboBoxRoundedPopupMenu < UIPopupMenu
+  image-source: /images/ui/combobox_rounded
+  image-clip: 0 69 91 23
+  image-border: 3
+
+ComboBoxRounded < ComboBox
+  image-source: /images/ui/combobox_rounded
+  image-border: 3

@@ -1,0 +1,34 @@
+MainWindow
+  !text: tr('Big Map')
+  id: minimapMainBig
+  size: 800 600
+  @onEscape: modules.game_minimap_big.close()
+
+  FlatPanel
+    id: contentsPanel
+    image-source: /images/ui/panel_flat
+    image-border: 1
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: closeButton.top
+    margin-bottom: 10
+
+    Minimap
+      id: minimapWidgetBig
+      anchors.fill: parent
+      margin: 1
+
+  HorizontalSeparator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: closeButton.top
+    margin-bottom: 5
+
+  Button
+    id: closeButton
+    !text: tr('Close')
+    width: 90
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    @onClick: modules.game_minimap_big.toggle()

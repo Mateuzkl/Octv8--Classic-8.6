@@ -1,0 +1,95 @@
+// Styles used by newer Classic modules but absent from the original Retro overrides.
+
+LongButton < Button
+  height: 20
+
+PanelCheckBox < UIWidget
+  image-source: /images/ui/panel_flat
+  image-border: 1
+
+  CheckBox
+    anchors.left: parent.left
+    anchors.verticalCenter: parent.verticalCenter
+
+ThickProgressBar < ProgressBar
+  image-source: /images/ui/progressbar
+
+ProgressBarSD < UIProgressBarSD
+  height: 22
+  tooltip-delayed: true
+
+HealthBarSD < ProgressBarSD
+
+ProgressBarSDInv < UIProgressBarSDInverted
+
+ScrollBarSlider < UIButton
+  id: sliderButton
+  anchors.centerIn: parent
+  image-source: /images/ui/scrollbar
+  image-border: 6
+  opacity: 1
+
+  $disabled:
+    opacity: 0
+
+VerticalScrollBarSlider < ScrollBarSlider
+  size: 12 12
+  minimum: 12
+  image-clip: 0 24 12 14
+
+HorizontalScrollBarSlider < ScrollBarSlider
+  size: 12 12
+  minimum: 12
+  image-clip: 12 26 12 12
+  image-border-top: 3
+  image-border-bottom: 3
+  image-border-left: 5
+  image-border-right: 6
+
+HotkeyItem < UIItem
+  size: 34 34
+  padding: 1
+  font: verdana-11px-rounded
+  border-color: white
+  color: white
+
+  $disabled:
+    color: #646464
+
+  UIWidget
+    id: tier
+    size: 9 8
+    image-source: /images/game/items/tiers-strip
+    image-clip: 0 0 9 8
+    image-size: 9 8
+    anchors.top: parent.top
+    anchors.right: parent.right
+    phantom: true
+    focusable: false
+    visible: false
+    image-smooth: true
+
+NonClosableMiniWindowContents < ScrollablePanel
+  id: contentsPanel
+  anchors.fill: parent
+  anchors.right: miniwindowScrollBar.left
+  margin-left: 3
+  margin-bottom: 3
+  margin-right: 1
+
+NonClosableMiniWindow < UIMiniWindow
+  font: verdana-11px-antialised
+  width: 176
+  height: 211
+  image-source: /images/ui/panel_map
+  image-border: 2
+  margin-left: 2
+  margin-right: 2
+  focusable: false
+  &minimizedHeight: 24
+  &nonClosable: true
+  &forceOpen: true
+
+ConsoleIconButton < UIButton
+  image-source: /images/ui/console
+  size: 16 16
