@@ -3,6 +3,15 @@ Workshop.__index = Workshop
 
 fragmentList = {}
 currentWorkshopPage = 1
+local gemLockEvents = {}
+local nextGemLockEventId = 0
+
+function Workshop.cancelPendingEvents()
+	for _, event in pairs(gemLockEvents) do
+		removeEvent(event)
+	end
+	gemLockEvents = {}
+end
 
 local function matchText(text, search)
 	if not text or not search then
@@ -368,7 +377,13 @@ function sendgemAction(actionType, param, pos)
 
 	if actionType == 3 then
 		-- Toggle Lock locally after brief delay (until server returns)
-		scheduleEvent(function()
+		nextGemLockEventId = nextGemLockEventId + 1
+		local eventId = nextGemLockEventId
+		gemLockEvents[eventId] = scheduleEvent(function()
+			gemLockEvents[eventId] = nil
+			if not g_game.isOnline() then
+				return
+			end
 			local gem = GemAtelier.getGemDataById(param)
 			if not gem then
 				g_logger.debug(string.format("[GemAtelier] Failed to toggle lock: gem id=%d not found.", param))
@@ -381,13 +396,15 @@ function sendgemAction(actionType, param, pos)
 				param, gem.locked == 1 and "locked" or "unlocked"))
 
 			-- Updates button visual if visible
-			if lastSelectedGem and lastSelectedGem.locker then
+			if lastSelectedGem and not lastSelectedGem:isDestroyed() and lastSelectedGem.locker then
 				lastSelectedGem.locker:setChecked(gem.locked == 1)
 			end
 
 			-- Reloads list maintaining current focus
 			local lastIndex = lastSelectedGem and lastSelectedGem.gemIndex or 1
-			GemAtelier.showGems(false, lastIndex)
+			if gemAtelierWindow and not gemAtelierWindow:isDestroyed() then
+				GemAtelier.showGems(false, lastIndex)
+			end
 		end, 300)
 	end
 end

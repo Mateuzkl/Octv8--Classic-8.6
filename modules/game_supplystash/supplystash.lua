@@ -7,6 +7,7 @@ local itemNameCache = {}
 local itemInfoCache = {}
 local searchInput
 local categoryFilter
+local stowAllEvent = nil
 local currentCategoryFilter = "all"
 local OPCODE_SUPPLY_STASH_REQUEST = 0x28
 local OPCODE_SUPPLY_STASH_SEND = 0x29
@@ -213,7 +214,12 @@ function handleItemDragLeave(draggedWidget, droppedWidget, mousePos)
 	return showStashDropBlockedMessage()
 end
 
+local ensureSupplyStashWindow
+
 local function requestOpen()
+	if not ensureSupplyStashWindow() then
+		return
+	end
 	debugLog("requestOpen called")
 	sendSupplyRequest(ACTION_OPEN)
 end
@@ -236,6 +242,37 @@ local function setupCategoryFilter()
 	end
 end
 
+ensureSupplyStashWindow = function()
+	if window and not window:isDestroyed() then
+		return window
+	end
+
+	window = g_ui.displayUI('supplystash')
+	if not window then
+		return nil
+	end
+
+	freeSlots = window:recursiveGetChildById('freeSlots')
+	itemsContainer = window:recursiveGetChildById('itemsContainer')
+	supplyItems = itemsContainer:recursiveGetChildById('supplyItems')
+	searchInput = window:recursiveGetChildById('searchInput')
+	categoryFilter = window:recursiveGetChildById('categoryFilter') or window:recursiveGetChildById('itemTypes')
+	setupCategoryFilter()
+	if searchInput then
+		searchInput.onTextChange = function()
+			refreshItemList()
+		end
+	end
+	window.onDrop = onSupplyDrop
+	itemsContainer.onDrop = onSupplyDrop
+	supplyItems.onDrop = onSupplyDrop
+	markSupplyStashDropBlocked(window)
+	markSupplyStashDropBlocked(itemsContainer)
+	markSupplyStashDropBlocked(supplyItems)
+	window:hide()
+	return window
+end
+
 local function showWindow()
 	debugLog("showWindow")
 	window:show()
@@ -247,8 +284,10 @@ end
 
 local function hideWindow()
 	debugLog("hideWindow")
-	window:hide()
-	window:unlock()
+	if window then
+		window:hide()
+		window:unlock()
+	end
 	modules.game_interface.getRootPanel():focus()
 end
 
@@ -303,7 +342,9 @@ local function registerProtocol()
 				end
 			end
 			debugLog("setup called with sizeLeft=" .. tostring(sizeLeft))
-			setup(itemData, sizeLeft)
+			if ensureSupplyStashWindow() then
+				setup(itemData, sizeLeft)
+			end
         end
     )
 	protocolRegistered = true
@@ -319,32 +360,26 @@ local function unregisterProtocol()
 	protocolRegistered = false
 end
 
-function init()	
-	debugLog("init start")
-	
-	-- Main stash window
-	window 	   = g_ui.displayUI('supplystash')
-	debugLog("UI loaded: supplystash")
-	freeSlots = window:recursiveGetChildById('freeSlots')
-	
-	-- Selecter for charms
-	itemsContainer = window:recursiveGetChildById('itemsContainer')
-	supplyItems = itemsContainer:recursiveGetChildById('supplyItems')
-	searchInput = window:recursiveGetChildById('searchInput')
-	categoryFilter = window:recursiveGetChildById('categoryFilter') or window:recursiveGetChildById('itemTypes')
-	setupCategoryFilter()
-	if searchInput then
-		searchInput.onTextChange = function()
-			refreshItemList()
-		end
+local function cancelSupplyStashEvents()
+	if stowAllEvent then
+		removeEvent(stowAllEvent)
+		stowAllEvent = nil
 	end
-	window.onDrop = onSupplyDrop
-	itemsContainer.onDrop = onSupplyDrop
-	supplyItems.onDrop = onSupplyDrop
-	markSupplyStashDropBlocked(window)
-	markSupplyStashDropBlocked(itemsContainer)
-	markSupplyStashDropBlocked(supplyItems)
-	debugLog("UI refs resolved: freeSlots=" .. tostring(freeSlots ~= nil) .. ", itemsContainer=" .. tostring(itemsContainer ~= nil) .. ", supplyItems=" .. tostring(supplyItems ~= nil))
+end
+
+local function offlineSupplyStash()
+	cancelSupplyStashEvents()
+	unregisterProtocol()
+	if window then
+		window:hide()
+	end
+	if withdrawWindow then
+		withdrawWindow:hide()
+	end
+end
+
+function init()
+	debugLog("init start")
 	
 	connect(
         g_game,
@@ -352,12 +387,9 @@ function init()
             onEnterGame = registerProtocol,
             onPendingGame = registerProtocol,
             onGameStart = registerProtocol,
-            onGameEnd = unregisterProtocol
+            onGameEnd = offlineSupplyStash
         }
     )
-	
-	createwithdrawWindow()
-	debugLog("withdraw window created")
 	
     if g_game.isOnline() then
 		debugLog("game is online during init; registering protocol now")
@@ -369,22 +401,37 @@ end
 
 function terminate()
 	debugLog("terminate")
+	cancelSupplyStashEvents()
 	disconnect(
         g_game,
         {
             onEnterGame = registerProtocol,
             onPendingGame = registerProtocol,
             onGameStart = registerProtocol,
-            onGameEnd = unregisterProtocol
+            onGameEnd = offlineSupplyStash
         }
     )
 
     unregisterProtocol()
-	window:destroy()
-	withdrawWindow:destroy()
+	if window then
+		window:destroy()
+		window = nil
+	end
+	if withdrawWindow then
+		withdrawWindow:destroy()
+		withdrawWindow = nil
+	end
+	freeSlots = nil
+	itemsContainer = nil
+	supplyItems = nil
+	searchInput = nil
+	categoryFilter = nil
 end
 
 function toggle()
+	if not ensureSupplyStashWindow() then
+		return
+	end
 	debugLog("toggle called; window visible=" .. tostring(window and window:isVisible() or false))
 	if window:isVisible() then
 		hideWindow()
@@ -394,14 +441,19 @@ function toggle()
 end
 
 function createwithdrawWindow()
-	if withdrawWindow then return end
+	if withdrawWindow and not withdrawWindow:isDestroyed() then return withdrawWindow end
 	withdrawWindow = g_ui.displayUI('withdraw')
-	withdrawWindow:hide()
+	if withdrawWindow then
+		withdrawWindow:hide()
+	end
 	debugLog("withdraw window UI loaded")
+	return withdrawWindow
 end
 
 function withdrawHide()
-	withdrawWindow:hide()
+	if withdrawWindow then
+		withdrawWindow:hide()
+	end
 end	
 
 function placeholder()
@@ -411,8 +463,10 @@ end
 function stowAll()
 	debugLog("stowAll clicked")
 	sendSupplyRequest(ACTION_STOW_ALL)
-	scheduleEvent(function()
-		if window and window:isVisible() then
+	cancelSupplyStashEvents()
+	stowAllEvent = scheduleEvent(function()
+		stowAllEvent = nil
+		if g_game.isOnline() and window and not window:isDestroyed() and window:isVisible() then
 			requestOpen()
 		end
 	end, 300)
@@ -605,6 +659,9 @@ local function itemMatchesSearch(itemId, name)
 end
 
 local function openWithdrawWindow(itemId, amount, tier)
+	if not createwithdrawWindow() then
+		return
+	end
 	hideWindow()
 	withdrawWindow:show()
 	withdrawWindow:raise()
@@ -686,6 +743,9 @@ function refreshItemList()
 end
 
 function setup(itemData, sizeLeft)
+	if not ensureSupplyStashWindow() then
+		return
+	end
 	itemData = itemData or {}
 	debugLog("setup start: items=" .. tostring(#itemData) .. ", sizeLeft=" .. tostring(sizeLeft))
 	showWindow()

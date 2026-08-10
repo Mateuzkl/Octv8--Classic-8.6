@@ -43,6 +43,7 @@
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>PGOptimize</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OpenGL|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -51,6 +52,7 @@
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>PGOptimize</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DirectX|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -59,6 +61,7 @@
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>PGOptimize</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DirectX|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -67,6 +70,7 @@
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>PGOptimize</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -75,6 +79,7 @@
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -83,6 +88,7 @@
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -194,6 +200,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4834</DisableSpecificWarnings>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
+      <IncludeInUnityFile>true</IncludeInUnityFile>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -235,6 +243,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4834</DisableSpecificWarnings>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
+      <IncludeInUnityFile>true</IncludeInUnityFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
@@ -274,6 +284,8 @@
       <OmitFramePointers>false</OmitFramePointers>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4326</DisableSpecificWarnings>
+      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
+      <IncludeInUnityFile>true</IncludeInUnityFile>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -320,6 +332,8 @@
       <OmitFramePointers>false</OmitFramePointers>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4326</DisableSpecificWarnings>
+      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
+      <IncludeInUnityFile>true</IncludeInUnityFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
@@ -368,6 +382,8 @@
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <PreprocessToFile>false</PreprocessToFile>
       <SmallerTypeCheck>false</SmallerTypeCheck>
+      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
+      <IncludeInUnityFile>true</IncludeInUnityFile>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -423,6 +439,8 @@
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <PreprocessToFile>false</PreprocessToFile>
       <SmallerTypeCheck>false</SmallerTypeCheck>
+      <CombineFilesOnlyFromTheSameFolder>true</CombineFilesOnlyFromTheSameFolder>
+      <IncludeInUnityFile>true</IncludeInUnityFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -605,7 +623,9 @@
     <ClCompile Include="..\src\framework\util\crypt.cpp" />
     <ClCompile Include="..\src\framework\util\extras.cpp" />
     <ClCompile Include="..\src\framework\util\pngunpacker.cpp" />
-    <ClCompile Include="..\src\framework\util\qrcodegen.c" />
+    <ClCompile Include="..\src\framework\util\qrcodegen.c">
+      <IncludeInUnityFile>false</IncludeInUnityFile>
+    </ClCompile>
     <ClCompile Include="..\src\framework\util\stats.cpp" />
     <ClCompile Include="..\src\framework\xml\tinystr.cpp" />
     <ClCompile Include="..\src\framework\xml\tinyxml.cpp" />

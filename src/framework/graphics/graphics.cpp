@@ -32,11 +32,13 @@
 #include <framework/platform/platformwindow.h>
 #include <framework/graphics/textrender.h>
 
+#include <algorithm>
+
 Graphics g_graphics;
 
 Graphics::Graphics()
 {
-    m_maxTextureSize = 2048;
+    m_maxTextureSize = 4096;
 }
 
 void Graphics::init()
@@ -84,8 +86,8 @@ void Graphics::init()
 
     int maxTextureSize = 0;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-    if (m_maxTextureSize == -1 || m_maxTextureSize < maxTextureSize)
-        m_maxTextureSize = maxTextureSize;
+    if (maxTextureSize > 0)
+        m_maxTextureSize = std::min(m_maxTextureSize, maxTextureSize);
 
 #ifdef WITH_DEPTH_BUFFER
     checkDepthSupport();

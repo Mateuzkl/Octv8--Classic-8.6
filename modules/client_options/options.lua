@@ -5,8 +5,9 @@ local defaultOptions = {
 	fullscreen = false,
 	showPing = true,
 	showFps = true,
-	hdmodeBox = true,
+	hdmodeBox = false,
 	vsync = true,
+	unlimitedFps = false,
 	botSoundVolume = 0,
 	floorFading = 100,
 	crosshair = 1,
@@ -68,6 +69,8 @@ optionsButton = nil
 options = {}
 extraOptions = {}
 subWindows = {}
+local startupHdSpriteUpscaling = false
+local hdDefaultMigrationKey = "classicHdSpriteDefaultOffV1"
 
 local function createSubWindow(id, title, uiName, size)
 	local window = g_ui.createWidget("MainWindow", rootWidget)
@@ -121,6 +124,12 @@ function init()
 
 		options[k] = v
 	end
+
+	if not g_settings.getBoolean(hdDefaultMigrationKey) then
+		g_settings.set("hdmodeBox", false)
+		g_settings.set(hdDefaultMigrationKey, true)
+	end
+	startupHdSpriteUpscaling = g_settings.getBoolean("hdmodeBox")
 
 	for _, v in ipairs(g_extras.getAll()) do
 		extraOptions[v] = g_extras.get(v)
@@ -212,8 +221,19 @@ function toggleSubWindow(name)
 end
 
 function setup()
+	local vsync = g_settings.getBoolean("vsync")
+	local unlimitedFps = g_settings.getBoolean("unlimitedFps")
+	if vsync and unlimitedFps then
+		unlimitedFps = false
+	end
+
+	setOption("vsync", vsync, true)
+	setOption("unlimitedFps", unlimitedFps, true)
+
 	for k, v in pairs(defaultOptions) do
-		if type(v) == "boolean" then
+		if k == "vsync" or k == "unlimitedFps" then
+			-- Applied above in a deterministic order because they are exclusive.
+		elseif type(v) == "boolean" then
 			setOption(k, g_settings.getBoolean(k), true)
 		elseif type(v) == "number" then
 			setOption(k, g_settings.getNumber(k), true)
@@ -352,7 +372,16 @@ function setOption(key, value, force)
 	local gameMapPanel = modules.game_interface.getMapPanel()
 
 	if key == "vsync" then
+		if value and options.unlimitedFps then
+			setOption("unlimitedFps", false, true)
+		end
 		g_window.setVerticalSync(value)
+		g_app.setVerticalSyncRequested(value)
+	elseif key == "unlimitedFps" then
+		if value and options.vsync then
+			setOption("vsync", false, true)
+		end
+		g_app.setUnlimitedFps(value)
 	elseif key == "showFps" then
 		modules.client_topmenu.setFpsVisible(value)
 	elseif key == "showPing" then
@@ -449,8 +478,8 @@ function setOption(key, value, force)
 	elseif key == "antialiasing" then
 		g_app.setSmooth(value)
 	elseif key == "hdmodeBox" then
-		if g_sprites and g_sprites.setScaleFactor then
-			g_sprites.setScaleFactor(value and 2 or 1)
+		if not force and value ~= startupHdSpriteUpscaling then
+			displayInfoBox(tr("HD Sprite Upscaling"), tr("Restart the client to apply HD Sprite Upscaling."))
 		end
 	end
 
@@ -480,7 +509,7 @@ function setOption(key, value, force)
 		modules.client_profiles.onProfileChange()
 	end
 
-	if key == "classicView" or key == "rightPanels" or key == "leftPanels" or key == "cacheMap" or key == "hdmodeBox" then
+	if key == "classicView" or key == "rightPanels" or key == "leftPanels" or key == "cacheMap" then
 		modules.game_interface.refreshViewMode()
 	elseif key:find("actionbar") then
 		if modules.game_actionbar then
@@ -495,6 +524,10 @@ function getOption(key)
 	end
 
 	return options[key]
+end
+
+function getStartupHdSpriteUpscaling()
+	return startupHdSpriteUpscaling
 end
 
 function online()

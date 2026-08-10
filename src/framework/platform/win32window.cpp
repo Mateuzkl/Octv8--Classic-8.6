@@ -222,6 +222,11 @@ void WIN32Window::init()
 
 void WIN32Window::terminate()
 {
+    if (std::this_thread::get_id() != g_graphicsThreadId) {
+        g_logger.error("WIN32Window::terminate must run on the graphics thread");
+        return;
+    }
+
     SetCursor(NULL);
     if(m_defaultCursor) {
         DestroyCursor(m_defaultCursor);
@@ -444,6 +449,13 @@ void WIN32Window::internalDestroyGLContext()
 #ifdef OPENGL_ES
     if(m_eglDisplay) {
         if(m_eglContext) {
+            // EGL resources must be released by their owning graphics thread.
+            if(!eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface, m_eglContext))
+                g_logger.error("Unable to make EGL context current for shutdown.");
+            else
+                glFinish();
+            if(!eglMakeCurrent(m_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT))
+                g_logger.error("Unable to release EGL context.");
             eglDestroyContext(m_eglDisplay, m_eglContext);
             m_eglContext = 0;
         }
@@ -453,6 +465,8 @@ void WIN32Window::internalDestroyGLContext()
         }
         eglTerminate(m_eglDisplay);
         m_eglDisplay = 0;
+        if(!eglReleaseThread())
+            g_logger.error("Unable to release EGL thread.");
     }
 #else
     if(m_wglContext) {
@@ -1038,31 +1052,44 @@ void WIN32Window::setFullscreen(bool fullscreen)
 void WIN32Window::setVerticalSync(bool enable)
 {
     m_verticalSync = enable;
+    m_verticalSyncApplied = false;
 #ifdef OPENGL_ES
-    g_graphicsDispatcher.addEvent([&, enable] {
+    g_graphicsDispatcher.addEvent([this, enable] {
         if (eglSwapInterval(m_eglDisplay, enable ? 1 : 0) != EGL_TRUE) {
             g_logger.error("Error while setting vsync");
+        } else {
+            m_verticalSyncApplied = enable;
         }
     });
 #else
-    g_graphicsDispatcher.addEvent([&, enable] {
+    g_graphicsDispatcher.addEvent([this, enable] {
         typedef BOOL(WINAPI* wglSwapIntervalProc)(int);
-        if (isExtensionSupported("WGL_EXT_swap_control") && isExtensionSupported("EXT_swap_control_tear")) {
+
+        auto tryWglSwapInterval = [&](int interval) -> bool {
             wglSwapIntervalProc wglSwapInterval = (wglSwapIntervalProc)getExtensionProcAddress("wglSwapIntervalEXT");
-            if (wglSwapInterval) {
-                wglSwapInterval(enable ? -1 : 0);
+            if (!wglSwapInterval) {
+                g_logger.warning("VSync requested but wglSwapIntervalEXT is not available");
+                return false;
+            }
+            if (wglSwapInterval(interval) == FALSE) {
+                g_logger.warning(stdext::format("wglSwapIntervalEXT(%d) failed", interval));
+                return false;
+            }
+            return true;
+        };
+
+        if (isExtensionSupported("WGL_EXT_swap_control")) {
+            const bool hasTear = isExtensionSupported("WGL_EXT_swap_control_tear");
+            const int interval = enable ? (hasTear ? -1 : 1) : 0;
+            if (tryWglSwapInterval(interval)) {
+                m_verticalSyncApplied = enable;
                 return;
             }
+        } else if (enable) {
+            g_logger.warning("VSync requested but WGL_EXT_swap_control is not supported");
         }
 
-        if (!isExtensionSupported("WGL_EXT_swap_control"))
-            return;
-
-        wglSwapIntervalProc wglSwapInterval = (wglSwapIntervalProc)getExtensionProcAddress("wglSwapIntervalEXT");
-        if (!wglSwapInterval)
-            return;
-
-        wglSwapInterval(enable ? 1 : 0);
+        m_verticalSyncApplied = false;
     });
 #endif
 }

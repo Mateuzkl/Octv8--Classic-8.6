@@ -87,7 +87,7 @@ CiclopediaWindow
   !text: tr('Ciclopedia')
   color: #909090
   visible: false
-  @onEscape: toggle()
+  @onEscape: modules.game_ciclopedia.toggle()
 
   UIWidget
     id: buttonSelection
@@ -111,7 +111,7 @@ CiclopediaWindow
       anchors.left: parent.left
       margin-top: 1
       margin-left: 1
-      @onClick: toggleWindow("items")
+      @onClick: modules.game_ciclopedia.toggleWindow("items")
 
       $on:
         size: 150 34
@@ -133,7 +133,7 @@ CiclopediaWindow
       anchors.top: prev.top
       anchors.left: parent.left
       margin-left: 1
-      @onClick: toggleWindow("bestiary")
+      @onClick: modules.game_ciclopedia.toggleWindow("bestiary")
 
       $on:
         size: 150 34
@@ -154,7 +154,7 @@ CiclopediaWindow
       id: charms
       anchors.top: prev.top
       anchors.left: prev.right
-      @onClick: toggleWindow("charms")
+      @onClick: modules.game_ciclopedia.toggleWindow("charms")
 
       $on:
         size: 150 34
@@ -177,7 +177,7 @@ CiclopediaWindow
       anchors.top: prev.top
       anchors.left: prev.right
       margin-left: 1
-      @onClick: toggleWindow("map")
+      @onClick: modules.game_ciclopedia.toggleWindow("map")
 
       $on:
         size: 150 34
@@ -200,7 +200,7 @@ CiclopediaWindow
       anchors.top: prev.top
       anchors.left: prev.right
       margin-left: 1
-      @onClick: toggleWindow("houses")
+      @onClick: modules.game_ciclopedia.toggleWindow("houses")
 
       $on:
         size: 150 34
@@ -223,7 +223,7 @@ CiclopediaWindow
       anchors.top: prev.top
       anchors.left: prev.right
       margin-left: 1
-      @onClick: toggleWindow("character")
+      @onClick: modules.game_ciclopedia.toggleWindow("character")
 
       $on:
         size: 150 34

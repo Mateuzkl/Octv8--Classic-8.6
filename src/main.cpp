@@ -23,6 +23,7 @@
 #include <framework/core/application.h>
 #include <framework/core/resourcemanager.h>
 #include <framework/core/eventdispatcher.h>
+#include <framework/util/stats.h>
 #include <framework/luaengine/luainterface.h>
 #include <framework/http/http.h>
 #include <framework/platform/crashhandler.h>
@@ -115,6 +116,7 @@ int main(int argc, const char* argv[]) {
     g_http.terminate();
     g_client.terminate();
     g_app.terminate();
+    g_stats.clearAll();
     return 0;
 }
 

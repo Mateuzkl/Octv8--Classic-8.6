@@ -59,6 +59,12 @@ void Connection::poll()
 
 void Connection::terminate()
 {
+    // Canceled Asio operations retain their handlers until the completion
+    // queue is drained. Release them before the final service teardown.
+    g_ioService.stop();
+    g_ioService.reset();
+    while(g_ioService.poll() != 0) {
+    }
     g_ioService.stop();
     m_outputStreams.clear();
 }

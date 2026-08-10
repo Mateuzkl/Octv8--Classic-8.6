@@ -216,8 +216,7 @@ function unregisterBestiaryProtocol()
 	bestiaryProtocolRegistered = false
 end
 
-function terminateBestiary()
-	unregisterBestiaryProtocol()
+function cancelBestiaryEvents()
 	if bestiaryTrackerRefreshEvent then
 		removeEvent(bestiaryTrackerRefreshEvent)
 		bestiaryTrackerRefreshEvent = nil
@@ -226,6 +225,11 @@ function terminateBestiary()
 		removeEvent(bestiaryMonsterRefreshEvent)
 		bestiaryMonsterRefreshEvent = nil
 	end
+end
+
+function terminateBestiary()
+	unregisterBestiaryProtocol()
+	cancelBestiaryEvents()
 	if bestiaryTrackerWindow then
 		bestiaryTrackerWindow:destroy()
 		bestiaryTrackerWindow = nil

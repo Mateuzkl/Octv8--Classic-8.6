@@ -1030,23 +1030,37 @@ void X11Window::setFullscreen(bool fullscreen)
 
 void X11Window::setVerticalSync(bool enable)
 {
-    if (std::this_thread::get_id() != g_mainThreadId) {
+    if (std::this_thread::get_id() != g_graphicsThreadId) {
         g_graphicsDispatcher.addEvent(std::bind(&X11Window::setVerticalSync, this, enable));
         return;
     }
+    m_verticalSync = enable;
+    m_verticalSyncApplied = false;
+
 #ifdef OPENGL_ES
-    //TODO
+    if (enable)
+        g_logger.warning("VSync not implemented for OpenGL ES on X11");
 #else
     typedef GLint (*glSwapIntervalProc)(GLint);
     glSwapIntervalProc glSwapInterval = NULL;
 
-    if(isExtensionSupported("GLX_MESA_swap_control"))
+    if (isExtensionSupported("GLX_MESA_swap_control"))
         glSwapInterval = (glSwapIntervalProc)getExtensionProcAddress("glXSwapIntervalMESA");
-    else if(isExtensionSupported("GLX_SGI_swap_control"))
+    else if (enable && isExtensionSupported("GLX_SGI_swap_control"))
         glSwapInterval = (glSwapIntervalProc)getExtensionProcAddress("glXSwapIntervalSGI");
 
-    if(glSwapInterval)
-        glSwapInterval(enable ? 1 : 0);
+    if (!glSwapInterval) {
+        if (enable)
+            g_logger.warning("VSync requested but no GLX swap control extension is available");
+        return;
+    }
+
+    if (glSwapInterval(enable ? 1 : 0) != 0) {
+        g_logger.warning("Failed to set VSync through GLX");
+        return;
+    }
+
+    m_verticalSyncApplied = enable;
 #endif
 }
 

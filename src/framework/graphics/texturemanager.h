@@ -33,6 +33,7 @@ public:
     void terminate();
 
     void clearCache();
+    bool unload(const std::string& fileName);
     void reload();
 
     void preload(const std::string& fileName) { getTexture(fileName); }
@@ -42,7 +43,6 @@ public:
 
 private:
     std::unordered_map<std::string, TexturePtr> m_textures;
-    std::vector<AnimatedTexturePtr> m_animatedTextures;
     ScheduledEventPtr m_liveReloadEvent;
     std::list<uint> m_texturesToRelease;
 };

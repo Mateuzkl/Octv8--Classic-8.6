@@ -3,6 +3,14 @@ window = nil
 settings = {}
 local callDelay = 1000
 local dispatcher = {}
+local refreshEvent = nil
+
+local function cancelQuestRefresh()
+	if refreshEvent then
+		removeEvent(refreshEvent)
+		refreshEvent = nil
+	end
+end
 
 function init()
 	g_ui.importStyle("questlogwindow")
@@ -27,6 +35,8 @@ function init()
 end
 
 function terminate()
+	cancelQuestRefresh()
+
 	disconnect(g_game, {
 		onQuestLog = onGameQuestLog,
 		onQuestLine = onGameQuestLine,
@@ -41,6 +51,7 @@ function terminate()
 end
 
 function offline()
+	cancelQuestRefresh()
 	if window then
 		window:hide()
 	end
@@ -55,6 +66,7 @@ function online()
 		return
 	end
 
+	cancelQuestRefresh()
 	load()
 	refreshQuests()
 
@@ -183,6 +195,7 @@ function onGameQuestLine(questId, questMissions)
 end
 
 function refreshQuests()
+	refreshEvent = nil
 	if not g_game.isOnline() then
 		return
 	end
@@ -190,7 +203,7 @@ function refreshQuests()
 	local data = settings[g_game.getCharacterName()]
 	data = data or {}
 
-	scheduleEvent(refreshQuests, callDelay)
+	refreshEvent = scheduleEvent(refreshQuests, callDelay)
 end
 
 function load()

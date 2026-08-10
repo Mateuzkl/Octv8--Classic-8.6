@@ -245,6 +245,7 @@ end
 function terminate()
     cancelTopBarProficiencyInit()
     cancelAutoSelect()
+    cancelDeferredProficiencyEvents()
 
     disconnect(g_game, {
         onGameStart = onGameStart,
@@ -321,6 +322,17 @@ function cancelAutoSelect()
     if WeaponProficiency.autoSelectEvent then
         removeEvent(WeaponProficiency.autoSelectEvent)
         WeaponProficiency.autoSelectEvent = nil
+    end
+end
+
+function cancelDeferredProficiencyEvents()
+    if WeaponProficiency.deferredSelectionEvent then
+        removeEvent(WeaponProficiency.deferredSelectionEvent)
+        WeaponProficiency.deferredSelectionEvent = nil
+    end
+    if WeaponProficiency.confirmRequestEvent then
+        removeEvent(WeaponProficiency.confirmRequestEvent)
+        WeaponProficiency.confirmRequestEvent = nil
     end
 end
 
@@ -508,6 +520,7 @@ end
 function onGameEnd()
     cancelTopBarProficiencyInit()
     cancelAutoSelect()
+    cancelDeferredProficiencyEvents()
 
     if WeaponProficiency.window then
         WeaponProficiency.window:hide()
@@ -809,6 +822,10 @@ function hide()
     end
 
     cancelAutoSelect()
+    if WeaponProficiency.deferredSelectionEvent then
+        removeEvent(WeaponProficiency.deferredSelectionEvent)
+        WeaponProficiency.deferredSelectionEvent = nil
+    end
 
     -- Close window
     WeaponProficiency.window:hide()
@@ -930,8 +947,13 @@ function requestOpenWindow(redirectItem)
     end
 
     if targetMarketItem then
-        scheduleEvent(function()
-            if WeaponProficiency.window and WeaponProficiency.window:isVisible() then
+        if WeaponProficiency.deferredSelectionEvent then
+            removeEvent(WeaponProficiency.deferredSelectionEvent)
+        end
+        WeaponProficiency.deferredSelectionEvent = scheduleEvent(function()
+            WeaponProficiency.deferredSelectionEvent = nil
+            if g_game.isOnline() and WeaponProficiency.window and
+                not WeaponProficiency.window:isDestroyed() and WeaponProficiency.window:isVisible() then
                 local displayId = targetMarketItem.displayId or targetMarketItem.originalId or targetItemId
                 WeaponProficiency:selectItem(displayId, targetMarketItem)
             end
@@ -2514,9 +2536,14 @@ function WeaponProficiency:applyPendingSelections()
         updateProficiencyHighlight()
 
         -- Request updated proficiency info from server to confirm
-        scheduleEvent(function()
-            if self.selectedItemId then
-                sendWeaponProficiencyAction(0, self.selectedItemId)
+        if self.confirmRequestEvent then
+            removeEvent(self.confirmRequestEvent)
+        end
+        local appliedItemId = self.selectedItemId
+        self.confirmRequestEvent = scheduleEvent(function()
+            self.confirmRequestEvent = nil
+            if g_game.isOnline() and self.selectedItemId == appliedItemId then
+                sendWeaponProficiencyAction(0, appliedItemId)
             end
         end, 200)
     end

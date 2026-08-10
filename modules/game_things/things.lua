@@ -11,6 +11,12 @@ end
 
 function load()
 	local version = g_game.getClientVersion()
+	local hdSpriteUpscaling = modules.client_options and modules.client_options.getStartupHdSpriteUpscaling and
+		modules.client_options.getStartupHdSpriteUpscaling()
+	if g_sprites and g_sprites.setScaleFactor then
+		g_sprites.setScaleFactor(hdSpriteUpscaling and 2 or 1)
+	end
+
 	local things = g_settings.getNode("things")
 	local datPath, sprPath = nil
 

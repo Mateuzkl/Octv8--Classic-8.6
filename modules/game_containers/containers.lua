@@ -47,6 +47,10 @@ end
 
 function destroy(container)
 	if container.window then
+		if container.window.borderEvent then
+			removeEvent(container.window.borderEvent)
+			container.window.borderEvent = nil
+		end
 		container.window:destroy()
 
 		container.window = nil
@@ -146,8 +150,9 @@ function onContainerOpen(container, previousContainer)
 
 		containerWindow:setBorderWidth(2)
 		containerWindow:setBorderColor("#FFFFFF")
-		scheduleEvent(function ()
-			if containerWindow then
+		containerWindow.borderEvent = scheduleEvent(function ()
+			containerWindow.borderEvent = nil
+			if not containerWindow:isDestroyed() then
 				containerWindow:setBorderWidth(0)
 			end
 		end, 300)

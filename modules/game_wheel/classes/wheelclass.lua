@@ -1992,6 +1992,20 @@ local function getLocalGemStruct()
   return struct
 end
 
+local applyCloseEvent = nil
+local presetFocusEvent = nil
+
+function WheelOfDestiny.cancelPendingEvents()
+  if applyCloseEvent then
+    removeEvent(applyCloseEvent)
+    applyCloseEvent = nil
+  end
+  if presetFocusEvent then
+    removeEvent(presetFocusEvent)
+    presetFocusEvent = nil
+  end
+end
+
 function onWheelOfDestinyApply(close, ignoreprotocol)
   local struct = getGemStruct()
 
@@ -2021,10 +2035,16 @@ function onWheelOfDestinyApply(close, ignoreprotocol)
   end
 
   if close then
-    scheduleEvent(function()
-      wheelWindow:hide()
-      wheelWindow:ungrabMouse()
-      wheelWindow:ungrabKeyboard()
+    if applyCloseEvent then
+      removeEvent(applyCloseEvent)
+    end
+    applyCloseEvent = scheduleEvent(function()
+      applyCloseEvent = nil
+      if wheelWindow and not wheelWindow:isDestroyed() then
+        wheelWindow:hide()
+        wheelWindow:ungrabMouse()
+        wheelWindow:ungrabKeyboard()
+      end
     end, 100)
   end
 end
@@ -2781,7 +2801,14 @@ function WheelOfDestiny.onConfirmCreatePreset()
   toggleTabBarButtons('managePresetsButton')
 
   -- Rebuild preset list and focus the new preset
-  scheduleEvent(function()
+  if presetFocusEvent then
+    removeEvent(presetFocusEvent)
+  end
+  presetFocusEvent = scheduleEvent(function()
+    presetFocusEvent = nil
+    if not wheelWindow or wheelWindow:isDestroyed() then
+      return
+    end
     WheelOfDestiny.configurePresets()
 
     local presetPanel = wheelWindow:recursiveGetChildById("presetList")

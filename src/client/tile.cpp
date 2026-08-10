@@ -119,7 +119,7 @@ void Tile::drawBottom(const Point& dest, LightView* lightView)
     }
 
     if (lightView && hasTranslucentLight()) {
-        lightView->addLight(dest + Point(16, 16), 215, 1);
+        lightView->addLight(dest + Point(g_sprites.spriteSize() / 2, g_sprites.spriteSize() / 2), 215, 1);
     }
 }
 

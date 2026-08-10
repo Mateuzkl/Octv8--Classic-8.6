@@ -32,6 +32,8 @@
 #include <framework/util/pngunpacker.h>
 
 #include <algorithm>
+#include <limits>
+#include <new>
 
 SpriteManager g_sprites;
 
@@ -39,6 +41,8 @@ namespace
 {
 constexpr int MinScaleFactor = 1;
 constexpr int MaxScaleFactor = 4;
+constexpr size_t MaxImageCacheEntries = 2000;
+constexpr size_t MaxImageCacheBytes = static_cast<size_t>(32) * 1024 * 1024;
 }
 
 SpriteManager::SpriteManager()
@@ -339,15 +343,49 @@ ImagePtr SpriteManager::getSpriteImage(int id)
     }
 
     auto it = m_imageCache.find(id);
-    if (it != m_imageCache.end())
-        return it->second;
+    if (it != m_imageCache.end()) {
+        m_imageCacheLru.splice(m_imageCacheLru.begin(), m_imageCacheLru, it->second.lruIt);
+        return it->second.image;
+    }
 
     ImagePtr baseSprite = getSpriteImageCasual(id);
     ImagePtr scaledSprite = upscaleSprite(baseSprite, m_scaleFactor);
     if (!scaledSprite)
         return baseSprite;
 
-    m_imageCache[id] = scaledSprite;
+    const size_t imageBytes = static_cast<size_t>(scaledSprite->getPixelCount()) * scaledSprite->getBpp();
+    if (imageBytes > MaxImageCacheBytes)
+        return scaledSprite;
+
+    while (!m_imageCacheLru.empty() &&
+           (m_imageCache.size() >= MaxImageCacheEntries || imageBytes > MaxImageCacheBytes - m_imageCacheBytes)) {
+        const int oldestId = m_imageCacheLru.back();
+        m_imageCacheLru.pop_back();
+
+        auto oldest = m_imageCache.find(oldestId);
+        if (oldest != m_imageCache.end()) {
+            m_imageCacheBytes -= oldest->second.bytes;
+            m_imageCache.erase(oldest);
+        }
+    }
+
+    try {
+        m_imageCacheLru.push_front(id);
+        const auto inserted = m_imageCache.emplace(id, ImageCacheEntry{ scaledSprite, imageBytes, m_imageCacheLru.begin() });
+        if (inserted.second)
+            m_imageCacheBytes += imageBytes;
+        else
+            m_imageCacheLru.pop_front();
+    } catch (const std::bad_alloc&) {
+        if (!m_imageCacheLru.empty() && m_imageCacheLru.front() == id)
+            m_imageCacheLru.pop_front();
+
+        static bool warned = false;
+        if (!warned) {
+            warned = true;
+            g_logger.warning("HD Sprite Upscaling: unable to cache scaled image; continuing without caching");
+        }
+    }
     return scaledSprite;
 }
 
@@ -370,6 +408,8 @@ void SpriteManager::setScaleFactor(int factor)
 void SpriteManager::clearImageCache()
 {
     m_imageCache.clear();
+    m_imageCacheLru.clear();
+    m_imageCacheBytes = 0;
 }
 
 void SpriteManager::updateSpriteSize()
@@ -386,37 +426,63 @@ ImagePtr SpriteManager::upscaleSprite(const ImagePtr& sprite, int scaleFactor) c
     if (sprite->getBpp() != 4)
         return sprite;
 
-    const int sourceWidth = sprite->getWidth();
-    const int sourceHeight = sprite->getHeight();
-    const int targetWidth = sourceWidth * scaleFactor;
-    const int targetHeight = sourceHeight * scaleFactor;
-    const int pixelCount = sourceWidth * sourceHeight;
+    // This protects CPU-side xBRZ allocations. Texture/atlas allocation happens later.
+    try {
+        const int sourceWidth = sprite->getWidth();
+        const int sourceHeight = sprite->getHeight();
+        if (sourceWidth <= 0 || sourceHeight <= 0 ||
+            sourceWidth > std::numeric_limits<int>::max() / scaleFactor ||
+            sourceHeight > std::numeric_limits<int>::max() / scaleFactor)
+            return sprite;
 
-    std::vector<uint32_t> sourcePixels(pixelCount);
-    const std::vector<uint8>& sourceData = sprite->getPixels();
-    for (int i = 0; i < pixelCount; ++i) {
-        const int offset = i * 4;
-        sourcePixels[i] = (static_cast<uint32_t>(sourceData[offset + 3]) << 24) |
-                          (static_cast<uint32_t>(sourceData[offset + 0]) << 16) |
-                          (static_cast<uint32_t>(sourceData[offset + 1]) << 8) |
-                          static_cast<uint32_t>(sourceData[offset + 2]);
+        const int targetWidth = sourceWidth * scaleFactor;
+        const int targetHeight = sourceHeight * scaleFactor;
+        const size_t sourcePixelCount = static_cast<size_t>(sourceWidth) * sourceHeight;
+        const size_t targetPixelCount = static_cast<size_t>(targetWidth) * targetHeight;
+        const std::vector<uint8>& sourceData = sprite->getPixels();
+        if (sourcePixelCount > sourceData.size() / 4 ||
+            targetPixelCount > static_cast<size_t>(std::numeric_limits<int>::max()) / 4)
+            return sprite;
+
+        std::vector<uint32_t> sourcePixels(sourcePixelCount);
+        for (size_t i = 0; i < sourcePixelCount; ++i) {
+            const size_t offset = i * 4;
+            sourcePixels[i] = (static_cast<uint32_t>(sourceData[offset + 3]) << 24) |
+                              (static_cast<uint32_t>(sourceData[offset + 0]) << 16) |
+                              (static_cast<uint32_t>(sourceData[offset + 1]) << 8) |
+                              static_cast<uint32_t>(sourceData[offset + 2]);
+        }
+
+        std::vector<uint32_t> targetPixels(targetPixelCount);
+        xbrz::scale(scaleFactor, sourcePixels.data(), targetPixels.data(), sourceWidth, sourceHeight, xbrz::ColorFormat::ARGB);
+
+        auto upscaledImage = std::make_shared<Image>(Size(targetWidth, targetHeight));
+        std::vector<uint8>& targetData = upscaledImage->getPixels();
+        for (size_t i = 0; i < targetPixels.size(); ++i) {
+            const uint32_t pixel = targetPixels[i];
+            const size_t offset = i * 4;
+            targetData[offset + 0] = static_cast<uint8>((pixel >> 16) & 0xFF);
+            targetData[offset + 1] = static_cast<uint8>((pixel >> 8) & 0xFF);
+            targetData[offset + 2] = static_cast<uint8>(pixel & 0xFF);
+            targetData[offset + 3] = static_cast<uint8>((pixel >> 24) & 0xFF);
+        }
+
+        return upscaledImage;
+    } catch (const std::bad_alloc&) {
+        static bool warned = false;
+        if (!warned) {
+            warned = true;
+            g_logger.warning("HD Sprite Upscaling: out of memory during xBRZ upscale; using original sprite");
+        }
+    } catch (const std::exception& e) {
+        static bool warned = false;
+        if (!warned) {
+            warned = true;
+            g_logger.warning(stdext::format("HD Sprite Upscaling failed (%s); using original sprite", e.what()));
+        }
     }
 
-    std::vector<uint32_t> targetPixels(targetWidth * targetHeight);
-    xbrz::scale(scaleFactor, sourcePixels.data(), targetPixels.data(), sourceWidth, sourceHeight, xbrz::ColorFormat::ARGB);
-
-    auto upscaledImage = std::make_shared<Image>(Size(targetWidth, targetHeight));
-    std::vector<uint8>& targetData = upscaledImage->getPixels();
-    for (size_t i = 0; i < targetPixels.size(); ++i) {
-        const uint32_t pixel = targetPixels[i];
-        const size_t offset = i * 4;
-        targetData[offset + 0] = static_cast<uint8>((pixel >> 16) & 0xFF);
-        targetData[offset + 1] = static_cast<uint8>((pixel >> 8) & 0xFF);
-        targetData[offset + 2] = static_cast<uint8>(pixel & 0xFF);
-        targetData[offset + 3] = static_cast<uint8>((pixel >> 24) & 0xFF);
-    }
-
-    return upscaledImage;
+    return sprite;
 }
 
 bool SpriteManager::loadCasualSpr(std::string file)

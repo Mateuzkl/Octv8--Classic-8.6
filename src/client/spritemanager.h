@@ -26,6 +26,7 @@
 #include "const.h"
 #include <framework/core/declarations.h>
 #include <framework/graphics/declarations.h>
+#include <list>
 
 //@bindsingleton g_sprites
 class SpriteManager
@@ -58,6 +59,13 @@ public:
     int getScaleFactor() { return m_scaleFactor; }
 
 private:
+    struct ImageCacheEntry
+    {
+        ImagePtr image;
+        size_t bytes = 0;
+        std::list<int>::iterator lruIt;
+    };
+
     bool loadCasualSpr(std::string file);
     bool loadCwmSpr(std::string file);
 
@@ -72,13 +80,15 @@ private:
     uint32 m_signature = 0;
     int m_spritesCount = 0;
     int m_spritesOffset = 0;
-    int m_spriteSize = 64;
+    int m_spriteSize = 32;
     int m_baseSpriteSize = 32;
-    int m_scaleFactor = 2;
+    int m_scaleFactor = 1;
     FileStreamPtr m_spritesFile;
     std::vector<std::vector<uint8_t>> m_sprites;
     std::unordered_map<uint32, std::string> m_cachedData;
-    std::unordered_map<int, ImagePtr> m_imageCache;
+    std::unordered_map<int, ImageCacheEntry> m_imageCache;
+    std::list<int> m_imageCacheLru;
+    size_t m_imageCacheBytes = 0;
 };
 
 extern SpriteManager g_sprites;

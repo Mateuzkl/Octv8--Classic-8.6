@@ -321,6 +321,8 @@ void Application::registerLuaFunctions()
     // GraphicalApplication
     g_lua.bindSingletonFunction("g_app", "setMaxFps", &GraphicalApplication::setMaxFps, &g_app);
     g_lua.bindSingletonFunction("g_app", "getMaxFps", &GraphicalApplication::getMaxFps, &g_app);
+    g_lua.bindSingletonFunction("g_app", "setVerticalSyncRequested", &GraphicalApplication::setVerticalSyncRequested, &g_app);
+    g_lua.bindSingletonFunction("g_app", "setUnlimitedFps", &GraphicalApplication::setUnlimitedFps, &g_app);
     g_lua.bindSingletonFunction("g_app", "getFps", &GraphicalApplication::getFps, &g_app);
     g_lua.bindSingletonFunction("g_app", "getGraphicsFps", &GraphicalApplication::getGraphicsFps, &g_app);
     g_lua.bindSingletonFunction("g_app", "getProcessingFps", &GraphicalApplication::getProcessingFps, &g_app);
@@ -401,6 +403,7 @@ void Application::registerLuaFunctions()
     g_lua.registerSingletonClass("g_textures");
     g_lua.bindSingletonFunction("g_textures", "preload", &TextureManager::preload, &g_textures);
     g_lua.bindSingletonFunction("g_textures", "clearCache", &TextureManager::clearCache, &g_textures);
+    g_lua.bindSingletonFunction("g_textures", "unload", &TextureManager::unload, &g_textures);
     g_lua.bindSingletonFunction("g_textures", "reload", &TextureManager::reload, &g_textures);
 
     // Shaders

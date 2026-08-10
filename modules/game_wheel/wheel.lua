@@ -68,8 +68,15 @@ local function createWheelButton()
   return nil
 end
 
-function init()
+local function ensureWheelWindow()
+  if wheelWindow and not wheelWindow:isDestroyed() then
+    return wheelWindow
+  end
+
   wheelWindow = g_ui.displayUI('wheel')
+  if not wheelWindow then
+    return nil
+  end
   mainPanel = wheelWindow:getChildById('mainPanel')
 
   wheelOfDestinyWindow = g_ui.loadUI('styles/wheelMenu', mainPanel)
@@ -106,8 +113,6 @@ function init()
   renamePresetWindow = g_ui.displayUI('styles/renamePreset')
   renamePresetWindow:hide()
 
-  loadConfigJson()
-
   selectedNewPresetRadio = UIRadioGroup.create()
   selectedNewPresetRadio:addWidget(newPresetWindow.contentPanel.useEmpty)
   selectedNewPresetRadio:addWidget(newPresetWindow.contentPanel.copyPreset)
@@ -129,10 +134,24 @@ function init()
   loadMenu('wheelMenu')
   toggleTabBarButtons('informationButton')
   hide()
+
+  return wheelWindow
+end
+
+local function onDestinyWheel(...)
+  if not ensureWheelWindow() then
+    return
+  end
+  WheelOfDestiny.onDestinyWheel(...)
+end
+
+function init()
+  loadConfigJson()
+
   connect(g_game, {
     onGameEnd = onGameEnd,
     onGameStart = WheelOfDestiny.loadWheelPresets,
-    onDestinyWheel = WheelOfDestiny.onDestinyWheel,
+    onDestinyWheel = onDestinyWheel,
     --onUnlockGem = GemAtelier.onUnlockGem, --disabled because it's in TODO
     onResourceBalance = onResourceBalance,
   })
@@ -142,10 +161,20 @@ function init()
 end
 
 function terminate()
+  if WheelOfDestiny.cancelPendingEvents then
+    WheelOfDestiny.cancelPendingEvents()
+  end
+  if GemAtelier.cancelPendingEvents then
+    GemAtelier.cancelPendingEvents()
+  end
+  if Workshop.cancelPendingEvents then
+    Workshop.cancelPendingEvents()
+  end
+
   disconnect(g_game, {
     onGameEnd = onGameEnd,
     onGameStart = WheelOfDestiny.loadWheelPresets,
-    onDestinyWheel = WheelOfDestiny.onDestinyWheel,
+    onDestinyWheel = onDestinyWheel,
     --onUnlockGem = GemAtelier.onUnlockGem, --disabled because it's in TODO
     onResourceBalance = onResourceBalance
   })
@@ -155,14 +184,47 @@ function terminate()
     wheelButton = nil
   end
 
-  if wheelWindow then
-    wheelWindow:destroy()
-    wheelWindow = nil
+  if selectedNewPresetRadio then
+    selectedNewPresetRadio:destroy()
+    selectedNewPresetRadio = nil
   end
+
+  if wheelWindow and not wheelWindow:isDestroyed() then
+    wheelWindow:destroy()
+  end
+  wheelWindow = nil
+
+  if newPresetWindow and not newPresetWindow:isDestroyed() then
+    newPresetWindow:destroy()
+  end
+  newPresetWindow = nil
+  if renamePresetWindow and not renamePresetWindow:isDestroyed() then
+    renamePresetWindow:destroy()
+  end
+  renamePresetWindow = nil
+  if exportCodeWindow then
+    exportCodeWindow:destroy()
+    exportCodeWindow = nil
+  end
+  if deletePresetWindow then
+    deletePresetWindow:destroy()
+    deletePresetWindow = nil
+  end
+  if checkSavePresetWindow then
+    checkSavePresetWindow:destroy()
+    checkSavePresetWindow = nil
+  end
+
+  mainPanel = nil
+  wheelOfDestinyWindow = nil
+  gemAtelierWindow = nil
+  fragmentWindow = nil
+  wheelPanel = nil
+  centerReferencePoint = nil
 end
 
 function toggle()
-  if not wheelWindow then
+  if not ensureWheelWindow() then
     return
   end
 
@@ -201,15 +263,30 @@ function hide()
 end
 
 function onGameEnd()
-  hide()
+  if WheelOfDestiny.cancelPendingEvents then
+    WheelOfDestiny.cancelPendingEvents()
+  end
+  if GemAtelier.cancelPendingEvents then
+    GemAtelier.cancelPendingEvents()
+  end
+  if Workshop.cancelPendingEvents then
+    Workshop.cancelPendingEvents()
+  end
   WheelOfDestiny.saveWheelPresets()
 
-  newPresetWindow:hide()
-  renamePresetWindow:hide()
+  if not wheelWindow then
+    WheelOfDestiny.currentPreset = {}
+    setWheelButtonState(false)
+    return
+  end
 
-  if exportCodeWindow then
-    exportCodeWindow:destroy()
-    exportCodeWindow = nil
+  hide()
+
+  if newPresetWindow and not newPresetWindow:isDestroyed() then
+    newPresetWindow:hide()
+  end
+  if renamePresetWindow and not renamePresetWindow:isDestroyed() then
+    renamePresetWindow:hide()
   end
 
   if exportCodeWindow then
@@ -222,13 +299,18 @@ function onGameEnd()
     checkSavePresetWindow = nil
   end
 
+  if deletePresetWindow then
+    deletePresetWindow:destroy()
+    deletePresetWindow = nil
+  end
+
   WheelOfDestiny.currentPreset = {}
   wheelWindow:ungrabMouse()
   wheelWindow:ungrabKeyboard()
 end
 
 function show()
-  if requestOpenWheel() then
+  if ensureWheelWindow() and requestOpenWheel() then
     setWheelButtonState(true)
   end
 end
@@ -277,7 +359,7 @@ function loadMenu(menuId)
     informationButton.onClick = function() toggleTabBarButtons('informationButton') end
     managePresetsButton.onClick = function()
       toggleTabBarButtons('managePresetsButton')
-      scheduleEvent(function() WheelOfDestiny.configurePresets() end, 50)
+      WheelOfDestiny.configurePresets()
     end
     summaryButton.onClick = function() toggleSummary() end
     summaryOpenedButton.onClick = function() toggleSummary() end

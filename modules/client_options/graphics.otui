@@ -72,6 +72,7 @@ OptionPanel
     OptionCheckBox
       id: hdmodeBox
       !text: tr('Enable HD Graphics')
+      !tooltip: tr('Upscales classic 32x32 sprites with the xBRZ filter.\nIncreases CPU and memory usage significantly.\nRestart the client to apply this option.')
       anchors.left: parent.left
       anchors.right: parent.right
       anchors.top: parent.top
@@ -115,6 +116,19 @@ OptionPanel
     margin-top: 3
     minimum: 10
     maximum: 200
+
+  FlatPanel
+    height: 22
+    margin-top: 8
+
+    OptionCheckBox
+      id: unlimitedFps
+      !text: tr('Unlimited FPS')
+      !tooltip: tr('Disables the software frame limit. This can significantly increase CPU and GPU usage.')
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: parent.top
+      margin: 5
 
   Label
     id: ambientLightLabel
@@ -208,4 +222,3 @@ OptionPanel
     margin-top: 3
     minimum: 0
     maximum: 100
-
