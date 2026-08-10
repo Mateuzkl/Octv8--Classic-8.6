@@ -42,13 +42,10 @@
 #include <framework/html/htmlmanager.h>
 #include <framework/util/extras.h>
 #include <framework/util/stats.h>
-#include <framework/rmlui/rmluimanager.h>
 
 #ifdef FW_SOUND
 #include <framework/sound/soundmanager.h>
 #endif
-
-#include <framework/rmlui/rmluimanager.h>
 
 GraphicalApplication g_app;
 
@@ -69,10 +66,6 @@ void GraphicalApplication::init(std::vector<std::string>& args)
 
     // initialize ui
     g_ui.init();
-
-    // initialize RmlUi
-    g_rmlui.init();
-    g_rmlui.createContext("main", g_graphics.getViewportSize().width(), g_graphics.getViewportSize().height());
 
     // initialize graphics
     g_graphics.init();
@@ -100,8 +93,6 @@ void GraphicalApplication::terminate()
     // destroy any remaining widget
     g_html.terminate();
     g_ui.terminate();
-
-    g_rmlui.terminate();
 
     Application::terminate();
     m_terminated = false;
@@ -163,10 +154,9 @@ void GraphicalApplication::run()
         while (!m_stopping) {
             m_processingFrames.addFrame();
             {
-            g_clock.update();
-            poll();
-            g_rmlui.update();
-            g_clock.update();
+                g_clock.update();
+                poll();
+                g_clock.update();
             }
 
             mutex.lock();
@@ -321,13 +311,6 @@ void GraphicalApplication::run()
         {
             AutoStat s(STATS_RENDER, "DrawSecondForeground");
             toDrawQueue->draw(DRAW_AFTER_MAP);
-        }
-
-        {
-            AutoStat s(STATS_RENDER, "RenderRmlUi");
-            g_painter->saveAndResetState();
-            g_rmlui.render();
-            g_painter->restoreSavedState();
         }
 
         {

@@ -55,7 +55,6 @@
 #include <framework/graphics/shadermanager.h>
 #include <framework/ui/ui.h>
 #include <framework/input/mouse.h>
-#include "rmlui/rmluilua.cpp"
 #endif
 
 #include <framework/net/server.h>
@@ -914,8 +913,6 @@ void Application::registerLuaFunctions()
     g_lua.registerClass<ShaderProgram>();
     g_lua.registerClass<PainterShaderProgram>();
     g_lua.bindClassMemberFunction<PainterShaderProgram>("addMultiTexture", &PainterShaderProgram::addMultiTexture);
-
-    registerRmlUiLuaFunctions();
 #endif
 
     // Server
