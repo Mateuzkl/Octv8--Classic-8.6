@@ -1,0 +1,126 @@
+MiniWindow
+  id: elfOthersWindow
+  text: <-- Outros -->
+  width: 180
+  height: 224
+  &save: true
+  &autoOpen: 0
+
+  MiniWindowContents
+    Label
+      id: title
+      text: <-- Scripts -->
+      color: #00ff66
+      text-align: center
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: parent.top
+      margin-top: 3
+
+    Button
+      id: loadBotButton
+      text: Load-Bot
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: title.bottom
+      margin-left: 4
+      margin-right: 4
+      margin-top: 3
+      height: 18
+      @onClick: modules.game_bot.elfOther('Load-Bot')
+
+    Button
+      id: caveBotButton
+      text: CaveBot
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: prev.bottom
+      margin-left: 4
+      margin-right: 4
+      margin-top: 2
+      height: 18
+      @onClick: modules.game_bot.elfOther('CaveBot')
+
+    Button
+      id: attackButton
+      text: Attack
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: prev.bottom
+      margin-left: 4
+      margin-right: 4
+      margin-top: 2
+      height: 18
+      @onClick: modules.game_bot.elfOther('Attack')
+
+    Button
+      id: hpToolsButton
+      text: HP/Tools
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: prev.bottom
+      margin-left: 4
+      margin-right: 4
+      margin-top: 2
+      height: 18
+      @onClick: modules.game_bot.elfOther('HP/Tools')
+
+    Button
+      id: painelIconesButton
+      text: Painel de Icones
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: prev.bottom
+      margin-left: 4
+      margin-right: 4
+      margin-top: 2
+      height: 18
+      @onClick: modules.game_bot.elfOther('Painel de Icones')
+
+    Button
+      id: swapSetButton
+      text: SwapSet
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: prev.bottom
+      margin-left: 4
+      margin-right: 4
+      margin-top: 2
+      height: 18
+      @onClick: modules.game_bot.elfOther('SwapSet')
+
+    Button
+      id: pvpButton
+      text: PVP
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: prev.bottom
+      margin-left: 4
+      margin-right: 4
+      margin-top: 2
+      height: 18
+      @onClick: modules.game_bot.elfOther('PVP')
+
+    Button
+      id: ringAmuletButton
+      text: Ring/Amulet
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: prev.bottom
+      margin-left: 4
+      margin-right: 4
+      margin-top: 2
+      height: 18
+      @onClick: modules.game_bot.elfOther('Ring/Amulet')
+
+    Button
+      id: othersButton
+      text: Others
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: prev.bottom
+      margin-left: 4
+      margin-right: 4
+      margin-top: 2
+      height: 18
+      @onClick: modules.game_bot.elfOther('Others')

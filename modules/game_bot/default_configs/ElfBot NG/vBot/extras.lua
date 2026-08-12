@@ -16,11 +16,16 @@ end
 
 extrasWindow.onGeometryChange = function(widget, old, new)
   if old.height == 0 then return end
-  
+
   settings.height = new.height
 end
 
-extrasWindow:setHeight(settings.height or 360)
+local extrasWindowHeight = tonumber(settings.height) or 390
+if extrasWindowHeight < 390 then
+  extrasWindowHeight = 390
+end
+settings.height = extrasWindowHeight
+extrasWindow:setHeight(extrasWindowHeight)
 
 -- available options for dest param
 local rightPanel = extrasWindow.content.right
@@ -169,10 +174,10 @@ end
 
 addTextEdit("useAll", "Use All Hotkey", "space", rightPanel, "Set hotkey for universal actions - rope, shovel, scythe, use, open doors")
 if true then
-  local useId = { 34847, 1764, 21051, 30823, 6264, 5282, 20453, 20454, 20474, 11708, 11705, 
-                  6257, 6256, 2772, 27260, 2773, 1632, 1633, 1948, 435, 6252, 6253, 5007, 4911, 
-                  1629, 1630, 5108, 5107, 5281, 1968, 435, 1948, 5542, 31116, 31120, 30742, 31115, 
-                  31118, 20474, 5737, 5736, 5734, 5733, 31202, 31228, 31199, 31200, 33262, 30824, 
+  local useId = { 34847, 1764, 21051, 30823, 6264, 5282, 20453, 20454, 20474, 11708, 11705,
+                  6257, 6256, 2772, 27260, 2773, 1632, 1633, 1948, 435, 6252, 6253, 5007, 4911,
+                  1629, 1630, 5108, 5107, 5281, 1968, 435, 1948, 5542, 31116, 31120, 30742, 31115,
+                  31118, 20474, 5737, 5736, 5734, 5733, 31202, 31228, 31199, 31200, 33262, 30824,
                   5125, 5126, 5116, 5117, 8257, 8258, 8255, 8256, 5120, 30777, 30776, 23873, 23877,
                   5736, 6264, 31262, 31130, 31129, 6250, 6249, 5122, 30049, 7131, 7132, 7727 }
   local shovelId = { 606, 593, 867, 608 }
@@ -196,7 +201,7 @@ if true then
                         useWith(settings.shovel, item)
                         return
                     elseif table.find(ropeId, item:getId()) then
-                        useWith(settings.rope, item) 
+                        useWith(settings.rope, item)
                         return
                     elseif table.find(macheteId, item:getId()) then
                         useWith(settings.machete, item)
@@ -232,7 +237,7 @@ if true then
     end
 
     local pos = tile:getPosition().x .. "," .. tile:getPosition().y .. "," .. tile:getPosition().z
-    if not activeTimers[pos] or activeTimers[pos] < now then    
+    if not activeTimers[pos] or activeTimers[pos] < now then
       activeTimers[pos] = now + timer
     end
     tile:setTimer(activeTimers[pos] - now)
@@ -247,7 +252,7 @@ if true then
       local pos = tile:getPosition().x .. "," .. tile:getPosition().y .. "," .. tile:getPosition().z
       activeTimers[pos] = nil
       tile:setTimer(0)
-    end  
+    end
   end)
 end
 
@@ -265,7 +270,7 @@ end
 
 addCheckBox("stake", "Skin Monsters", false, leftPanel, "Automatically skin & stake corpses when cavebot is enabled")
 if true then
-  local knifeBodies = {4286, 4272, 4173, 4011, 4025, 4047, 4052, 4057, 4062, 4112, 4212, 4321, 4324, 4327, 10352, 10356, 10360, 10364} 
+  local knifeBodies = {4286, 4272, 4173, 4011, 4025, 4047, 4052, 4057, 4062, 4112, 4212, 4321, 4324, 4327, 10352, 10356, 10360, 10364}
   local stakeBodies = {4097, 4137, 8738, 18958}
   local fishingBodies = {9582}
   macro(500, function()
@@ -304,19 +309,19 @@ if true then
         elseif string.find(text, "feet when they see me") then
             say("Even before they smell your breath?")
         elseif string.find(text, "from this plane") then
-            say("Too bad you barely exist at all!") 
+            say("Too bad you barely exist at all!")
         elseif string.find(text, "ESDO LO") then
-            say("SEHWO ASIMO, TOLIDO ESD") 
+            say("SEHWO ASIMO, TOLIDO ESD")
         elseif string.find(text, "will soon rule this world") then
-            say("Excuse me but I still do not get the message!") 
+            say("Excuse me but I still do not get the message!")
         elseif string.find(text, "honourable and formidable") then
-            say("Then why are we fighting alone right now?") 
+            say("Then why are we fighting alone right now?")
         elseif string.find(text, "appear like a worm") then
-            say("How appropriate, you look like something worms already got the better of!") 
+            say("How appropriate, you look like something worms already got the better of!")
         elseif string.find(text, "will be the end of mortal") then
-            say("Then let me show you the concept of mortality before it!") 
+            say("Then let me show you the concept of mortality before it!")
         elseif string.find(text, "virtues of chivalry") then
-            say("Dare strike up a Minnesang and you will receive your last accolade!") 
+            say("Dare strike up a Minnesang and you will receive your last accolade!")
         end
     end
   end)
@@ -325,9 +330,9 @@ end
 
 addCheckBox("autoOpenDoors", "Auto Open Doors", true, rightPanel, "Open doors when trying to step on them.")
 if true then
-  local doorsIds = { 5007, 8265, 1629, 1632, 5129, 6252, 6249, 7715, 7712, 7714, 
-                     7719, 6256, 1669, 1672, 5125, 5115, 5124, 17701, 17710, 1642, 
-                     6260, 5107, 4912, 6251, 5291, 1683, 1696, 1692, 5006, 2179, 5116, 
+  local doorsIds = { 5007, 8265, 1629, 1632, 5129, 6252, 6249, 7715, 7712, 7714,
+                     7719, 6256, 1669, 1672, 5125, 5115, 5124, 17701, 17710, 1642,
+                     6260, 5107, 4912, 6251, 5291, 1683, 1696, 1692, 5006, 2179, 5116,
                      1632, 11705, 30772, 30774, 6248, 5735, 5732, 5120, 23873, 5736,
                      6264, 5122, 30049, 30042, 7727 }
 
@@ -344,7 +349,8 @@ if true then
   onKeyPress(function(keys)
     local wsadWalking = modules.game_walking.wsadWalking
     if not settings.autoOpenDoors then return end
-    local pos = player:getPosition()
+    local playerPos = player:getPosition()
+    local pos = {x = playerPos.x, y = playerPos.y, z = playerPos.z}
     if keys == 'Up' or (wsadWalking and keys == 'W') then
       pos.y = pos.y - 1
     elseif keys == 'Down' or (wsadWalking and keys == 'S') then
@@ -374,9 +380,9 @@ end
 addCheckBox("bless", "Buy bless at login", true, rightPanel, "Say !bless at login.")
 if true then
   local blessed = false
-  onTextMessage(function(mode,text) 
+  onTextMessage(function(mode,text)
     if not settings.bless then return end
-    
+
     text = text:lower()
 
     if text == "you already have all blessings." then
@@ -386,7 +392,7 @@ if true then
   if settings.bless then
     if player:getBlessings() == 0 then
       say("!bless")
-      schedule(2000, function() 
+      schedule(2000, function()
           if g_game.getClientVersion() > 1000 then
             if not blessed and player:getBlessings() == 0 then
                 warn("!! Blessings not bought !!")
@@ -400,7 +406,7 @@ end
 
 addCheckBox("reUse", "Keep Crosshair", false, rightPanel, "Keep crosshair after using with item")
 if true then
-  local excluded = {268, 237, 238, 23373, 266, 236, 239, 7643, 23375, 7642, 23374, 5908, 5942} 
+  local excluded = {268, 237, 238, 23373, 266, 236, 239, 7643, 23375, 7642, 23374, 5908, 5942}
 
   onUseWith(function(pos, itemId, target, subType)
     if settings.reUse and not table.find(excluded, itemId) then
@@ -440,14 +446,14 @@ if true then
   local m = macro(20, function()
     mwHot = settings.holdMwHot
     wgHot = settings.holdWgHot
-    
+
     if not settings.holdMwall then return end
       if #candidates == 0 then return end
 
       for i, pos in pairs(candidates) do
         local tile = g_map.getTile(pos)
         if tile then
-          if tile:getText():len() == 0 then 
+          if tile:getText():len() == 0 then
             table.remove(candidates, i)
           end
           local rune = tile:getText() == "HOLD MW" and 3180 or tile:getText() == "HOLD WG" and 3156
@@ -477,7 +483,8 @@ if true then
       if m.isOff() then return end
       if thing:getId() ~= 2129 then return end
       if tile:getText():len() > 0 then
-          table.remove(candidates, table.find(candidates,tile))
+          local idx = table.find(candidates, tile)
+          if idx then table.remove(candidates, idx) end
       end
   end)
 
@@ -534,7 +541,7 @@ if true then
       end
     end
   end
-  if settings.checkPlayer then 
+  if settings.checkPlayer then
     schedule(500, function()
       checkPlayers()
     end)
@@ -560,7 +567,7 @@ if true then
     if not settings.checkPlayer then return end
 
     local re = regexMatch(text, regex)
-    if #re ~= 0 then
+    if re and #re ~= 0 then
         local name = re[1][2]
         local level = re[1][3]
         local guild = re[1][5] or ""

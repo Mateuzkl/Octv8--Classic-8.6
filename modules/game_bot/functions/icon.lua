@@ -13,7 +13,8 @@ context.addIcon = function(id, options, callback)
     hotkey: string
     switchable: true / false [default: true]
     movable: true / false [default: true]
-    phantom: true / false [defaule: false]
+    dragWithCtrl: true / false [default: true]
+    phantom: true / false [default: false]
 ]]--
   local panel = modules.game_interface.gameMapPanel
   if type(id) ~= "string" or id:len() < 1 then
@@ -33,15 +34,19 @@ context.addIcon = function(id, options, callback)
   widget.botWidget = true
   widget.botIcon = true
 
-  if type(config.x) ~= 'number' and type(config.y) ~= 'number' then
+  if type(config.x) ~= 'number' or type(config.y) ~= 'number' then
+    local defaultX
+    local defaultY
     if type(options.x) == 'number' and type(options.y) == 'number' then
-      config.x = math.min(1.0, math.max(0.0, options.x))
-      config.y = math.min(1.0, math.max(0.0, options.y))
+      defaultX = math.min(1.0, math.max(0.0, options.x))
+      defaultY = math.min(1.0, math.max(0.0, options.y))
     else
-      config.x = 0.01 + math.floor(iconsWithoutPosition / 5) / 10
-      config.y = 0.05 + (iconsWithoutPosition % 5) / 5
+      defaultX = 0.01 + math.floor(iconsWithoutPosition / 5) / 10
+      defaultY = 0.05 + (iconsWithoutPosition % 5) / 5
       iconsWithoutPosition = iconsWithoutPosition + 1
     end
+    config.x = type(config.x) == 'number' and config.x or defaultX
+    config.y = type(config.y) == 'number' and config.y or defaultY
   end
 
   if options.item then
@@ -111,13 +116,52 @@ context.addIcon = function(id, options, callback)
     widget.hotkey:hide()
   end
 
-  if options.movable ~= false then
+  local function updateIconPosition(widget, saveImmediately)
+    local parent = widget:getParent()
+    local parentRect = parent:getRect()
+    local width = parentRect.width - widget:getWidth()
+    local height = parentRect.height - widget:getHeight()
+    if width <= 0 or height <= 0 then
+      return false
+    end
+
+    local x = widget:getX() - parentRect.x
+    local y = widget:getY() - parentRect.y
+    config.x = math.min(1, math.max(0, x / width))
+    config.y = math.min(1, math.max(0, y / height))
+
+    widget:addAnchor(AnchorHorizontalCenter, 'parent', AnchorHorizontalCenter)
+    widget:addAnchor(AnchorVerticalCenter, 'parent', AnchorVerticalCenter)
+    widget:setMarginTop(math.max(height * (-0.5) - parent:getMarginTop(), height * (-0.5 + config.y)))
+    widget:setMarginLeft(width * (-0.5 + config.x))
+
+    if saveImmediately and type(context.saveConfig) == 'function' then
+      pcall(context.saveConfig)
+    end
+    return true
+  end
+
+  local function applyIconPosition(widget)
+    local parent = widget:getParent()
+    local parentRect = parent:getRect()
+    local width = parentRect.width - widget:getWidth()
+    local height = parentRect.height - widget:getHeight()
+    if width <= 0 or height <= 0 then
+      return
+    end
+    widget:setMarginTop(math.max(height * (-0.5) - parent:getMarginTop(), height * (-0.5 + config.y)))
+    widget:setMarginLeft(width * (-0.5 + config.x))
+  end
+
+  if options.movable ~= false and options.moveable ~= false then
     widget.onDragEnter = function(widget, mousePos)
-      if not g_keyboard.isCtrlPressed() then
+      local dragRequiresCtrl = options.dragWithCtrl ~= false and options.moveWithCtrl ~= false
+      if dragRequiresCtrl and not g_keyboard.isCtrlPressed() then
         return false
       end
       widget:breakAnchors()
       widget.movingReference = { x = mousePos.x - widget:getX(), y = mousePos.y - widget:getY() }
+      widget.iconPositionChanged = false
       return true
     end
 
@@ -126,40 +170,30 @@ context.addIcon = function(id, options, callback)
       local x = math.min(math.max(parentRect.x, mousePos.x - widget.movingReference.x), parentRect.x + parentRect.width - widget:getWidth())
       local y = math.min(math.max(parentRect.y - widget:getParent():getMarginTop(), mousePos.y - widget.movingReference.y), parentRect.y + parentRect.height - widget:getHeight())
       widget:move(x, y)
+      widget.iconPositionChanged = moved ~= false
       return true
     end
 
     widget.onDragLeave = function(widget, pos)
-      local parent = widget:getParent()
-      local parentRect = parent:getRect()
-      local x = widget:getX() - parentRect.x
-      local y = widget:getY() - parentRect.y
-      local width = parentRect.width - widget:getWidth()
-      local height = parentRect.height - widget:getHeight()
-      
-      config.x = math.min(1, math.max(0, x / width))
-      config.y = math.min(1, math.max(0, y / height))
-
-      widget:addAnchor(AnchorHorizontalCenter, 'parent', AnchorHorizontalCenter)
-      widget:addAnchor(AnchorVerticalCenter, 'parent', AnchorVerticalCenter)
-      widget:setMarginTop(math.max(height * (-0.5) - parent:getMarginTop(), height * (-0.5 + config.y)))
-      widget:setMarginLeft(width * (-0.5 + config.x))
+      updateIconPosition(widget, widget.iconPositionChanged == true)
+      widget.iconPositionChanged = false
       return true
     end
   end
 
   widget.onGeometryChange = function(widget)
     if widget:isDragging() then return end
-    local parent = widget:getParent()
-    local parentRect = parent:getRect()
-    local width = parentRect.width - widget:getWidth()
-    local height = parentRect.height - widget:getHeight()
-    widget:setMarginTop(math.max(height * (-0.5) - parent:getMarginTop(), height * (-0.5 + config.y)))
-    widget:setMarginLeft(width * (-0.5 + config.x))
+    applyIconPosition(widget)
   end
 
+  applyIconPosition(widget)
+
   if options.phantom ~= true then
-    widget.onMouseRelease = function() 
+    widget.onMouseRelease = function(widget)
+      if widget.iconPositionChanged then
+        updateIconPosition(widget, true)
+        widget.iconPositionChanged = false
+      end
       return true 
     end
   end

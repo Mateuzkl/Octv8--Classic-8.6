@@ -1,0 +1,165 @@
+ElfHotkeysCloseButton < UIButton
+  size: 12 12
+  image-source: /images/ui/miniwindow_buttons
+  image-clip: 29 1 12 12
+
+  $hover:
+    image-clip: 29 15 12 12
+
+  $pressed:
+    image-clip: 29 29 12 12
+
+MainWindow
+  id: elfHotkeysWindow
+  text: ElfBot Hotkeys Original
+  size: 520 236
+  @onEscape: self:hide()
+
+  ElfHotkeysCloseButton
+    id: closeButton
+    anchors.top: parent.top
+    anchors.right: parent.right
+    margin-top: -29
+    margin-right: -9
+    @onClick: modules.game_bot.elfHotkeysClose()
+
+  Label
+    id: info
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 48
+    text-wrap: true
+    text-align: center
+    text: Cole hotkeys no formato ElfBot original. Use Editar Scripts para colar varias linhas. Depois clique Ligar.
+
+  HorizontalSeparator
+    anchors.top: info.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 5
+
+  Label
+    id: status
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 20
+    margin-top: 5
+    text-align: center
+    text: Status: desligado
+    color: red
+
+  Button
+    id: editScripts
+    text: Editar Scripts
+    anchors.top: status.bottom
+    anchors.left: parent.left
+    margin-top: 8
+    width: 120
+    height: 22
+    @onClick: modules.game_bot.elfHotkeysEdit()
+
+  Button
+    id: toggleScripts
+    text: Ligar
+    anchors.top: editScripts.top
+    anchors.left: editScripts.right
+    margin-left: 5
+    width: 80
+    height: 22
+    @onClick: modules.game_bot.elfHotkeysToggle()
+
+  Button
+    id: saveScripts
+    text: Salvar
+    anchors.top: editScripts.top
+    anchors.left: toggleScripts.right
+    margin-left: 5
+    width: 80
+    height: 22
+    @onClick: modules.game_bot.elfHotkeysSave()
+
+  Button
+    id: stopScripts
+    text: Desligar
+    anchors.top: editScripts.top
+    anchors.left: saveScripts.right
+    margin-left: 5
+    width: 80
+    height: 22
+    @onClick: modules.game_bot.elfHotkeysStop()
+
+  Label
+    id: presetLabel
+    text: Presets do PHP:
+    anchors.top: editScripts.bottom
+    anchors.left: parent.left
+    margin-top: 12
+    width: 100
+    height: 20
+
+  Button
+    id: knightPreset
+    text: Knight
+    anchors.top: presetLabel.bottom
+    anchors.left: parent.left
+    margin-top: 4
+    width: 80
+    height: 22
+    @onClick: modules.game_bot.elfHotkeysLoadPreset('knight')
+
+  Button
+    id: druidPreset
+    text: Druid
+    anchors.top: knightPreset.top
+    anchors.left: knightPreset.right
+    margin-left: 5
+    width: 80
+    height: 22
+    @onClick: modules.game_bot.elfHotkeysLoadPreset('druid')
+
+  Button
+    id: paladinPreset
+    text: Paladin
+    anchors.top: knightPreset.top
+    anchors.left: druidPreset.right
+    margin-left: 5
+    width: 80
+    height: 22
+    @onClick: modules.game_bot.elfHotkeysLoadPreset('paladin')
+
+  Button
+    id: sorcererPreset
+    text: Sorcerer
+    anchors.top: knightPreset.top
+    anchors.left: paladinPreset.right
+    margin-left: 5
+    width: 80
+    height: 22
+    @onClick: modules.game_bot.elfHotkeysLoadPreset('sorcerer')
+
+  Button
+    id: diversasPreset
+    text: Diversas
+    anchors.top: knightPreset.top
+    anchors.left: sorcererPreset.right
+    margin-left: 5
+    width: 80
+    height: 22
+    @onClick: modules.game_bot.elfHotkeysLoadPreset('diversas')
+
+  Label
+    id: preview
+    anchors.top: knightPreset.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    margin-top: 8
+    image-source: /images/ui/panel_flat
+    image-border: 1
+    padding: 4
+    text-align: left
+    text-wrap: true
+    text-auto-resize: false
+    text: Nenhum script carregado.
